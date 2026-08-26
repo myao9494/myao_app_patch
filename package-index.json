@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "package_type": "myao-patch-bridge",
+  "packages": [
+    {
+      "repo_id": "file_manager",
+      "sequence": 1,
+      "manifest_path": "packages/file_manager/000001/manifest.json"
+    }
+  ],
+  "signature": "66b2bb627735102ca0d02add7319a948d7c00a43a86db0e42f5daac420410ce3"
+}
