@@ -1,22 +1,6 @@
 {
   "schema_version": 1,
   "package_type": "myao-patch-bridge",
-  "packages": [
-    {
-      "repo_id": "file_manager",
-      "sequence": 1,
-      "manifest_path": "packages/file_manager/000001/manifest.json"
-    },
-    {
-      "repo_id": "excalidraw",
-      "sequence": 1,
-      "manifest_path": "packages/excalidraw/000001/manifest.json"
-    },
-    {
-      "repo_id": "excalidraw_myao9494",
-      "sequence": 1,
-      "manifest_path": "packages/excalidraw_myao9494/000001/manifest.json"
-    }
-  ],
-  "signature": "b8f92ff71da1ba2f8d3ff19075ee2262b9da08b7a65ad80ab396d4b63a69209e"
+  "packages": [],
+  "signature": "128610302c0030dcbf8a48452df429a89c31e2d045045a776a6230d3440a344a"
 }
