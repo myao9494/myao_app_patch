@@ -11,7 +11,12 @@
       "repo_id": "excalidraw",
       "sequence": 1,
       "manifest_path": "packages/excalidraw/000001/manifest.json"
+    },
+    {
+      "repo_id": "excalidraw_myao9494",
+      "sequence": 1,
+      "manifest_path": "packages/excalidraw_myao9494/000001/manifest.json"
     }
   ],
-  "signature": "1f5e5d7eb389e38ac0cdc3285566a4ac6d85dea7832ee1efef02f3dffc543c91"
+  "signature": "b8f92ff71da1ba2f8d3ff19075ee2262b9da08b7a65ad80ab396d4b63a69209e"
 }
