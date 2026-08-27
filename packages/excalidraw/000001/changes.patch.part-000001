@@ -1,0 +1,165 @@
+diff --git a/tests/test_obsidian_integration.py b/tests/test_obsidian_integration.py
+index fd00c5e45f3227749032f69c9d47e490698fe3a0..bd1836282fe655e8321e8a516f3a224dd0a17714 100644
+--- a/tests/test_obsidian_integration.py
++++ b/tests/test_obsidian_integration.py
+@@ -6,6 +6,9 @@ Obsidian互換機能のテスト
+ 2. JSONの圧縮・解凍
+ 3. MarkdownからのJSON抽出
+ 4. MarkdownへのJSON埋め込み
++5. 画像インデックス辞書を用いた画像解決
++6. Obsidian外に移動したフォルダでの同一フォルダ/サブフォルダ画像自動解決
++7. 移動したフォルダでのload_fileによる画像ハイドレーション
+ """
+ import sys
+ import json
+@@ -361,6 +364,136 @@ def test_resolve_embedded_file_path_via_index():
+     print("✅ resolve_embedded_file_path test passed")
+ 
+ 
++def test_resolve_embedded_file_path_moved_outside_vault():
++    """Obsidian外に移動したフォルダでの画像解決テスト"""
++    print("\nTesting resolve_embedded_file_path for folders moved outside vault...")
++
++    with TemporaryDirectory() as tmp_dir:
++        # Vault外の独立したフォルダを作成（.obsidianは存在しない）
++        moved_folder = Path(tmp_dir) / "moved_project"
++        moved_folder.mkdir(parents=True)
++        excalidraw_file = moved_folder / "diagram.excalidraw.md"
++
++        # 1. パス付きリンク（attachments/photo.png）で同一フォルダ直下に photo.png がある場合
++        img_photo = moved_folder / "photo.png"
++        img_photo.write_bytes(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR...")
++        resolved = resolve_embedded_file_path(excalidraw_file, "attachments/photo.png", vault_root=None)
++        assert resolved == img_photo
++        assert resolved.exists()
++        print("  ✓ Resolved path-prefixed link to same-folder image")
++
++        # 2. 拡張子なしリンク（attachments/photo）で同一フォルダ直下に photo.png がある場合
++        resolved_no_ext = resolve_embedded_file_path(excalidraw_file, "attachments/photo", vault_root=None)
++        assert resolved_no_ext == img_photo
++        assert resolved_no_ext.exists()
++        print("  ✓ Resolved extension-omitted link to same-folder image")
++
++        # 3. URLエンコードされたリンク（attachments/My%20Image.png）で My Image.png がある場合
++        img_space = moved_folder / "My Image.png"
++        img_space.write_bytes(b"\x89PNG\r\n\x1a\n...")
++        resolved_encoded = resolve_embedded_file_path(excalidraw_file, "attachments/My%20Image.png", vault_root=None)
++        assert resolved_encoded == img_space
++        assert resolved_encoded.exists()
++        print("  ✓ Resolved URL-encoded link to same-folder image")
++
++        # 4. パイプやサイズ指定付きリンク（photo.png|200）で photo.png がある場合
++        resolved_pipe = resolve_embedded_file_path(excalidraw_file, "photo.png|200", vault_root=None)
++        assert resolved_pipe == img_photo
++        assert resolved_pipe.exists()
++        print("  ✓ Resolved piped link to same-folder image")
++
++        # 5. 大文字小文字の違い（リンク: PHOTO.png, 実ファイル: photo.png）
++        resolved_case = resolve_embedded_file_path(excalidraw_file, "PHOTO.png", vault_root=None)
++        assert resolved_case == img_photo
++        assert resolved_case.exists()
++        print("  ✓ Resolved case-insensitive image filename")
++
++        # 6. 同一フォルダ内の attachments/ サブフォルダにある場合
++        attachments_dir = moved_folder / "attachments"
++        attachments_dir.mkdir(parents=True)
++        img_sub = attachments_dir / "sub_pic.png"
++        img_sub.write_bytes(b"\x89PNG\r\n\x1a\n...")
++        # リンクがファイル名のみでも attachments/ 配下を探索して解決
++        resolved_sub = resolve_embedded_file_path(excalidraw_file, "sub_pic.png", vault_root=None)
++        assert resolved_sub == img_sub
++        assert resolved_sub.exists()
++        print("  ✓ Resolved same-folder attachments subfolder image")
++
++    print("✅ resolve_embedded_file_path moved outside vault test passed")
++
++
++def test_load_file_hydrates_images_in_moved_folder():
++    """Obsidian外に移動したフォルダで load_file が画像を正しく読み込むことの統合テスト"""
++    print("\nTesting load_file image hydration for moved folder...")
++
++    with TemporaryDirectory() as tmp_dir:
++        moved_folder = Path(tmp_dir) / "moved_project"
++        moved_folder.mkdir(parents=True)
++        excalidraw_file = moved_folder / "diagram.excalidraw.md"
++
++        # 画像ファイルを同一フォルダ直下に作成
++        image_file = moved_folder / "pasted_image.png"
++        image_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
++        image_file.write_bytes(image_bytes)
++
++        # Excalidraw JSON
++        scene_data = {
++            "type": "excalidraw",
++            "version": 2,
++            "source": "https://excalidraw.com",
++            "elements": [
++                {
++                    "type": "image",
++                    "id": "elem_img_1",
++                    "fileId": "file_id_123",
++                    "x": 50,
++                    "y": 50,
++                    "width": 200,
++                    "height": 150,
++                    "isDeleted": False
++                }
++            ],
++            "appState": {},
++            "files": {
++                "file_id_123": {
++                    "id": "file_id_123",
++                    "mimeType": "image/png"
++                }
++            }
++        }
++        json_str = json.dumps(scene_data, ensure_ascii=False)
++
++        # Markdown形式で保存（リンクは attachments/pasted_image.png となっている）
++        markdown_content = f"""---
++excalidraw-plugin: parsed
++tags: [excalidraw]
++---
++
++# Excalidraw Data
++
++## Embedded Files
++file_id_123: [[attachments/pasted_image.png]]
++
++%%
++## Drawing
++```json
++{json_str}
++```
++%%"""
++        excalidraw_file.write_text(markdown_content, encoding="utf-8")
++
++        # load_file を実行
++        result = asyncio.run(load_file(str(excalidraw_file)))
++        assert result is not None
++        files = result["data"].get("files", {})
++        assert "file_id_123" in files
++        assert "dataURL" in files["file_id_123"]
++        assert files["file_id_123"]["dataURL"].startswith("data:image/png;base64,")
++        print("  ✓ load_file successfully hydrated image from moved folder")
++
++    print("✅ load_file image hydration in moved folder test passed")
++
++
+ if __name__ == "__main__":
+     print("=" * 60)
+     print("Obsidian Integration Tests")
+@@ -372,6 +505,8 @@ if __name__ == "__main__":
+         test_extract_json_from_markdown()
+         test_embed_json_into_markdown()
+         test_resolve_embedded_file_path_via_index()
++        test_resolve_embedded_file_path_moved_outside_vault()
++        test_load_file_hydrates_images_in_moved_folder()
+         test_end_to_end()
+ 
+         print("\n" + "=" * 60)
+@@ -388,3 +523,4 @@ if __name__ == "__main__":
+         import traceback
+         traceback.print_exc()
+         sys.exit(1)
++

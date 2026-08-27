@@ -6,7 +6,12 @@
       "repo_id": "file_manager",
       "sequence": 1,
       "manifest_path": "packages/file_manager/000001/manifest.json"
+    },
+    {
+      "repo_id": "excalidraw",
+      "sequence": 1,
+      "manifest_path": "packages/excalidraw/000001/manifest.json"
     }
   ],
-  "signature": "66b2bb627735102ca0d02add7319a948d7c00a43a86db0e42f5daac420410ce3"
+  "signature": "1f5e5d7eb389e38ac0cdc3285566a4ac6d85dea7832ee1efef02f3dffc543c91"
 }
