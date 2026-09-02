@@ -16,7 +16,12 @@
       "repo_id": "excalidraw_myao9494",
       "sequence": 2,
       "manifest_path": "packages/excalidraw_myao9494/000002/manifest.json"
+    },
+    {
+      "repo_id": "obsidian-settings",
+      "sequence": 1,
+      "manifest_path": "packages/obsidian-settings/000001/manifest.json"
     }
   ],
-  "signature": "aeaf4be16d437692f5c127ec8e43e260fc8b4cc9eeda2badb86655127c09c5d4"
+  "signature": "012d118cf8a79963f56ec595761093ef5159ce48c834810aa408607ac0d125bd"
 }
