@@ -1,8 +1,0 @@
-{
-  "textFileOpenMode": "web",
-  "markdownOpenMode": "obsidian_or_web",
-  "apiTimeout": 10,
-  "folderLatestModifiedMaxEntries": 20000,
-  "defaultTextFileExtension": "txt",
-  "pathMappings": {}
-}
