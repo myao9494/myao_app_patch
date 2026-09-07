@@ -1,0 +1,176 @@
+/**
+ * 画像プレビューモーダルのスタイルシート
+ * - フルスクリーン半透明ダークオーバーレイ
+ * - フローティングツールバー（ズーム、ナビゲーション、情報表示）
+ * - スムーズな画像表示とセンタリング
+ */
+
+.image-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  user-select: none;
+  overflow: hidden;
+}
+
+.image-preview-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: rgba(20, 20, 20, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f1f1f1;
+  flex-shrink: 0;
+}
+
+.image-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-preview-counter {
+  font-size: 12px;
+  color: #aaa;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: normal;
+}
+
+.image-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-preview-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1f1f1;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.image-preview-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.image-preview-btn.close:hover {
+  background: #e11d48;
+  border-color: #e11d48;
+}
+
+.image-preview-body {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.image-preview-body:active {
+  cursor: grabbing;
+}
+
+.image-preview-container {
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease-out;
+}
+
+.image-preview-img {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.image-preview-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 64px;
+  background: rgba(30, 30, 30, 0.6);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.image-preview-nav-btn:hover {
+  background: rgba(60, 60, 60, 0.9);
+}
+
+.image-preview-nav-btn.prev {
+  left: 16px;
+}
+
+.image-preview-nav-btn.next {
+  right: 16px;
+}
+
+.image-preview-footer {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background-color: rgba(20, 20, 20, 0.8);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #bbb;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.image-preview-meta {
+  display: flex;
+  gap: 16px;
+}
+
+.image-preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-preview-zoom-label {
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

@@ -36,7 +36,12 @@
       "repo_id": "obsidian-settings",
       "sequence": 2,
       "manifest_path": "packages/obsidian-settings/000002/manifest.json"
+    },
+    {
+      "repo_id": "file_manager",
+      "sequence": 2,
+      "manifest_path": "packages/file_manager/000002/manifest.json"
     }
   ],
-  "signature": "e482beb6ee12b8687ce60b6017a2344a9b5c05aa4d44f647129f42066eaac1ee"
+  "signature": "cb0507eb5fc9958b2094251e257ae5dbcfa13fa3b9e615afbb57bf7bde979ceb"
 }
