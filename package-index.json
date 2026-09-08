@@ -41,7 +41,17 @@
       "repo_id": "file_manager",
       "sequence": 2,
       "manifest_path": "packages/file_manager/000002/manifest.json"
+    },
+    {
+      "repo_id": "obsidian-settings",
+      "sequence": 3,
+      "manifest_path": "packages/obsidian-settings/000003/manifest.json"
+    },
+    {
+      "repo_id": "gantt_react_myao",
+      "sequence": 1,
+      "manifest_path": "packages/gantt_react_myao/000001/manifest.json"
     }
   ],
-  "signature": "cb0507eb5fc9958b2094251e257ae5dbcfa13fa3b9e615afbb57bf7bde979ceb"
+  "signature": "4cf156d1193309f827395ddfac6addb5b1454bc359e5b4056a223c357a276a2e"
 }
