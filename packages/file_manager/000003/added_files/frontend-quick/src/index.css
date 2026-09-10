@@ -1,0 +1,1176 @@
+/**
+ * quickアプリ スタイルシート
+ * - モバイルファースト設計（セーフエリア対応、44px以上のタッチ領域）
+ * - ダークテーマ基調（目に優しいSlate/Zincトーン）
+ * - レスポンシブ＆スムーズスクロール
+ */
+
+:root {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --bg-input: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --emerald-color: #10b981;
+  --emerald-hover: #059669;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-main);
+}
+
+/* メイン画面コンテナ */
+.quick-main-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ヘッダー */
+.quick-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.quick-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-icon-bolt {
+  color: #fbbf24;
+}
+
+.quick-logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.quick-host-badge {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  background-color: #334155;
+  color: #38bdf8;
+  border-radius: 12px;
+  font-family: monospace;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-btn-icon {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.quick-btn-icon:active {
+  background-color: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* 検索バー */
+.quick-searchbar-container {
+  padding: 12px 16px;
+  background-color: var(--bg-main);
+}
+
+.quick-searchbar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.quick-searchbar-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.quick-searchbar-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 42px 0 44px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  color: var(--text-primary);
+  font-size: 16px; /* iOS自動ズーム防止 */
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.quick-searchbar-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.quick-searchbar-spinner {
+  position: absolute;
+  right: 14px;
+  color: var(--accent-color);
+}
+
+.quick-searchbar-clear {
+  position: absolute;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #475569;
+  border: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* フィルタタブ */
+.quick-filter-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+}
+
+.quick-filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.quick-filter-tab.active {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.quick-tab-badge {
+  font-size: 0.75rem;
+  padding: 1px 6px;
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+/* 検索結果リスト */
+.quick-results-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quick-result-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.15s;
+}
+
+.quick-result-card:active {
+  background-color: var(--bg-card-hover);
+  transform: scale(0.99);
+}
+
+.quick-card-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quick-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.icon-doc { color: #60a5fa; }
+.icon-image { color: #f472b6; }
+.icon-code { color: #34d399; }
+.icon-folder { color: #fbbf24; }
+
+.quick-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-card-path {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.quick-card-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.quick-card-snippet {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background-color: rgba(15, 23, 42, 0.6);
+  border-left: 3px solid var(--accent-color);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.quick-snippet-mark {
+  background-color: rgba(245, 158, 11, 0.35);
+  color: #fde047;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* 空状態 */
+.quick-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.quick-empty-hint {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.quick-empty-sub {
+  font-size: 0.8rem;
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+
+/* ビューワー画面 */
+.quick-viewer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-main);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.quick-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.quick-btn-back {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.quick-viewer-title-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-viewer-filename {
+  font-size: 1rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-viewer-path {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.quick-btn-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: var(--accent-color);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 連絡先クイックアクションパネル */
+.quick-contacts-panel {
+  padding: 12px 16px;
+  background-color: rgba(16, 185, 129, 0.1);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.quick-contacts-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--emerald-color);
+  margin-bottom: 8px;
+}
+
+.quick-contacts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-card);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.quick-contact-num {
+  font-family: monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.quick-contact-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-btn-tel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background-color: var(--emerald-color);
+  color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.quick-btn-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  background-color: var(--bg-card-hover);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+/* ビューワー本文 */
+.quick-viewer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.quick-text-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+}
+
+.quick-image-preview-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.quick-preview-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.quick-excalidraw-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background-color: #1e1b4b;
+  border: 1px solid #4338ca;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.quick-btn-external {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #6366f1;
+  color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* エディタ画面 */
+.quick-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-main);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.quick-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.quick-editor-title-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-editor-filename {
+  font-size: 1rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-editor-dirty-badge {
+  font-size: 0.72rem;
+  color: #f59e0b;
+  display: block;
+}
+
+.quick-btn-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #475569;
+  border: none;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: default;
+}
+
+.quick-btn-save.active {
+  background-color: var(--emerald-color);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.quick-editor-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-editor-textarea {
+  flex: 1;
+  width: 100%;
+  padding: 16px;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  border: none;
+  outline: none;
+  font-size: 16px; /* iOSソフトキーボードの自動拡大を防止 */
+  line-height: 1.6;
+  font-family: inherit;
+  resize: none;
+}
+
+/* モーダル */
+.quick-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.quick-modal-card {
+  width: 100%;
+  max-height: 85vh;
+  background-color: var(--bg-card);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.quick-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.quick-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.quick-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.quick-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quick-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.quick-form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.quick-form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+}
+
+.quick-form-presets {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quick-btn-preset {
+  background-color: #334155;
+  border: none;
+  color: #93c5fd;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.quick-form-help {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.quick-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.quick-btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  background-color: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quick-btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 46px;
+  padding: 0 16px;
+  background-color: #334155;
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* トースト */
+.quick-toast-error {
+  position: fixed;
+  top: calc(16px + var(--safe-top));
+  left: 16px;
+  right: 16px;
+  background-color: #ef4444;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 2000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 表示切替ボタン */
+.quick-btn-toggle-view {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.quick-btn-toggle-view:active {
+  background-color: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* Markdown レンダリング本文スタイル（ファイルマネージャー本体準拠テーマ） */
+.quick-markdown-rendered-content,
+.markdown-preview-content {
+  --editor-bg: #111111;
+  --editor-bg-soft: #151515;
+  --editor-bg-strong: #101010;
+  --editor-panel: #111111;
+  --editor-border: #66ff69;
+  --editor-text: #f5f5f5;
+  --editor-text-muted: #8d8d8d;
+  --editor-heading: #66ff69;
+  --editor-accent: #66ff69;
+  --editor-accent-soft: rgba(102, 255, 105, 0.13);
+  --editor-code: #f5f5f5;
+  --editor-callout: rgba(102, 255, 105, 0.08);
+  --editor-bullet: #ffee00;
+  --editor-bold: #ffff00;
+  --editor-underline: rgba(255, 238, 0, 0.5);
+
+  background: #0d0d0d;
+  color: var(--editor-text);
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.quick-markdown-rendered-content h1,
+.quick-markdown-rendered-content h2,
+.quick-markdown-rendered-content h3,
+.quick-markdown-rendered-content h4,
+.quick-markdown-rendered-content h5,
+.quick-markdown-rendered-content h6 {
+  margin: 0.9em 0 0.4em;
+  color: var(--editor-heading);
+  line-height: 1.25;
+  font-weight: 750;
+  text-shadow: 0 0 16px rgba(102, 255, 105, 0.4);
+  border-bottom: 1px solid var(--editor-underline);
+  padding-bottom: 0.2em;
+}
+
+.quick-markdown-rendered-content h1 {
+  font-size: 1.35em;
+  letter-spacing: 0;
+}
+
+.quick-markdown-rendered-content h2 {
+  font-size: 1.25em;
+  letter-spacing: 0;
+}
+
+.quick-markdown-rendered-content h3,
+.quick-markdown-rendered-content h4,
+.quick-markdown-rendered-content h5,
+.quick-markdown-rendered-content h6 {
+  font-size: 1.15em;
+}
+
+.quick-markdown-rendered-content p {
+  margin: 0.5em 0;
+  color: var(--editor-text);
+  line-height: 1.5;
+}
+
+.quick-markdown-rendered-content strong,
+.quick-markdown-rendered-content b {
+  color: var(--editor-bold);
+  font-weight: 700;
+}
+
+.quick-markdown-rendered-content em,
+.quick-markdown-rendered-content i {
+  color: #98b8ff;
+}
+
+.quick-markdown-rendered-content mark {
+  color: inherit;
+  background: rgba(255, 214, 102, 0.34);
+  padding: 0.05em 0.2em;
+  border-radius: 4px;
+}
+
+.quick-markdown-rendered-content ul,
+.quick-markdown-rendered-content ol {
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+
+.quick-markdown-rendered-content li {
+  margin: 0.25em 0;
+  color: var(--editor-text);
+  line-height: 1.4;
+}
+
+.quick-markdown-rendered-content ul > li::marker,
+.quick-markdown-rendered-content ol > li::marker {
+  color: var(--editor-bullet);
+}
+
+/* タスクリスト・チェックボックス */
+.quick-markdown-rendered-content ul.contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.quick-markdown-rendered-content .task-list-item {
+  list-style: none;
+}
+
+.quick-markdown-rendered-content .task-list-item label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+  cursor: pointer;
+}
+
+.quick-markdown-rendered-content .task-list-item input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2em;
+  accent-color: var(--editor-bullet);
+  border-color: var(--editor-bullet);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* リンク・Wikilink */
+.quick-markdown-rendered-content a,
+.quick-markdown-rendered-content .markdown-wikilink {
+  color: #98b8ff;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(152, 184, 255, 0.35);
+}
+
+.quick-markdown-rendered-content a:active,
+.quick-markdown-rendered-content .markdown-wikilink:active {
+  color: #c7d7fe;
+  background-color: rgba(152, 184, 255, 0.15);
+}
+
+/* インラインコード・コードブロック */
+.quick-markdown-rendered-content code {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--editor-code);
+  border-radius: 3px;
+  padding: 0.15em 0.42em;
+  font-family: "M PLUS 1 Code", "Menlo", "Monaco", monospace;
+  font-size: 0.92em;
+  user-select: all;
+}
+
+.quick-markdown-rendered-content .markdown-code-block {
+  margin: 1.2em 0;
+  padding: 0;
+  background: #252526; /* VS Code風ダーク */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.quick-markdown-rendered-content .markdown-code-block::before {
+  content: attr(data-language);
+  display: block;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #9cdcfe;
+  background: #1e1e1e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.quick-markdown-rendered-content .markdown-code-block:not([data-language])::before {
+  display: none;
+}
+
+.quick-markdown-rendered-content .markdown-code-block code {
+  background: transparent;
+  padding: 12px 14px;
+  display: block;
+  color: #d4d4d4;
+  font-size: 13.5px;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 4;
+  overflow-x: auto;
+  user-select: text;
+}
+
+/* コールアウト */
+.quick-markdown-rendered-content .markdown-callout {
+  padding: 12px 16px;
+  border-radius: 0;
+  border: 1px solid rgba(102, 255, 105, 0.2);
+  background: var(--editor-callout);
+  margin: 1em 0;
+}
+
+.quick-markdown-rendered-content .markdown-callout-title {
+  font-weight: 700;
+  color: var(--editor-heading);
+  margin-bottom: 6px;
+}
+
+/* 引用 */
+.quick-markdown-rendered-content blockquote {
+  margin-left: 0;
+  padding: 0.8em 1em;
+  border-left: 3px solid var(--editor-accent);
+  background: rgba(102, 255, 105, 0.06);
+  border-radius: 0;
+  color: var(--editor-text);
+}
+
+/* Frontmatter */
+.quick-markdown-rendered-content .markdown-frontmatter {
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.quick-markdown-rendered-content .markdown-frontmatter summary {
+  cursor: pointer;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  display: inline-block;
+  color: var(--editor-text-muted);
+}
+
+.quick-markdown-rendered-content .markdown-frontmatter pre {
+  margin-top: 6px;
+  padding: 8px;
+  background-color: #0b0f19;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.quick-markdown-rendered-content hr {
+  border: none;
+  border-top: 1px solid var(--editor-border);
+  margin: 1.4em 0;
+}
+
+/* 画像・図面インライン表示 */
+.quick-markdown-rendered-content img,
+.quick-markdown-rendered-content .markdown-preview-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  display: block;
+  margin: 12px auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* テーブルスタイル（GFM Table） */
+.quick-markdown-rendered-content .markdown-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.2em 0;
+  border-radius: 6px;
+  border: 1px solid var(--editor-border);
+}
+
+.quick-markdown-rendered-content .markdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.quick-markdown-rendered-content .markdown-table th {
+  padding: 10px 14px;
+  background-color: rgba(102, 255, 105, 0.12);
+  color: var(--editor-heading);
+  font-weight: 700;
+  border-bottom: 2px solid var(--editor-border);
+  border-right: 1px solid var(--editor-border);
+  white-space: nowrap;
+}
+
+.quick-markdown-rendered-content .markdown-table th:last-child {
+  border-right: none;
+}
+
+.quick-markdown-rendered-content .markdown-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--editor-border);
+  border-right: 1px solid var(--editor-border);
+  color: var(--editor-text);
+}
+
+.quick-markdown-rendered-content .markdown-table td:last-child {
+  border-right: none;
+}
+
+.quick-markdown-rendered-content .markdown-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.quick-markdown-rendered-content .markdown-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.quick-markdown-rendered-content .markdown-table tbody tr:hover {
+  background-color: rgba(102, 255, 105, 0.05);
+}
+
+/* Mermaid ダイアグラム */
+.quick-markdown-rendered-content .mermaid-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.4em 0;
+  padding: 16px;
+  background-color: #0d1117;
+  border: 1px solid var(--editor-border);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.quick-markdown-rendered-content .mermaid {
+  background: transparent;
+  color: var(--editor-text);
+  font-family: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: min-content;
+}
+
+.quick-markdown-rendered-content .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Excalidraw ビューワー専用スタイル */
+.quick-excalidraw-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+.quick-excalidraw-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.quick-excalidraw-image-box {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background-color: #1e1e1e;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+}
+
+.quick-excalidraw-img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+

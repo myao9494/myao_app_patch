@@ -1,0 +1,555 @@
+/**
+ * ファイル検索コンポーネントのスタイル
+ * Everything風の検索UI
+ */
+
+.file-search {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  /* FileListと統一 */
+  color: var(--text-color);
+  background-color: var(--pane-bg);
+}
+
+/* ヘッダー: 2段構成（キーワード検索 + ファイル名フィルタ） */
+.search-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 検索行（1段目：キーワード、2段目：フィルタ） */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* 検索入力コンテナ */
+.search-row .search-input-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  min-width: 0;
+  /* flexアイテムの縮小を許可 */
+  padding: 4px 8px;
+  background-color: rgb(29, 29, 20);
+  border: 1px solid rgba(227, 222, 125, 0.521);
+  border-radius: 4px;
+}
+
+/* フィルタ入力コンテナ（2段目） */
+.filter-input-container {
+  background-color: rgb(29, 29, 20);
+}
+
+/* 検索フィルタ（右側） */
+.search-filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* タイプフィルタボタン */
+.type-filter-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--pane-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.type-filter-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+.type-filter-btn.active {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+/* 階層コントロール */
+.depth-control {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.depth-btn {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  background-color: var(--pane-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.depth-btn:hover:not(:disabled) {
+  background-color: var(--hover-bg);
+}
+
+.depth-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.depth-value {
+  min-width: 16px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* 正規表現トグルボタン */
+.regex-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--border-color);
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-color);
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: monospace;
+  transition: all 0.15s;
+}
+
+.regex-toggle:hover {
+  background-color: var(--hover-bg);
+}
+
+.regex-toggle.active {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+/* 検索入力（ヘッダー内） */
+.search-row .search-input-container .search-icon {
+  color: var(--text-color);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.search-row .search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--input-text);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.4;
+}
+
+.clear-btn,
+.refresh-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-color);
+  opacity: 0.6;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-btn:hover,
+.refresh-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+/* 検索情報 */
+.search-info {
+  font-size: 10px;
+  color: var(--text-color);
+  opacity: 0.7;
+  padding: 2px 4px;
+  margin-bottom: 2px;
+}
+
+.search-info span {
+  margin-right: 8px;
+}
+
+/* 検索結果 */
+.search-results {
+  flex: 1;
+  overflow: auto;
+  background-color: var(--pane-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.loading,
+.error,
+.placeholder,
+.no-results {
+  padding: 20px 10px;
+  text-align: center;
+  color: var(--text-color);
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.error {
+  color: #dc3545;
+}
+
+/* 結果テーブル */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.results-table th,
+.results-table td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+.results-table th {
+  background-color: var(--hover-bg);
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 11px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.results-table .name-col {
+  width: 60%;
+}
+
+.results-table .size-col {
+  width: 80px;
+}
+
+.results-table .date-col {
+  width: 90px;
+}
+
+.results-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.results-table tbody tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.results-table .name-cell {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.results-table .name-cell .icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.results-table .name-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.results-table .name-cell .item-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.results-table .name-cell .item-path {
+  font-size: 10px;
+  color: var(--text-color);
+  opacity: 0.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-hover-preview {
+  position: fixed;
+  z-index: 1000;
+  width: min(340px, calc(100vw - 24px));
+  overflow: auto;
+  pointer-events: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  background: rgba(17, 24, 39, 0.96);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px);
+}
+
+.search-hover-preview-below {
+  transform: translateY(0);
+}
+
+.search-hover-preview-above {
+  transform: translateY(-100%);
+}
+
+.search-hover-preview-path {
+  margin-bottom: 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: rgba(226, 232, 240, 0.72);
+  word-break: break-all;
+}
+
+.search-hover-preview-snippet {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e5eefb;
+  white-space: normal;
+}
+
+.search-hover-preview-snippet mark {
+  background: rgba(250, 204, 21, 0.22);
+  color: #facc15;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* フォルダ・ファイルアイコンの色指定を削除（FileIcon側で管理されるため） */
+
+/* インデックス状態 */
+.index-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  background-color: var(--hover-bg);
+  border-radius: 4px;
+  flex-wrap: nowrap;
+  overflow-x: hidden;
+}
+
+.index-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border-color);
+  background-color: var(--pane-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.index-toggle:hover {
+  background-color: var(--hover-bg);
+}
+
+.index-toggle.active {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+
+/* 検索モード選択ボタン */
+.mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 6px;
+  font-size: 10px;
+  line-height: 1.1;
+  border: 1px solid var(--border-color);
+  background-color: var(--pane-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.mode-toggle:hover {
+  background-color: #f0f0f0;
+}
+
+.mode-toggle.active {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+.index-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-color);
+  opacity: 0.8;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.index-info .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.index-info .error-icon {
+  color: #dc3545;
+}
+
+/* 行内コピーボタン */
+.row-copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: #999;
+  border-radius: 2px;
+  opacity: 0.6;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.row-copy-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+  opacity: 1;
+}
+
+.results-table tbody tr:hover .row-copy-btn {
+  opacity: 1;
+}
+
+/* 外部インデックスサービス関連 */
+.external-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.success-icon {
+  color: #28a745;
+}
+
+.warning-icon {
+  color: #ffc107;
+}
+
+.service-url {
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+  opacity: 0.6;
+  padding: 1px;
+  border-radius: 2px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.service-url:hover {
+  opacity: 1;
+  background-color: var(--hover-bg);
+}
+
+/* 外部サービス接続エラーバナー */
+.external-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #721c24;
+}
+
+.external-error-banner span {
+  flex: 1;
+}
+
+/* キーボードフォーカス状態（セクションナビゲーション中） */
+.keyboard-focused {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* 深度コントロールのキーボードフォーカス */
+.depth-control.keyboard-focused {
+  border-radius: 4px;
+}
+
+/* テーブル行のキーボードフォーカス */
+.results-table tbody tr.keyboard-focused {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}

@@ -1,0 +1,4722 @@
+{
+  "schema_version": 1,
+  "repo_id": "local-fulltext-search",
+  "display_name": "Local-fulltext-search",
+  "kind": "app",
+  "sequence": 1,
+  "created_at": "2026-09-10T22:10:49.897337+00:00",
+  "source_branch": "main",
+  "source_from_commit": "11443f18a9a8ad48254ab8f250fe4feeba6015ae",
+  "source_to_commit": "feacfe55f5644d400864cdc70447723b889fd460",
+  "patch_size": 473840,
+  "patch_sha256": "cdf691aa4a958b0a87631c027c845e12c3f6d16a797342f8fa386c864dfc9123",
+  "chunks": [
+    {
+      "name": "changes.patch.part-000001",
+      "size": 473840,
+      "sha256": "cdf691aa4a958b0a87631c027c845e12c3f6d16a797342f8fa386c864dfc9123"
+    }
+  ],
+  "changed_paths": [
+    "AGENTS.md",
+    "claude.md",
+    "docs/file_icons.md",
+    "frontend/dist/assets/index-DQ0MbxXo.js",
+    "frontend/dist/icons/catppuccin/email.svg",
+    "frontend/dist/index.html",
+    "frontend/public/icons/catppuccin/email.svg",
+    "frontend/src/fileIcon.test.ts",
+    "frontend/src/fileIcon.ts",
+    "launcher/docs/spec.md",
+    "launcher/src/launcher_app/assets/catppuccin/email.svg",
+    "launcher/src/launcher_app/file_icons.py",
+    "launcher/tests/test_file_icons.py",
+    "launcher/windows/LocalSearchLauncher.Tests/Program.cs",
+    "launcher/windows/LocalSearchLauncher/Assets/catppuccin/email.png",
+    "launcher/windows/LocalSearchLauncher/SearchModels.cs",
+    "launcher/windows/publish/folder/Assets/catppuccin/email.png",
+    "launcher/windows/publish/single-file/Assets/catppuccin/email.png"
+  ],
+  "added_files": [
+    {
+      "path": "AGENTS.md",
+      "size": 16280,
+      "sha256": "e65ef100eea0c99ec05dc7166847df74a45ab0a98201dec1121c9e5683855921"
+    },
+    {
+      "path": "claude.md",
+      "size": 3852,
+      "sha256": "3bf5e181b33f9b772e84c3ba0bdb1f7fe75959c83a3624346c3e3b5f0dcf977a"
+    },
+    {
+      "path": "docs/file_icons.md",
+      "size": 3220,
+      "sha256": "d200441b3a9d56a0535ea7f7840559330313dd8d036be946921b26827b725e87"
+    },
+    {
+      "path": "frontend/dist/assets/index-DQ0MbxXo.js",
+      "size": 227687,
+      "sha256": "42d169921208214f20bf438927b569c42b34e76bccbbbc90ff3b28ae4bea28d1"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/email.svg",
+      "size": 525,
+      "sha256": "9f87c1e725bcc691854e8ab4987d604ae640da054b82d7fd564aa05dd4470f7e"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "size": 633,
+      "sha256": "d1706ac3dd01abcbacb911774c37216341a60dd8337a3fc902e622beb6214212"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/email.svg",
+      "size": 525,
+      "sha256": "9f87c1e725bcc691854e8ab4987d604ae640da054b82d7fd564aa05dd4470f7e"
+    },
+    {
+      "path": "frontend/src/fileIcon.test.ts",
+      "size": 1337,
+      "sha256": "e088412169559f850c9547f72bddfbfb383b8f8568f25d0e955ecd06175be126"
+    },
+    {
+      "path": "frontend/src/fileIcon.ts",
+      "size": 1268,
+      "sha256": "81b1f138269fafe04bcaecf73b7cb094cdf215c4f7b7294991c54c9ee5174873"
+    },
+    {
+      "path": "launcher/docs/spec.md",
+      "size": 16858,
+      "sha256": "e3eb1e5e27fbe6af300ddcd7de8d67382b548722ac59fb7577787e7d320b886c"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/email.svg",
+      "size": 525,
+      "sha256": "9f87c1e725bcc691854e8ab4987d604ae640da054b82d7fd564aa05dd4470f7e"
+    },
+    {
+      "path": "launcher/src/launcher_app/file_icons.py",
+      "size": 1719,
+      "sha256": "6885e4806c24398767c499f8ae98b08f617b7617eeb332a0118c30db9875a62c"
+    },
+    {
+      "path": "launcher/tests/test_file_icons.py",
+      "size": 1509,
+      "sha256": "464bc9c8be35afa364adc25caf5fa7007fb6a09ff90f87848e394f047f448878"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher.Tests/Program.cs",
+      "size": 4420,
+      "sha256": "5453726ff0761342f1843ed47339af6e7cf0a462b2a1ffd19092f41a10006674"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/email.png",
+      "size": 606,
+      "sha256": "7ef0258bf2241cb63bc5ea485cb114f1950d617720d44867191a25315b6f00fb"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/SearchModels.cs",
+      "size": 4988,
+      "sha256": "89f3fe8d91f52d222ab8d4ff1b677890a5446cfdc176d51c736d13b5c3f7cd74"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/email.png",
+      "size": 606,
+      "sha256": "7ef0258bf2241cb63bc5ea485cb114f1950d617720d44867191a25315b6f00fb"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/email.png",
+      "size": 606,
+      "sha256": "7ef0258bf2241cb63bc5ea485cb114f1950d617720d44867191a25315b6f00fb"
+    }
+  ],
+  "deleted_files": [
+    "frontend/dist/assets/index-BY-wjOpk.js"
+  ],
+  "target_files": [
+    {
+      "path": ".gitattributes",
+      "blob": "496a13f9542ccde4a36e5f70ed18a1482f263e76",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": ".gitignore",
+      "blob": "0f2357bb785f11863116b7c2a05ed57ae154e96a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "AGENTS.md",
+      "blob": "6e1eeed13d4720a71d575ecb7f4b887315d63f0c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "README.md",
+      "blob": "73f16a96f3eaf0448e1c719eb84c71e6ffe25589",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "blob": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/__init__.py",
+      "blob": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/deps.py",
+      "blob": "1d545dcc1451f8c881d6cd9e1d0dba15ac07ff60",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/files.py",
+      "blob": "4018ce295901ff6fa7fb652a083e1a69450e5277",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/folders.py",
+      "blob": "f94488f7dbd8d774b7c27f7b058536bd087d88b3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/index.py",
+      "blob": "56c9a4ad39633281582b947a5d7d8c78a6b29533",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/launcher.py",
+      "blob": "821088fbaa237f07d42514676e1a7d279397ea9f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/api/search.py",
+      "blob": "a9c0df60ef4b446c79b436aec49ee5dd185a2398",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/config.py",
+      "blob": "ecff0a03d5f1188b980a58a540b034e247b6e468",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/db/__init__.py",
+      "blob": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/db/connection.py",
+      "blob": "39997314033054f64ba36972026ab53da91360c4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/db/schema.py",
+      "blob": "8bf0ebcd5d819ba0d7231a828a5d1e03c1076e14",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/extractors/__init__.py",
+      "blob": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/extractors/obsidian_properties.py",
+      "blob": "23e8b85a9e43930b8bb3eca51c207a7fd08d4413",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/extractors/text_extractor.py",
+      "blob": "e0a0f79bf5cf545c2aafdb60aaa197df6f3ecb2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/main.py",
+      "blob": "e9ebf538ac472b6874de1d694c482d7471051eea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/models/__init__.py",
+      "blob": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/models/files.py",
+      "blob": "08b21b50db541ba1ac485c3f7adef23ac29132ea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/models/indexing.py",
+      "blob": "29b8bf30fcc695b0f409c1f0e94299184feb8d86",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/models/search.py",
+      "blob": "f0b1a8669594c7727c90f04b47899f7c2b7397b4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/__init__.py",
+      "blob": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/change_tracking_service.py",
+      "blob": "767f41d9405b78e6f641115ebf73ad68efa811f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/cjk_bigram.py",
+      "blob": "5fcca88da60d163f775b8fd27231dcac655cb633",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/index_service.py",
+      "blob": "08c6a1fb12aabb77719c6e5443f0af4d859634ef",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/launcher_service.py",
+      "blob": "ca120cd5b96202c5fa7b5e0cc096e5c0885a4578",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/path_service.py",
+      "blob": "5ab1db7f5596a201a9bc2eb0a1e6afebf9723cf3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/scheduler_service.py",
+      "blob": "60262ba18440f2bf52c003096991c1b03460befa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/scheduler_worker.py",
+      "blob": "c7acf424671c39d0cec51ac271f0ac10bc70829a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/search_benchmark.py",
+      "blob": "466cd53cd2a64772a74196005fa4f10ff7753525",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/search_service.py",
+      "blob": "ef6d8394d46e28afbe87a5994f289385c15ca1f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/web_browser_fetcher.py",
+      "blob": "e5589c617afbdbf1038e6b60b9694550dd58de67",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/services/windows_change_tracking.py",
+      "blob": "6773928c9ce0bc8990f38809e5227e178b765404",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/benchmark_search.py",
+      "blob": "921a5cba4a33aa682ea29fea265f61c8397c4457",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/offline-start-test.pid",
+      "blob": "52d1a48d73eb274dbeedfd772de0e5fe92ff0d36",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/requirements.txt",
+      "blob": "c187656ebd46a7e30540537ea3fc11f1f197c964",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/run.py",
+      "blob": "f2941992fa879a2a47a37e7152a28bef9232ca4e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_api_deps.py",
+      "blob": "d949c1f5eb2f16bb7303f02e97c6d9b98cd17860",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_change_tracking_service.py",
+      "blob": "c6d898b4500089865f8b44bf47e8a39dcf071ee1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_config.py",
+      "blob": "001d4bfc99417e3df7975700b9ea2fecacc076e9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_db_schema.py",
+      "blob": "896973c6ac1cf76089a607379e941a2e83f40263",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_external_open_hub_contract.py",
+      "blob": "c8b29b2987fa2239baa28d11b993e795ca07e2e3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_files_api.py",
+      "blob": "f1576398f93c41c5f222e13c6c6a39cad84cdb14",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_folders_api.py",
+      "blob": "686f8eb3b32ab24918ddc48e7ed9ce5ee68951d5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_index_api.py",
+      "blob": "46592f3d57535750e5ea9cc3d3ee9375a25e8475",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_index_service.py",
+      "blob": "c057cad1bff232bce1a6d2f36e0b7bc5aac05fe7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_launcher_service.py",
+      "blob": "13e9c0e359ffcfefaa3397713bc4681fc1cb5f3a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_main.py",
+      "blob": "691be183264e0324d717001335944a7a47336fa0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_path_service.py",
+      "blob": "5de0c82ebbe03a60fba5c7d51208257e1144d419",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_scheduler_service.py",
+      "blob": "47f960d655257ab6fe090516315138ce19977200",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_search_api.py",
+      "blob": "069477d4a0ea5e4e67c2b14569ebc8273f2d5192",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_search_benchmark.py",
+      "blob": "47b462fbb3cd6d4683dbb5fe935010b1bdf1684e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_search_models.py",
+      "blob": "31cc9db18bc44767d47e7a32e819c0ddd773e40f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_search_service.py",
+      "blob": "18e32e028bad621b6be98a75e36345a96fc77972",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_synonyms_api.py",
+      "blob": "5d6dfd647ef8783bdf622fa6fd1064e41da0a29d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_text_extractor.py",
+      "blob": "920202f4eafeff3bd8ce8a950d14505e7fed6a1a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_web_browser_fetcher.py",
+      "blob": "4faf2b70f7a33117f8ebaf15a6f60b70bc820947",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "claude.md",
+      "blob": "2d4b7304e44acfa8aeda17a09ded4bc2deef34bb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/change_tracking.md",
+      "blob": "0356e92c4331f6d124c393612f94a93246b109de",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/change_tracking_flow.excalidraw",
+      "blob": "e7800de15c45366b22875d972b7618acd2a9fdd4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/file_icons.md",
+      "blob": "9887bbbb1e93face16a9717a185015247dc5e815",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/gantt_launcher_ui.md",
+      "blob": "b974745965d48bcb41d5f607f86a19a095186b26",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/gantt_task_search.md",
+      "blob": "961bbd93f7757eda25021cab3ba62ad3762b977e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/indexed_targets_page.md",
+      "blob": "66ad9bdf4cafa0b0d8314e11df5fd039ac3a57a7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/infinite_depth.md",
+      "blob": "947b8bc2f38f36c1cec6486ea77ea89f181d8ea4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/open_hub.md",
+      "blob": "29c485739d4928fa2bb921119072315b30ec6319",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/or_search_spec.md",
+      "blob": "12f2a465db6999ecfa293485e331fe36e11e9166",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/performance.md",
+      "blob": "b5873d3edd4518e586d5e8fbd617f43cb67e3e8d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/runtime_and_distribution.md",
+      "blob": "094be43c523e5bad3ddcdedf1dce2668a2e8ea3e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/scheduler.md",
+      "blob": "9523819721242d01223920b1b8615bfa292ce6c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/synonym_management.md",
+      "blob": "742d87209fa07131ba83b57295474788f7d6a214",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/web_page_search_spec.md",
+      "blob": "344fff0f4afca996c367ca12357d43da3f442b4b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-Cy5Kf6Lo.css",
+      "blob": "aa6b6f2791655a50f8c71a9d21847f39fea56d5d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-DQ0MbxXo.js",
+      "blob": "1fc3bf8c567c2aa723b54642dffdb6b760da8a9e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icon-192.svg",
+      "blob": "e9cc16dcf9631ed924a66a2a2e3855a458021801",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icon-512.svg",
+      "blob": "406a20f02086ab1edc1298d01adcc8bbbbe75ce8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/audio.svg",
+      "blob": "197cb1523534bdaeda9e631431f989a113bb0cd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/csv.svg",
+      "blob": "ec5bc90e92b52f1d65424d31354bb8a144411caf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/drawio.svg",
+      "blob": "71c379162da44f2f4660b37cbbff6415459c1de4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/email.svg",
+      "blob": "c5eab56523f16b114a78b42346801b3859be5b7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/epub.svg",
+      "blob": "731f07692aded695629783e2fd1052b946b8915f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/excalidraw.svg",
+      "blob": "b2c75eec4134ffad4b7d0acdd8c68c8636caf425",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/file.svg",
+      "blob": "6130deeecbf5557947f374a258bf978ae417655a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/folder.svg",
+      "blob": "19043dbc6043e25356378b712278a64a642c0e79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/html.svg",
+      "blob": "52f3df8fc90b039f6427ec492bf198c393f978fa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/image.svg",
+      "blob": "6ae019060a90e8a31dcf6edc427d0c02f224cf2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/javascript.svg",
+      "blob": "786cdbfb9d1386e545cf541eccf651548131684f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/json.svg",
+      "blob": "2a36f1a33a6e8d32a8ea32dd2d8dee1bc13ce5c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/markdown.svg",
+      "blob": "064473aa297394e07c020b991cb912bf542df361",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/pdf.svg",
+      "blob": "f41d8ccc56cfba73fd14c45460e9f3f1fbdc2557",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/python.svg",
+      "blob": "890e6a1e7da4de5ecb8bef654c302967f52ed3d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/task.svg",
+      "blob": "3006ac9d0a1a238d4c0cdb888c6239d040e9b315",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/txt.svg",
+      "blob": "85605cd97889bda881b373dad68b1c98e290c2ab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/typescript.svg",
+      "blob": "0708a9102609ad356b9de69f84d1976d9ac0fefd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/video.svg",
+      "blob": "bd8e891e7a52c0fff3d4396a716d1690f8c69776",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/xml.svg",
+      "blob": "bb0e5645dab7dd7bcb6078accd316e8e61a855d3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/yaml.svg",
+      "blob": "0177fcf0d181082c62ac5ac6f221f850a9f477a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/zip.svg",
+      "blob": "a1909ffa739925adad5aeb34025bd548e311baea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "blob": "cb137bc4af50b83a5fe26499861fda8f14d4941b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/manifest.webmanifest",
+      "blob": "9a24eb719c683bf7c591074b2289b2ad438a23db",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/sw.js",
+      "blob": "a7eef227e770589d896d9e8ed8c408ecac5d1c7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/index.html",
+      "blob": "e83217625d020872cec75eb42b31c863b7e7b833",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "blob": "d77fd458423376d7c191b0133cabc1f5706dd302",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package.json",
+      "blob": "48b782bacf34e246db58a055fa93a0876dcce172",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icon-192.svg",
+      "blob": "e9cc16dcf9631ed924a66a2a2e3855a458021801",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icon-512.svg",
+      "blob": "406a20f02086ab1edc1298d01adcc8bbbbe75ce8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/audio.svg",
+      "blob": "197cb1523534bdaeda9e631431f989a113bb0cd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/csv.svg",
+      "blob": "ec5bc90e92b52f1d65424d31354bb8a144411caf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/drawio.svg",
+      "blob": "71c379162da44f2f4660b37cbbff6415459c1de4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/email.svg",
+      "blob": "c5eab56523f16b114a78b42346801b3859be5b7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/epub.svg",
+      "blob": "731f07692aded695629783e2fd1052b946b8915f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/excalidraw.svg",
+      "blob": "b2c75eec4134ffad4b7d0acdd8c68c8636caf425",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/file.svg",
+      "blob": "6130deeecbf5557947f374a258bf978ae417655a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/folder.svg",
+      "blob": "19043dbc6043e25356378b712278a64a642c0e79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/html.svg",
+      "blob": "52f3df8fc90b039f6427ec492bf198c393f978fa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/image.svg",
+      "blob": "6ae019060a90e8a31dcf6edc427d0c02f224cf2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/javascript.svg",
+      "blob": "786cdbfb9d1386e545cf541eccf651548131684f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/json.svg",
+      "blob": "2a36f1a33a6e8d32a8ea32dd2d8dee1bc13ce5c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/markdown.svg",
+      "blob": "064473aa297394e07c020b991cb912bf542df361",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/pdf.svg",
+      "blob": "f41d8ccc56cfba73fd14c45460e9f3f1fbdc2557",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/python.svg",
+      "blob": "890e6a1e7da4de5ecb8bef654c302967f52ed3d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/task.svg",
+      "blob": "3006ac9d0a1a238d4c0cdb888c6239d040e9b315",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/txt.svg",
+      "blob": "85605cd97889bda881b373dad68b1c98e290c2ab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/typescript.svg",
+      "blob": "0708a9102609ad356b9de69f84d1976d9ac0fefd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/video.svg",
+      "blob": "bd8e891e7a52c0fff3d4396a716d1690f8c69776",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/xml.svg",
+      "blob": "bb0e5645dab7dd7bcb6078accd316e8e61a855d3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/yaml.svg",
+      "blob": "0177fcf0d181082c62ac5ac6f221f850a9f477a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/zip.svg",
+      "blob": "a1909ffa739925adad5aeb34025bd548e311baea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/manifest.webmanifest",
+      "blob": "9a24eb719c683bf7c591074b2289b2ad438a23db",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/sw.js",
+      "blob": "a7eef227e770589d896d9e8ed8c408ecac5d1c7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "blob": "c6b3ecfc03c2acd0fd71ef3b6d143d107f49f13a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/api/client.ts",
+      "blob": "a5f2efaa5cc397006e5a3bc95cf2f697b72a30cc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/apiClientSearch.test.ts",
+      "blob": "55de2748cf9496ada0a1a9a3116f93315ef34086",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/appSettingsStructure.test.ts",
+      "blob": "4689a2e0d16f0fc9270c756f7c76e29b22a3d738",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ResultsList.tsx",
+      "blob": "067a09320cbf31e32803b49bd002611632a0ee84",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/SearchBar.tsx",
+      "blob": "ad2deb4489b28021b41f47b1478b0aa88f50273a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/extensionFilter.test.ts",
+      "blob": "50e997a583d42ea065c46c8835a1f96582dc1ba2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/extensionFilter.ts",
+      "blob": "34aeca725fdda1d3c94ed37b7c3f9f5dbf7950e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/fileIcon.test.ts",
+      "blob": "bdc04b1c7a7817e5ce1f38053ccf764b2503f44d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/fileIcon.ts",
+      "blob": "a9e97a754fc51f3d9cc4651abc411938ef2a2809",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/fileLocationClient.test.ts",
+      "blob": "700c8d4af25eda0f55be4c100e8d4a5c045a92c0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/launchParams.test.ts",
+      "blob": "93c20bbb40aa1e9e8686be03837025284f1d3dba",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/launchParams.ts",
+      "blob": "ee829949f32a4d26309206c80a48dbeeeff478a3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "blob": "538489af7e249f81f379dfa58a82c728886676d9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/offlineAssets.test.ts",
+      "blob": "7bd096d6129f01c60114aa64599351312c27edeb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/resultsListStructure.test.ts",
+      "blob": "9d06eaa66cac43106cccfc5d480eaee2e7cfb64f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/styles/app.css",
+      "blob": "96ad1ba519101f69a36dceeac54897f13523be78",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/types.ts",
+      "blob": "fd51045ec50d24725c5bb1beba8c09ebdeaa19e3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "blob": "d017215bde7821582b729b2ded8f69c59ff1af04",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/tsconfig.node.json",
+      "blob": "16dfedc6a6ffc6183d7d74dfd920d7f963ce79a8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "blob": "2b8d3ad36b4f6063f04d700bcebb525ae41786c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/docs/architecture.md",
+      "blob": "84ff977c2bcf1b8d409d886bc1cc32898cd0a9b9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/docs/backup/launcher_overview_backup_20260502_182559.excalidraw",
+      "blob": "10e76180a63c37411d9b695111924fb32cfb0ae8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/docs/backup/launcher_search_and_click_flow_backup_20260502_183040.excalidraw",
+      "blob": "b7857e1c304df81720a9e4efed85b6e750ffae17",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/docs/backup/launcher_search_and_click_flow_backup_20260502_183443.excalidraw",
+      "blob": "3f40928e6348f94806da6338d99239886c4ab433",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/docs/spec.md",
+      "blob": "42f3cfcb8aec4d93a2b3687ddedd28c4b82efb3e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/requirements.txt",
+      "blob": "def75f35b3da8949db5c0241e3de42d068936ae4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/__init__.py",
+      "blob": "d347548e0fc85ca249c5433efd7cf49dc32c59a8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/api/__init__.py",
+      "blob": "0eaca508479e92c4502ba635d5b4ee89fe2ee2f6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/api/client.py",
+      "blob": "b4b3eba136e4989d08dbf0e24d804a10c98190ce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/audio.svg",
+      "blob": "197cb1523534bdaeda9e631431f989a113bb0cd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/csv.svg",
+      "blob": "ec5bc90e92b52f1d65424d31354bb8a144411caf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/drawio.svg",
+      "blob": "71c379162da44f2f4660b37cbbff6415459c1de4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/email.svg",
+      "blob": "c5eab56523f16b114a78b42346801b3859be5b7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/epub.svg",
+      "blob": "731f07692aded695629783e2fd1052b946b8915f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/excalidraw.svg",
+      "blob": "b2c75eec4134ffad4b7d0acdd8c68c8636caf425",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/file.svg",
+      "blob": "6130deeecbf5557947f374a258bf978ae417655a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/folder.svg",
+      "blob": "19043dbc6043e25356378b712278a64a642c0e79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/html.svg",
+      "blob": "52f3df8fc90b039f6427ec492bf198c393f978fa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/image.svg",
+      "blob": "6ae019060a90e8a31dcf6edc427d0c02f224cf2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/javascript.svg",
+      "blob": "786cdbfb9d1386e545cf541eccf651548131684f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/json.svg",
+      "blob": "2a36f1a33a6e8d32a8ea32dd2d8dee1bc13ce5c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/markdown.svg",
+      "blob": "064473aa297394e07c020b991cb912bf542df361",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/pdf.svg",
+      "blob": "f41d8ccc56cfba73fd14c45460e9f3f1fbdc2557",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/python.svg",
+      "blob": "890e6a1e7da4de5ecb8bef654c302967f52ed3d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/task.svg",
+      "blob": "3006ac9d0a1a238d4c0cdb888c6239d040e9b315",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/txt.svg",
+      "blob": "85605cd97889bda881b373dad68b1c98e290c2ab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/typescript.svg",
+      "blob": "0708a9102609ad356b9de69f84d1976d9ac0fefd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/video.svg",
+      "blob": "bd8e891e7a52c0fff3d4396a716d1690f8c69776",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/xml.svg",
+      "blob": "bb0e5645dab7dd7bcb6078accd316e8e61a855d3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/yaml.svg",
+      "blob": "0177fcf0d181082c62ac5ac6f221f850a9f477a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/assets/catppuccin/zip.svg",
+      "blob": "a1909ffa739925adad5aeb34025bd548e311baea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/config.py",
+      "blob": "a7e3f95dc2efa94bf679f46931470780655728b4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/file_icons.py",
+      "blob": "320416b1900ce9234497b3b30940d62917d1908a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/gantt_task.py",
+      "blob": "92ea5ab296c3d5b230f151c838648c00a13bf92c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/main.py",
+      "blob": "944be8be457c25f6351c8c2e58bd3dc3a3f9bbc3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/models.py",
+      "blob": "b36d61b686fbdaf2ff61f3ceceff654f89996bc1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/offline_flet.py",
+      "blob": "2b60f556ed95d67c84374cd38b63243036f28dd2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/services/__init__.py",
+      "blob": "3bdf0205cafa4599d7951dd0b0e6e4072f4151e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/services/file_actions.py",
+      "blob": "cb181f0eccd120d7b4f85dd974baae87b470ffcb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/services/hotkeys.py",
+      "blob": "82920d545e07a4b343f0caf997a31cc3b1c3ece1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/ui/__init__.py",
+      "blob": "8b5afaceae458e225523ace3e259d34f294d94c9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/ui/app.py",
+      "blob": "2339791314f160d4b0c884f0f84d1092c43c3a68",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/ui/native_mac.py",
+      "blob": "e6685759160e68f1463d4efd043075f385de708b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/ui/urls.py",
+      "blob": "9ab53b3ef408c83d9ec45fb3296ccd81477671e7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/src/launcher_app/utils.py",
+      "blob": "ab5e79a1a94b71be1c56df909736de073aaff98d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_api_client.py",
+      "blob": "9b743e16e3b7e09771e37e5b6a2a86d48a44fc9d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_config.py",
+      "blob": "de99d4273d6eaace63a1039d939ee8ba3134deac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_file_actions.py",
+      "blob": "8821db608776d5f1b528eb3f8eb5a274b1fa17da",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_file_icons.py",
+      "blob": "e359fa2e7cd2323f310b754b0269708a748b9380",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_flet_app_actions.py",
+      "blob": "1d9a6b4937498c28fa1da5c26dd333ff8ca58fb4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_gantt_task.py",
+      "blob": "2e59f11b2042f136a02467c748aafc8efbaf377a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_hotkeys.py",
+      "blob": "c2beadd2577d84966ae9cab458f151b64c637ef8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_memo_screen_style.py",
+      "blob": "4b05727015cbff6374ff4368958d5c5ed53c4b35",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_native_mac_power.py",
+      "blob": "4cf4f0b06e7a1bedfa5586f46f64fe8e28d25a26",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_native_mac_spaces.py",
+      "blob": "53c2e8c2b71172a4e926f41a1529286f555afa94",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_native_mac_urls.py",
+      "blob": "e2c2fece0a74286c73ba60b77b4e6382c86bde8d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_offline_flet.py",
+      "blob": "8dbebe1dbd8a45c89b8abf99dd9cc5398a4a97f3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/tests/test_utils.py",
+      "blob": "064b478ded6a06e9b51e58b01041c0ef1e0a80d3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/vendor/flet-view/README.md",
+      "blob": "9679d51b55b1c92ab3ee0bf2b01cfcba46f7e81a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/vendor/flet-view/flet-view-windows.zip",
+      "blob": "4ca69f8cd8d243e60f75b90d25c445fcd0e5a6b3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher.Tests/LocalSearchLauncher.Tests.csproj",
+      "blob": "db8dad0e0556fdc3d730d0cf1e8ef816800b9772",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher.Tests/Program.cs",
+      "blob": "833cff29f2bf938f74c0fe4b746911e94891998b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/App.xaml",
+      "blob": "e4a6e359df64c76b673dd2667cd4312761e41d7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/App.xaml.cs",
+      "blob": "80ae985d8ef694ae200ceba8754f56191681cb9f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/AssemblyInfo.cs",
+      "blob": "ac006ce56e1353f7b67341501f479ce2feccc976",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/audio.png",
+      "blob": "120438f76328d90bc71d4ed618ca5e3adb9b684d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/csv.png",
+      "blob": "0e1083b74a5c9c056aa76434d09d0fe592668cf0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/drawio.png",
+      "blob": "c6af3f8bad9aea98d22b9401a394c8a18105e5e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/email.png",
+      "blob": "3b41278b36c298ce68e1d663d9f380ac50741324",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/epub.png",
+      "blob": "3dff74231fbf065c003a7822ad7da7df7112f290",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/excalidraw.png",
+      "blob": "08f3331354456d64e8d92334ce6f8e2f6f911db5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/file.png",
+      "blob": "f3ee8fac30b4039e0f674dbbedb9c17a73d0c46e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/folder.png",
+      "blob": "d2d61ad975a72906c00022ba9d53092475c4f7c6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/html.png",
+      "blob": "221d195a33e1d2549a5a364daad65ff5c47c30a4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/image.png",
+      "blob": "de7a84bb02d53f2379498a8a8b9ba68923b1f84e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/javascript.png",
+      "blob": "8638160a3f412eb25ca9386b57546aeac72c7850",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/json.png",
+      "blob": "11acbb38ac8f84ee2f9654b676892239797842e4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/markdown.png",
+      "blob": "3d28cfb292d92f1eabfd79c71fdd7779285727bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/pdf.png",
+      "blob": "3a14a6d5de302dd94d0f6b65a39fc29dc7fc61cf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/python.png",
+      "blob": "4b97d31111c1cb79f7d9d6479baa74841c1be34a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/task.png",
+      "blob": "339d3d30a8dce6b48ab819c7e845067398600ae3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/txt.png",
+      "blob": "98fd3f7da396c1bf2e8a937de558ea7488bee2c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/typescript.png",
+      "blob": "75cefa04c78f5adc17010006374eb847a0db658d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/video.png",
+      "blob": "ee67a64d69103857ed037e27a7f8a4a70f572d44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/xml.png",
+      "blob": "258c321124c918be8cc83c61b54c655c69f1f4c4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/yaml.png",
+      "blob": "2e8e769bec397964782e30207f1c40d8f274fe9a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/Assets/catppuccin/zip.png",
+      "blob": "bac26dfa2bf26aed95b163ebdeb239bfe2da9c93",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/DoubleShiftHook.cs",
+      "blob": "9ee8ac0db4a3ee3abe6a411ded2f253a145402a7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/LauncherApiClient.cs",
+      "blob": "623b4019dd2739289053bece8c75cd479db97af9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/LocalSearchLauncher.csproj",
+      "blob": "d17fdf037001e44c4ba0e3cc8298c6cefc5b972d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/MainWindow.xaml",
+      "blob": "55d654e515b1c486beda4087624a2799d8b1cfd7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/MainWindow.xaml.cs",
+      "blob": "df246982af043e986e7053565082c6066461ff20",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/ModifierChordHook.cs",
+      "blob": "00e59b85578ce5760573fe94a98a6bbe73bdcc6b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/SearchModels.cs",
+      "blob": "140f0b613003449b58c1c8b66767898686a27b50",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/LocalSearchLauncher/WindowDragPolicy.cs",
+      "blob": "8c59434aaaeb66ebe12cb4bbad222d541159eb44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/README.md",
+      "blob": "08071b4b942f5e55bc9512615f70be2a570c62f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish.ps1",
+      "blob": "0c3c5214c1e0ef8a58fb4f8e5370e3cced62ae77",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Accessibility.dll",
+      "blob": "d75e72dffb9fabcd7ce86a68a0d931933c603de4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/audio.png",
+      "blob": "120438f76328d90bc71d4ed618ca5e3adb9b684d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/csv.png",
+      "blob": "0e1083b74a5c9c056aa76434d09d0fe592668cf0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/drawio.png",
+      "blob": "c6af3f8bad9aea98d22b9401a394c8a18105e5e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/email.png",
+      "blob": "3b41278b36c298ce68e1d663d9f380ac50741324",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/epub.png",
+      "blob": "3dff74231fbf065c003a7822ad7da7df7112f290",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/excalidraw.png",
+      "blob": "08f3331354456d64e8d92334ce6f8e2f6f911db5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/file.png",
+      "blob": "f3ee8fac30b4039e0f674dbbedb9c17a73d0c46e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/folder.png",
+      "blob": "d2d61ad975a72906c00022ba9d53092475c4f7c6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/html.png",
+      "blob": "221d195a33e1d2549a5a364daad65ff5c47c30a4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/image.png",
+      "blob": "de7a84bb02d53f2379498a8a8b9ba68923b1f84e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/javascript.png",
+      "blob": "8638160a3f412eb25ca9386b57546aeac72c7850",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/json.png",
+      "blob": "11acbb38ac8f84ee2f9654b676892239797842e4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/markdown.png",
+      "blob": "3d28cfb292d92f1eabfd79c71fdd7779285727bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/pdf.png",
+      "blob": "3a14a6d5de302dd94d0f6b65a39fc29dc7fc61cf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/python.png",
+      "blob": "4b97d31111c1cb79f7d9d6479baa74841c1be34a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/task.png",
+      "blob": "339d3d30a8dce6b48ab819c7e845067398600ae3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/txt.png",
+      "blob": "98fd3f7da396c1bf2e8a937de558ea7488bee2c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/typescript.png",
+      "blob": "75cefa04c78f5adc17010006374eb847a0db658d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/video.png",
+      "blob": "ee67a64d69103857ed037e27a7f8a4a70f572d44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/xml.png",
+      "blob": "258c321124c918be8cc83c61b54c655c69f1f4c4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/yaml.png",
+      "blob": "2e8e769bec397964782e30207f1c40d8f274fe9a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Assets/catppuccin/zip.png",
+      "blob": "bac26dfa2bf26aed95b163ebdeb239bfe2da9c93",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/D3DCompiler_47_cor3.dll",
+      "blob": "948cc90bb3a3ab5417b1397184b04833e55ae066",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/DirectWriteForwarder.dll",
+      "blob": "8a379384f4512ba1308406ac474b6edf27947aa3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/LocalSearchLauncher.deps.json",
+      "blob": "ecca680c06a4896bce60a62b42763905930df94d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/LocalSearchLauncher.dll",
+      "blob": "ef86b7cb80a4e5febed5ab009f0f0c3bd12ed37b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/LocalSearchLauncher.exe",
+      "blob": "d584ac559800de89b77802600beaa5a3b0255c41",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/LocalSearchLauncher.runtimeconfig.json",
+      "blob": "6f1ecd04c85edaf9653c76ece3fb6fd0b5d8a11e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.CSharp.dll",
+      "blob": "09bd4026ce75b7980f9726e080316f7217aa1831",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.DiaSymReader.Native.amd64.dll",
+      "blob": "92b355ba34de6f6bba71150d741224cd5c1efd29",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.VisualBasic.Core.dll",
+      "blob": "ecb09c62e1139b7919e2fe0aca6711e92dce1438",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.VisualBasic.Forms.dll",
+      "blob": "cc65a214caac717a390c6787c50163d3edafcad1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.VisualBasic.dll",
+      "blob": "243768058fb6987d84324b1d8050098f28d64528",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.Win32.Primitives.dll",
+      "blob": "220e38cced814a4d5a9bd28a02baea6662ab4c4b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.Win32.Registry.AccessControl.dll",
+      "blob": "a8edc07e3f32df9d57821c99e193fa376203d644",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.Win32.Registry.dll",
+      "blob": "277e75940ea47b259b65335aad1106d112f47241",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/Microsoft.Win32.SystemEvents.dll",
+      "blob": "3bbb5d1a7cda24d60803a56b99e4331cd0b0f016",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PenImc_cor3.dll",
+      "blob": "12df16bbf0173a55c9f80b2f8b651bd27ae906f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationCore.dll",
+      "blob": "b4910c05990407db77a0ee1da9793efa8e82435f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework-SystemCore.dll",
+      "blob": "656f9af4b5ce83034f2b18b6f524db616e25b43c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework-SystemData.dll",
+      "blob": "21b554bbb2e89f878318e63ed1d6b9ecb82730bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework-SystemDrawing.dll",
+      "blob": "b872d756248b74233ca67efcff85be9d1574176d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework-SystemXml.dll",
+      "blob": "542f252505bb0a7455729be964c220995eeece04",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework-SystemXmlLinq.dll",
+      "blob": "cfdf7555f4bfed12856d7be4f725c34536e4abcf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.Aero.dll",
+      "blob": "252f3fd352cf3dbf2da2c839da48fbb13b36c8d5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.Aero2.dll",
+      "blob": "7aaa071e9249b41c09c7abc7cf584c2951a15754",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.AeroLite.dll",
+      "blob": "f9fb3bbd7199744585152e807896d59f22f8ce3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.Classic.dll",
+      "blob": "c0a8a5803a48e7c83fbb1f78a8b25ef95b73d7c7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.Luna.dll",
+      "blob": "ca51a4321675edccd3eda4cae9460ffc552f9433",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.Royale.dll",
+      "blob": "6aa13d017a9c57674042852001ecf856b6967578",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationFramework.dll",
+      "blob": "7344d2a64d6c3bf1f49973773457fc3cae9c61fc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationNative_cor3.dll",
+      "blob": "f80f1c3cfae2ce978daa078fe78af4cd76cb87cc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/PresentationUI.dll",
+      "blob": "e92f437656babe4019a798f5a1b09520174d6b52",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ReachFramework.dll",
+      "blob": "e068153e554996b5faa9bf99b5d04dbe5460f8de",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.AppContext.dll",
+      "blob": "61118ca9d2a7d14cd1ca25f6446961815daac030",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Buffers.dll",
+      "blob": "990d80d3a263fa79e36a5193b7bbf99a9b59f26c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.CodeDom.dll",
+      "blob": "14fb6c41efb96fdfea57745e9c39a663f43c24d3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Collections.Concurrent.dll",
+      "blob": "e23f13204894cfb4e3a037683848927909e67648",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Collections.Immutable.dll",
+      "blob": "adc4810c62510a0169d78b58bd93c7ef4e023863",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Collections.NonGeneric.dll",
+      "blob": "a2ba8a201c9f02a4df99930d9614e4931039db62",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Collections.Specialized.dll",
+      "blob": "5eaabb8a4133d34227e76ececa438e246f60267a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Collections.dll",
+      "blob": "4a2bf6d7e5e34854e3b572ef70b2b02874e24f7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ComponentModel.Annotations.dll",
+      "blob": "470752a23434d29d918f2293b5983bc419883287",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ComponentModel.DataAnnotations.dll",
+      "blob": "151d3a46702f374532b30a11f518a6d21f4d7a37",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ComponentModel.EventBasedAsync.dll",
+      "blob": "2498d931dfb69ab75b8e2a8400a35b84d655c5ae",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ComponentModel.Primitives.dll",
+      "blob": "51310ae3dc1d50af0779d640138d06299b58a740",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ComponentModel.TypeConverter.dll",
+      "blob": "68a26c25b6070a1f281bee6ccb3b889af98b1154",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ComponentModel.dll",
+      "blob": "90156c1d6819467a4e4c345b4eb04d7b5794f364",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Configuration.ConfigurationManager.dll",
+      "blob": "138a3815b289d2e73d6a26dba665cfea24765e6f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Configuration.dll",
+      "blob": "7ffb0b42614e6fa8954e30cd6f9d6673ec49d0d2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Console.dll",
+      "blob": "8523bb230a6d5fc0204a3ca26374b1ed316c641b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Core.dll",
+      "blob": "a4695143a35832a8ace96c4903b3bd9c585eb1e6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Data.Common.dll",
+      "blob": "716124f490a823f7d073b2cdf47e27ae2f6f756e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Data.DataSetExtensions.dll",
+      "blob": "b9be4d6eaf14a0df1fd1b3af73e4be46f976e2a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Data.dll",
+      "blob": "173472e82a7c3fd75af7eec2b8ac645736bb541c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Design.dll",
+      "blob": "09ba5790b1fbbd6a7d73c8cca873be93624cb57a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.Contracts.dll",
+      "blob": "cbb6da6de3a82ef61ff782c9e90a9bd515f5b585",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.Debug.dll",
+      "blob": "118bcef3334d53252cfe2e05f4c80f4d360e559f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.DiagnosticSource.dll",
+      "blob": "19bfc5ddebe1603d3d1196f73e9833b2d6cfdcaa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.EventLog.Messages.dll",
+      "blob": "a1b3a2bc7450f069605bfc899e98990ef436b5fc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.EventLog.dll",
+      "blob": "ac1e28199ed4727260634731dfc8f55140a3024c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.FileVersionInfo.dll",
+      "blob": "9794a8e7e4299e9aedcc501f2b54ef5b5f4d1154",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.PerformanceCounter.dll",
+      "blob": "91affa71ad621ec1192063d43791df64e4d3f54c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.Process.dll",
+      "blob": "46a1ccfdb78c3fa3df18d8347c2385cfab30783a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.StackTrace.dll",
+      "blob": "07a3c73c134bc6060a10351305c12c4bb3b693e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.TextWriterTraceListener.dll",
+      "blob": "bad30a8c89812b4b122d8ae839c46784d49a7a2b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.Tools.dll",
+      "blob": "25494d081d36e89992639681fd9e8c4133038165",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.TraceSource.dll",
+      "blob": "7968690cdf16130aa7aea3f692e51583183d2f20",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Diagnostics.Tracing.dll",
+      "blob": "1c5d9e724594dcfb4c548109e2d256975f1879f0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.DirectoryServices.dll",
+      "blob": "963ba0c270b7c42792dfdc52517cbd4467f6ea23",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Drawing.Common.dll",
+      "blob": "30348d57baba55e6c90972a5f39310bd32cf67c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Drawing.Design.dll",
+      "blob": "81b29da8e4e96d76c3a690e56c5dda190a71e503",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Drawing.Primitives.dll",
+      "blob": "82124624d0009df72ff9f9750a9d3ff341db9541",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Drawing.dll",
+      "blob": "3c09317eed4a9315cbd9d5bacd8bc50a997f6d20",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Dynamic.Runtime.dll",
+      "blob": "150dc80abcf4e583bcfb806a6a1293116f80598c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Formats.Asn1.dll",
+      "blob": "03ea6569fa9222572fc7b7ca939cdae486bcb062",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Formats.Tar.dll",
+      "blob": "0a30cfb7cc7bf643ebd0c2fc21033687a6e8961a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Globalization.Calendars.dll",
+      "blob": "bfefbccede00dcde8c4a1a512e4c6726e400e8bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Globalization.Extensions.dll",
+      "blob": "97f8494db4f676c0d862bcb5b9273c1348f41675",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Globalization.dll",
+      "blob": "10e8f1bddb0942a1bb6825cecb0f94d44523f166",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Compression.Brotli.dll",
+      "blob": "4ff07ef699929c25bafaf3a8855006d732a20b6b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Compression.FileSystem.dll",
+      "blob": "ae9bcf5d013b49848a85d6814b5c71fee3787a3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Compression.Native.dll",
+      "blob": "c3f314e0e105743a6e0a1d9bb05123cd5f0a15dc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Compression.ZipFile.dll",
+      "blob": "01af93270dce05c4ead16749b1318c2ecb620e57",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Compression.dll",
+      "blob": "1265f388e96a637d9c13d4a03e9b9d3b400fe07f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.FileSystem.AccessControl.dll",
+      "blob": "71bb7630a51ef735d3e99d957d65582c2f9b0d1c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.FileSystem.DriveInfo.dll",
+      "blob": "68312070cc313a5f86c512e7a96dba0264b1ab57",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.FileSystem.Primitives.dll",
+      "blob": "1784856d88dd4f368c05691301c92db2d13b31b6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.FileSystem.Watcher.dll",
+      "blob": "7fc3a96218b025ce83b660221f2e2107cf96a3a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.FileSystem.dll",
+      "blob": "9287c5bb256a984579d392b2483f7c88c8c7bf8c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.IsolatedStorage.dll",
+      "blob": "79b77d77460d9f65e7e81c5082ae37d8e8d4b675",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.MemoryMappedFiles.dll",
+      "blob": "faec267d43767126e909f4fd90f1fbba1dd337a6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Packaging.dll",
+      "blob": "57bb1496f9b8019673b0e8e379ec0af2233ae4b0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Pipes.AccessControl.dll",
+      "blob": "502213a75198ec885a1396bf47cc097b5b3c9044",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.Pipes.dll",
+      "blob": "3338d731f9b6f86e7f5ce66d7265342b2a950069",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.UnmanagedMemoryStream.dll",
+      "blob": "f6614229c81438258ba60d08cee7dc68869ed8a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.IO.dll",
+      "blob": "b13427cf237c09d17b2347b85a9c77a6a687da5e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Linq.Expressions.dll",
+      "blob": "b0fe318cf71ac408a3bf0f63ef434ae461d39c6f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Linq.Parallel.dll",
+      "blob": "addaac35fb1d8de7e32a61cf302c8f00297fae4a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Linq.Queryable.dll",
+      "blob": "fdf2120bc44e09874a7037c8e610023daea0a380",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Linq.dll",
+      "blob": "9c4e424b72cfa5f49c843eca97156217470ab48f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Memory.dll",
+      "blob": "93f0cd8439e809afcaf4aadd0a8291f36a2df36b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Http.Json.dll",
+      "blob": "af736042fe7e1bb26898669a51e99fa44a1f5af7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Http.dll",
+      "blob": "5d1dc1760aeeacb854aa807a225fc315644c0f65",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.HttpListener.dll",
+      "blob": "934a4c95dac978facf1dc207fa73e37b79a9329b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Mail.dll",
+      "blob": "c3947ec317908bbc3359aa2a668bea587695f873",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.NameResolution.dll",
+      "blob": "492778efccb8b6648e9dcb05079e1875f054ee6b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.NetworkInformation.dll",
+      "blob": "e4c00da48a579ca11df278deb269c10a41197e3b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Ping.dll",
+      "blob": "f6815a365a4def7d817fc08347845823d6a59b69",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Primitives.dll",
+      "blob": "cd6edd954166ff85e3d803215f751cbe4a157a3a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Quic.dll",
+      "blob": "5ebab59d2c8912a61479d32597d0efe23ed77a25",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Requests.dll",
+      "blob": "e7131bc305f907b3270853bcbeb446b724b6283a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Security.dll",
+      "blob": "963ba3a8bc0005e8446900e4638d2138ef4a2830",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.ServicePoint.dll",
+      "blob": "eb0178fd2e272f6932f6e306f822865328f2abab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.Sockets.dll",
+      "blob": "585829c0b12770c854dc709f75c8fac53a00c1dd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.WebClient.dll",
+      "blob": "5a63cd29d2e2e913455d5f07641bf9633cc59695",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.WebHeaderCollection.dll",
+      "blob": "941443d74c8b72765f08baed9b9098097f9df878",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.WebProxy.dll",
+      "blob": "0a3594483d17f566cd272d08ae63a8cea5173add",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.WebSockets.Client.dll",
+      "blob": "393b9eaa920840033b529b07789283642018637f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.WebSockets.dll",
+      "blob": "4f952f59a23d5633d5dad80332d7ac4914f085b8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Net.dll",
+      "blob": "77ca00fd78eebd4605e4ba9851dbab9c5edd439c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Numerics.Vectors.dll",
+      "blob": "40fdd6eb5cd61cdfffb319a8d48121756fe18e89",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Numerics.dll",
+      "blob": "3e071aac3915e5ccbeee627b02938a9a5cb3828b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ObjectModel.dll",
+      "blob": "4b3567a12c5cefd8593dda5da39ac95d30922866",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Printing.dll",
+      "blob": "50b2f7f5ee8d0ed02173ac1c04f909fbf603120f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Private.CoreLib.dll",
+      "blob": "53a7cfbc6042cfa3280622b5dbbf7f0ccfca91a6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Private.DataContractSerialization.dll",
+      "blob": "67f4319ccdc57c1d879bd88e4e937b4a72958ecb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Private.Uri.dll",
+      "blob": "6cb17c7c67ca53608722fc37aca3739520a20ed8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Private.Xml.Linq.dll",
+      "blob": "6088f745bcbd3f62b718026d561acfbc2f1fc256",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Private.Xml.dll",
+      "blob": "74b7a3fa6145b9770904e94b7a83e8adc5532e64",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.DispatchProxy.dll",
+      "blob": "31e0868bc0153ae7d1587eb511b8f78d104c7d7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.Emit.ILGeneration.dll",
+      "blob": "2b4b7fb730904ef18ad528371724a79515048bda",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.Emit.Lightweight.dll",
+      "blob": "adc61bbf453a13c9919dbd2c8b5eab940cf27dea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.Emit.dll",
+      "blob": "05405db36a8c3ad68cc9ac8a47b490f67ff29ac1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.Extensions.dll",
+      "blob": "d02ace0e8b587df379d31c8b929871e590c5ab68",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.Metadata.dll",
+      "blob": "1e02bd4980107e8a98ef47b99eaf85bde3707c05",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.Primitives.dll",
+      "blob": "84be5862efcad3407179f62997439d63647d7836",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.TypeExtensions.dll",
+      "blob": "95019ef6eeadd276b89d6febdd01bf83e19dcc6d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Reflection.dll",
+      "blob": "7c3f4ebb885d44fdfd20b3d6543285ced16c6ffe",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Resources.Extensions.dll",
+      "blob": "7504d97346ac80086ee1e0eb1b3ce141d644adae",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Resources.Reader.dll",
+      "blob": "c83585f9af64269710e2b24bbe7832c5bd24a2c1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Resources.ResourceManager.dll",
+      "blob": "e18f949bdf8bbc146cf4d197414f5b0de8398314",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Resources.Writer.dll",
+      "blob": "adbec8b3f4265e40cb1c359faaefaf764ccc71b3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.CompilerServices.Unsafe.dll",
+      "blob": "622fe9ac64ea8d0c801594f79baadc229ecc791d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.CompilerServices.VisualC.dll",
+      "blob": "07b97e8930701ed2eb2eb6c6c795593cd1291b27",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Extensions.dll",
+      "blob": "ac286d6ae027b87ca1f38ab20bb1ad4d1f6f09eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Handles.dll",
+      "blob": "573a8cec70bb1c2674a019c900c25d487e94708d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.InteropServices.JavaScript.dll",
+      "blob": "0fe1ea9ac7efc485919216193dc591e50e34905a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.InteropServices.RuntimeInformation.dll",
+      "blob": "59076d3c687c5468057c7ea6eb050ebffd8de433",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.InteropServices.dll",
+      "blob": "5a7e601b318028418ecfe54fa8edaba4922974c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Intrinsics.dll",
+      "blob": "c81685bb94e1cfe5d600d3d1e690f4db2c368400",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Loader.dll",
+      "blob": "44fba5a38e0092c02f2167440c90bddde6ad19ef",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Numerics.dll",
+      "blob": "511b6559609d08875ce9c265dab43154241eb2d8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Serialization.Formatters.dll",
+      "blob": "baa73d648bf0243246e7a660c8d674c83d4f7b99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Serialization.Json.dll",
+      "blob": "56c827571fb17af2582de1016005d8290c82fe04",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Serialization.Primitives.dll",
+      "blob": "530b8554a33250e76ab96f9d2d13a5750cadde3d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Serialization.Xml.dll",
+      "blob": "0d9499a8558b64ab1a42109e42fc71b529259e7c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.Serialization.dll",
+      "blob": "4b99c362aab93488c6b10aa4d7d70b177ba66323",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Runtime.dll",
+      "blob": "66e7244334dc1991a7c0a4866f514b45176b6b48",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.AccessControl.dll",
+      "blob": "75fb3f603170ebb555a2daf153d17917bc22a809",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Claims.dll",
+      "blob": "48630a0e066c0fb6d80363e21a62f19f8fdf778b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Algorithms.dll",
+      "blob": "ccab6d7455955b434990fc2d7750f67cc6d80f72",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Cng.dll",
+      "blob": "23c14b766d5a958769bccb0a01e2738700bb4b77",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Csp.dll",
+      "blob": "deb942d4bfe17fd9bfab78f4981ce60346a5437c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Encoding.dll",
+      "blob": "da38a8714f08006674bf6068f4696f03d232be39",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.OpenSsl.dll",
+      "blob": "05edaa1faa579018fa3caf42ad04ae9cb23e2b79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Pkcs.dll",
+      "blob": "0b28c17a5298f50d8873f7227a90b64ca4f01c2c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Primitives.dll",
+      "blob": "bc952d027bb1433421d2bfc8a7c591aefee5cc1d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.ProtectedData.dll",
+      "blob": "374dc629cc1b50ae4eeca9d41b1ced74118ee5c6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.X509Certificates.dll",
+      "blob": "5f8e8f828b4b45d5f8430dda4cffe13e70f4a5bc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.Xml.dll",
+      "blob": "ef22f6b0976b4cc10e6a68d476242a598efcf736",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Cryptography.dll",
+      "blob": "0a6e877a5eeee0318caac8278d69695d36daf692",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Permissions.dll",
+      "blob": "33e6b56f5af26fe822a37d5faefae625e0fd386a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Principal.Windows.dll",
+      "blob": "44ba85f6aaae081f160c026fcbcc705399a9d9fb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.Principal.dll",
+      "blob": "4fffdf8645d90c33c510c3291e2f5b8565a9c83f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.SecureString.dll",
+      "blob": "80d88fb0ac6523a51221ee72a3c93e8254f1bbe3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Security.dll",
+      "blob": "95f59e495b00ece8976dab84ef1a53c2bd3e11e7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ServiceModel.Web.dll",
+      "blob": "11162e099ed1e877da6a69435900a0cca58ffbde",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ServiceProcess.dll",
+      "blob": "a630f0863471441aadfae088977eda1ecff7e5cf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Text.Encoding.CodePages.dll",
+      "blob": "f4bae57e1445b336642c33d5f827bcbaedd1c86c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Text.Encoding.Extensions.dll",
+      "blob": "119a71118e5f9832814b61cbc679df1d7f6aa01d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Text.Encoding.dll",
+      "blob": "b8c8787e541374594deee94320add90407970374",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Text.Encodings.Web.dll",
+      "blob": "1c72f0bcd3b0eb91349b3d37dd42eca4fdf40a4b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Text.Json.dll",
+      "blob": "285c7072b271918c813d43da4a90d6206ee38f66",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Text.RegularExpressions.dll",
+      "blob": "71a5f7e683ab2714bdaa17fb1e1ccf690444a80e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.AccessControl.dll",
+      "blob": "e5e1d6601d47dce552f1d1840d1a3a53a912d182",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Channels.dll",
+      "blob": "0b77e2fcee68199ec67953bed5ae3237c686fff8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Overlapped.dll",
+      "blob": "365475bdcf3f88de2407dd3d3fd05ed7160d1da4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Tasks.Dataflow.dll",
+      "blob": "fe664e8e4080084b451cb7e6b1af241ce34557ad",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Tasks.Extensions.dll",
+      "blob": "854c2bcaf092a97daed663b90d8a9cc1cfb95b71",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Tasks.Parallel.dll",
+      "blob": "b08955995afc580788d62b5f876bbd4c7e5528ec",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Tasks.dll",
+      "blob": "974a42116634bdf0405ee557327041e1e44b3060",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Thread.dll",
+      "blob": "b8b4c98173f594ed677cb9c64e7819a82787bc8b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.ThreadPool.dll",
+      "blob": "370990a0183ad6733c42bbe59f758cf9da5b49d4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.Timer.dll",
+      "blob": "e051c70f50eea1f6a0c2c233068f23c1f7cf9b0b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Threading.dll",
+      "blob": "6fbe41272cd91a2dce0b5bcbc8113bbc4d00791e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Transactions.Local.dll",
+      "blob": "1c014e56f8546a8af411ce9d4325b681d7fccb86",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Transactions.dll",
+      "blob": "2491d7893dc44664d7014e63ef34678192872389",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.ValueTuple.dll",
+      "blob": "1ab272bba2284117a22f1cf14997abad1e54e573",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Web.HttpUtility.dll",
+      "blob": "e74032201ad189ec9d9cc63203813b2db8fcc8d2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Web.dll",
+      "blob": "d214ad2602f62ccfa6f717675b1df142f73e5ca0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Controls.Ribbon.dll",
+      "blob": "e67a649c60954f4a6272afd050617d4eeb8ff777",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Extensions.dll",
+      "blob": "eb91c9e72ad75260b1038dfb2db5487ceda3e716",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Forms.Design.Editors.dll",
+      "blob": "6485998f96ed3c9cd51c24486b8f09bbee27c8bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Forms.Design.dll",
+      "blob": "fdc00c022be38f05d3310326d6a85f21042db6da",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Forms.Primitives.dll",
+      "blob": "01c4dc94e5bb7ec5821fbe0a798820be39fd380b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Forms.dll",
+      "blob": "ed1150a33670be4226d476389ca97effee8f5cf2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Input.Manipulations.dll",
+      "blob": "581ba768e984ab351c0053af3824e64360db01e9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.Presentation.dll",
+      "blob": "8d8af51fd4302443ebb4c0953a0ebef58cefeba5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Windows.dll",
+      "blob": "78b3b6a2b73a75f3c18778cf416ae88bb222dec9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xaml.dll",
+      "blob": "fd23923daf437c62ef9d7afaf9b45ee2ac26b958",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.Linq.dll",
+      "blob": "b72749874098ba7a446524881204644f440f5933",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.ReaderWriter.dll",
+      "blob": "be5d07c1c509d04908e70a919fb03b6b60d49e53",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.Serialization.dll",
+      "blob": "e5d16c864cb6f3c98ab234af695fc2e71d3e3b4a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.XDocument.dll",
+      "blob": "808ae2f2dac05369188df596d0b63df8ad7190b6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.XPath.XDocument.dll",
+      "blob": "59560eaeba0eef1509c6d139027eb26b6730d862",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.XPath.dll",
+      "blob": "94c743a65f344ad6277174a1e9c30da5f67ab162",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.XmlDocument.dll",
+      "blob": "eae34c1e716ea8d774b13af96f90abc68970c55f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.XmlSerializer.dll",
+      "blob": "2d9a2c1b1ab73d35f7fb404b5f732a558c1ca871",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.Xml.dll",
+      "blob": "e91958f0912dab3c291fdaf470a9a6adeaa3909d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/System.dll",
+      "blob": "6f34ded2905ceaabf1802d60c6f0f0280c94984a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/UIAutomationClient.dll",
+      "blob": "41234287a4eacfb4c6919a4fb183fcc072267a57",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/UIAutomationClientSideProviders.dll",
+      "blob": "4032ff7fb809e100c2a74d25fbde46bd40ec7d59",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/UIAutomationProvider.dll",
+      "blob": "dd5f5721adc68fcfe6d95378f8e88735674ba55b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/UIAutomationTypes.dll",
+      "blob": "6b9a79f551df80640fb0c55d458ae9931165259f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/WindowsBase.dll",
+      "blob": "e6d495056560d91eebf6d52c9c638d8446a1b881",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/WindowsFormsIntegration.dll",
+      "blob": "1f67ca569b72d3000de7e6ca9e2789fe8c6074b2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/clretwrc.dll",
+      "blob": "f59189e338c08052e33f9f1511c6564b1e011068",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/clrgc.dll",
+      "blob": "2f493ef5a39aa3d3d95581e788a5c95dcc97e0cf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/clrjit.dll",
+      "blob": "be273a31ad12cc9f98d949ffab605729996eb731",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/coreclr.dll",
+      "blob": "7d324bad82732e158d389f34b2859ddb6ea58939",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/createdump.exe",
+      "blob": "8d9575d6fc471425abea8027627b72c2f31d20d2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "cfc768d064eb9a7203537f6474543e33f1dae262",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/PresentationCore.resources.dll",
+      "blob": "e8739b046382f771128d0bc08e9d6a93c09ac05d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/PresentationFramework.resources.dll",
+      "blob": "a7b1ee92b7fd1c0fcc7fa0c325260d78bfe4b2ac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/PresentationUI.resources.dll",
+      "blob": "a007f4b6a60a5ae676018e56486fadaf97adecc7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/ReachFramework.resources.dll",
+      "blob": "05bb405b1c9955d6e28852f5a4562d104f92b048",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "28df4bbefc6b8eee87288c4f3349595506bebe82",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/System.Windows.Forms.Design.resources.dll",
+      "blob": "169fd0956403b667161456ff644a14fd8cf8a78c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "853f83f25f83929ea2c931eb6d6c20fdf48865e6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/System.Windows.Forms.resources.dll",
+      "blob": "5753cc8eda84cfaf23ab2b11361194d8f7f22c80",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "673a9251e0c9c614fb2fac0b2cf0af3b991bd195",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/System.Xaml.resources.dll",
+      "blob": "19cea9df88d2b8f439ff6ae70271ca403bfeae7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/UIAutomationClient.resources.dll",
+      "blob": "c8dc3068f7bcae05bc9fbbc57463c5ea4f58dc01",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/UIAutomationClientSideProviders.resources.dll",
+      "blob": "96f657e8a96b4f2d3d95343ad3d641d24a7b56a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/UIAutomationProvider.resources.dll",
+      "blob": "432949c8d308f6e85909dd66c98505d0b675f455",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/UIAutomationTypes.resources.dll",
+      "blob": "b129389753725a3c60516a794e0b0ef0d9b048c0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/WindowsBase.resources.dll",
+      "blob": "f5887e07d043c62c9f56502bd30ba5491620a41e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/cs/WindowsFormsIntegration.resources.dll",
+      "blob": "07255fbad0501a8c302a498e300ded508273c3d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "9306a3c56ff2329845e19a3d76056b28f993c7c1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/PresentationCore.resources.dll",
+      "blob": "0c4a8160a07884c1eaa6607541a6817aa6992af2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/PresentationFramework.resources.dll",
+      "blob": "e4a87b76f9ed635edcd037acc43659983ddb8b4b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/PresentationUI.resources.dll",
+      "blob": "1ae464eef487d77226a8cd77898a3e901fb937ee",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/ReachFramework.resources.dll",
+      "blob": "d74ac161f09ad83bf937d8916648bfe6427622ea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "efc93b09a5d2ac30b92ea0ae54a7df65121f25de",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/System.Windows.Forms.Design.resources.dll",
+      "blob": "ef474427aab026d3c6b9f8ac2b31dfded163890d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "d1ffceff60059249bb5338a616cc7a0711690367",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/System.Windows.Forms.resources.dll",
+      "blob": "4d1e52105bfc319e6b70fab31e20b2727642ac12",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "1b08baa47dd5e07c72e86d01430ae53163ec3df1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/System.Xaml.resources.dll",
+      "blob": "759cc5af2eda98b69f0a4dc7af4611fc166cc8ed",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/UIAutomationClient.resources.dll",
+      "blob": "5c27f655c077e32ab0cfed3d2a86854317e27146",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/UIAutomationClientSideProviders.resources.dll",
+      "blob": "21b10f88a4446fd6b4855631d218fa061864e15b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/UIAutomationProvider.resources.dll",
+      "blob": "4efde19f502bcd60957f9a52f507c87806d1871c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/UIAutomationTypes.resources.dll",
+      "blob": "a330a4fdfc957edc24e0a77b57ca6b16a064e01b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/WindowsBase.resources.dll",
+      "blob": "5456f1089b359673b81ae438f4dda21f68c3ddcf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/de/WindowsFormsIntegration.resources.dll",
+      "blob": "4cad6d8386772b648d4c6ef2641f58c5229891a4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "20bf3793fd4315622920093481405824a7241525",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/PresentationCore.resources.dll",
+      "blob": "3193b1689f9efa0520e8825605b172caf771f475",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/PresentationFramework.resources.dll",
+      "blob": "cafbe9cef133d144c1c994a8422257a68aae22ce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/PresentationUI.resources.dll",
+      "blob": "9d30debe0549b3df8725c31556d2042af9249638",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/ReachFramework.resources.dll",
+      "blob": "901f660b54c0fd4f5922a3989460d57bfc67f46d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "be1274ee549a58cdf30c9a399160219227b7a656",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/System.Windows.Forms.Design.resources.dll",
+      "blob": "cb786698f0ac8e8474e0cfe6c10bfe5a2254c14d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "2d93c38aec1073737b0fddc9af808e9fdf77b8c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/System.Windows.Forms.resources.dll",
+      "blob": "29f4a5442f1a2397ab8bd4a0da7c9f3835e8242a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "737a2f94f9b6d3b157d18f1d98467f85cde5dd53",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/System.Xaml.resources.dll",
+      "blob": "e08ca743998611d90ed157c466ef87ec37df0a4c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/UIAutomationClient.resources.dll",
+      "blob": "12796fb015b9a5fc750de6edbb6e5bb31fd314e7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/UIAutomationClientSideProviders.resources.dll",
+      "blob": "9febd51753fb4060453cda2fab6a9ff04b9a32a1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/UIAutomationProvider.resources.dll",
+      "blob": "0170cb39e884b26e82de667fce1858f57d33c9a6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/UIAutomationTypes.resources.dll",
+      "blob": "675a653f0899d53d62eab80753c01f8424547d8b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/WindowsBase.resources.dll",
+      "blob": "af1387b1616c9e9b7cd47413598969a9c74db5fe",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/es/WindowsFormsIntegration.resources.dll",
+      "blob": "a9848db5c876639775b8c6dceeed1240540fbb39",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "56dadf6ce94db72e71eb7cf497a3d1c24f989580",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/PresentationCore.resources.dll",
+      "blob": "79b6c2b16ec052353ba0795059735b043a0d2f0d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/PresentationFramework.resources.dll",
+      "blob": "1b0ebe3e07b50ddc8859b1bbf50ab4793a942ccf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/PresentationUI.resources.dll",
+      "blob": "498b61d778cd8246c5a4b02646537f244e98da46",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/ReachFramework.resources.dll",
+      "blob": "41908112089d281ee60dec7e5ab33d7c97ae019f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "482e7a6b8bc21892214b7cc2d79f8291dfe4bb9f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/System.Windows.Forms.Design.resources.dll",
+      "blob": "1ac219c08a97cba545702e87a10c2951f3dead29",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "e466ee0a07cc30fc4693ca75876e9f99acd9a7f5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/System.Windows.Forms.resources.dll",
+      "blob": "1b7f7d7e3fc0f707ca21487fbff66d014d44ff73",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "440d5d6cbf3e2df714e55c0d08a2a6077307794b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/System.Xaml.resources.dll",
+      "blob": "669e2af565fda38cd6e23ca0d5b02bf4c170cfd1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/UIAutomationClient.resources.dll",
+      "blob": "9da05c9b2a89836c5afe5353694199b6b413a4d7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/UIAutomationClientSideProviders.resources.dll",
+      "blob": "3f396c51c3e100b0dd3a7b8c5e3834ecb0b6c73a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/UIAutomationProvider.resources.dll",
+      "blob": "d3efd26863a8bd23ec5ec393049a8db06b827ef2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/UIAutomationTypes.resources.dll",
+      "blob": "6ea274224d779444d6618b7d34524e1be918b6f4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/WindowsBase.resources.dll",
+      "blob": "94b489f0f4d1a4ec25c75b7684bed639be642820",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/fr/WindowsFormsIntegration.resources.dll",
+      "blob": "4b3f4523106b9d2caa881a3b62468410a90e887a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/hostfxr.dll",
+      "blob": "0e0d1bb093479b540ce3c930ed0535cb1b56dab2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/hostpolicy.dll",
+      "blob": "1aaacf48b463afb471f74565ccb5969aeb03d420",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "5a7673fec46c4c8eb680e317dee8c790fb6e4af2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/PresentationCore.resources.dll",
+      "blob": "b159fd2b3320c29f0b73f42c04e6cc3767fbc3cc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/PresentationFramework.resources.dll",
+      "blob": "e0d6d30ac4ae223ca3794ac0b88fd6e965321e16",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/PresentationUI.resources.dll",
+      "blob": "7f12d7233c26b5014c38afb1064173dd47f99f82",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/ReachFramework.resources.dll",
+      "blob": "75e4d0d95fd9f621923a6051d9bdd744af3486b8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "4bab933eb43ab684266150ed3834cc3e6d75417f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/System.Windows.Forms.Design.resources.dll",
+      "blob": "a8a9342d7cea987bd89a896767253d2a7f817f55",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "e1ac9f11bac17710918e22ee751146527de069d2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/System.Windows.Forms.resources.dll",
+      "blob": "3b54eeaa741d4a140bf135cd2c08f23f1d0eb887",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "7d90212f9dc50bea6b29b5c7d6a870e89a26a724",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/System.Xaml.resources.dll",
+      "blob": "c5354df19f6b1fa131d9f80469d5c9f5c6c7bf81",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/UIAutomationClient.resources.dll",
+      "blob": "e1d732e63587d96f8695262f68c3ab9657bd60fa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/UIAutomationClientSideProviders.resources.dll",
+      "blob": "981edaf11da0db7cac72b2fa12e42b8b7f272ad5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/UIAutomationProvider.resources.dll",
+      "blob": "50e874860ab102b8592ac54ca68638cf11734047",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/UIAutomationTypes.resources.dll",
+      "blob": "a28dc487bd3d800a78d5b2c78fa22c7e8f9a22e9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/WindowsBase.resources.dll",
+      "blob": "425349d272899e4d2f0693070a86ead12ae7dd6e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/it/WindowsFormsIntegration.resources.dll",
+      "blob": "5aa7107d0e033e41e46d280e860d90b502c31192",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "9d7eeeae679fb444772035b0cd702d178cac438e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/PresentationCore.resources.dll",
+      "blob": "5df5d0d876cfd8debbdba3d47559f686d662521a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/PresentationFramework.resources.dll",
+      "blob": "7700419d1895a19245ffe8c4e488cb4e63d24a5c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/PresentationUI.resources.dll",
+      "blob": "1ff1f513b98174d1948f5d2045a1dfa79dac2499",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/ReachFramework.resources.dll",
+      "blob": "bb553799322bc03d7f1a951bfec7bb7c609242c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "4103b2e7911e4f311ff8eba06fbe7e4796fc3501",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/System.Windows.Forms.Design.resources.dll",
+      "blob": "1d8c73341a1b63204c2906dbf17cd72d45883fd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "30a5509509b25c0167e8c2a5277f3d56d0ce0387",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/System.Windows.Forms.resources.dll",
+      "blob": "4a1cbe9c1aaf2e9968ad26b11010b69708bd04b1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "a5a849c148061141cfbe7abebff845b531da5bc8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/System.Xaml.resources.dll",
+      "blob": "0a683b5e144954411fa747279c578063bbc6e43d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/UIAutomationClient.resources.dll",
+      "blob": "10d4c2bf3be55713d40c73a2f03250c7be647959",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/UIAutomationClientSideProviders.resources.dll",
+      "blob": "f234be5f3077649c450558ee922e7b596c1d07b7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/UIAutomationProvider.resources.dll",
+      "blob": "f91aa1d1e63f8e2139d3520619afa2fe792c2aea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/UIAutomationTypes.resources.dll",
+      "blob": "d2cea506158b00e8ff5edc361f873f4c65281834",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/WindowsBase.resources.dll",
+      "blob": "a593fc51d30d3b2f514fcc0ea305f7465efb9405",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ja/WindowsFormsIntegration.resources.dll",
+      "blob": "ee20dcda2ffb49627b3641cff2b35f1b6a425613",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "1aff0e5e04bc436facc758d50d5e362b22216b81",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/PresentationCore.resources.dll",
+      "blob": "e02b0e946794686b52cd210368c58ef792c5874f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/PresentationFramework.resources.dll",
+      "blob": "ddaa7c2f0c98080002346d5e1b1a5af1a46d6014",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/PresentationUI.resources.dll",
+      "blob": "425124e05979f8cdbbbdec6e5a1885a9783a11f4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/ReachFramework.resources.dll",
+      "blob": "32c002e883b685723b244222fad8825603916438",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "367722b53e77d1db89134f59938f264c98e8912f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/System.Windows.Forms.Design.resources.dll",
+      "blob": "ef6ec8b1751b4f2ea9417a75e190f92c8f3e0b55",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "6d30939ed46af769ab6896e53683779a10a7d80f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/System.Windows.Forms.resources.dll",
+      "blob": "1b412bc55728135f4187c9692adebc795cc70dd4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "c073678e12cbcb84c7f9c4efeb943d4ac56918ca",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/System.Xaml.resources.dll",
+      "blob": "1bbc61ceea4a6ab8d82de35b1e33cc72696d198c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/UIAutomationClient.resources.dll",
+      "blob": "c4715a1b1d06c87625ac9fe59ba0ab3d624d8635",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/UIAutomationClientSideProviders.resources.dll",
+      "blob": "b0465bea1c60becfdfe7c421ee1fee7b74e00825",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/UIAutomationProvider.resources.dll",
+      "blob": "11e07bd5456be2cf42347c3d2e6135a562e39db6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/UIAutomationTypes.resources.dll",
+      "blob": "9974eff8762aefbda32cf9c9ffa7846f80f19f9e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/WindowsBase.resources.dll",
+      "blob": "38ea416bf67bb7c496bc53253dae6b4c451db6ac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ko/WindowsFormsIntegration.resources.dll",
+      "blob": "416346494a927498b7b7aefa82cf68a3599e4c2a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/mscordaccore.dll",
+      "blob": "ad253a7fcf209a711726dea251d6f4fc1abbe506",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/mscordaccore_amd64_amd64_8.0.2826.26413.dll",
+      "blob": "ad253a7fcf209a711726dea251d6f4fc1abbe506",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/mscordbi.dll",
+      "blob": "792bf5c5f9b4cdc61c685f5310f9e39748fa888f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/mscorlib.dll",
+      "blob": "478167fc987e0302bfe8421efd0d3a80794512e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/mscorrc.dll",
+      "blob": "3f72bbea94925f1a6f7e2bd50693557cdd35e9a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/msquic.dll",
+      "blob": "9f0824abbc8f1ec270b7b487271dba0b35efbd44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/netstandard.dll",
+      "blob": "a4ac254eaea7f78b2cd4ea72dc1311575f14f5f3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "513f9f78b3c858a1c9f571adf69e57308668e939",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/PresentationCore.resources.dll",
+      "blob": "feec1de03c8ac63bf8ab1c165ef22703f2eae418",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/PresentationFramework.resources.dll",
+      "blob": "f0ebece57b41cca73189c0e35c9ddf3265647408",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/PresentationUI.resources.dll",
+      "blob": "602429d2d30a37ee0b57f9a6132c28e35a513013",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/ReachFramework.resources.dll",
+      "blob": "c993472feebbe6bc6c24a1fd52e8c0360eacc0bc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "9c2a8deeda7a975aaf5d5b9d76d6cb3b7f78aabc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/System.Windows.Forms.Design.resources.dll",
+      "blob": "4c273233ea4f12d22a347daf3cdd0bec0faaef89",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "8826927bfcc5063e9fb5512ea2df9bd50b8b7616",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/System.Windows.Forms.resources.dll",
+      "blob": "5ba0713ff8c77e99b56dde615f8ca9857800c38f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "af3fabcf309de2613c9ca137ff9741a82c9de0c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/System.Xaml.resources.dll",
+      "blob": "220f9300910b800aca337f942e0cb12a0ecf988e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/UIAutomationClient.resources.dll",
+      "blob": "eda62fdfb82538945cec05c87c2ba4f915517c38",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/UIAutomationClientSideProviders.resources.dll",
+      "blob": "0875dfb08c9a772cbf5aabcf40bd8f3811fa5877",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/UIAutomationProvider.resources.dll",
+      "blob": "9bc976b07532b897632962c79ea2570b5d9aa4eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/UIAutomationTypes.resources.dll",
+      "blob": "ea15d0c07852adb6cc8be0a625d9281e74ab24f2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/WindowsBase.resources.dll",
+      "blob": "f5e405bc541b1ec14407bad72001a0b21893249e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pl/WindowsFormsIntegration.resources.dll",
+      "blob": "010a29ae063abb1b05bc098fccc96b61407dd2d0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "706aaa21aa34c68ba915f7e766181578be64e4b4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/PresentationCore.resources.dll",
+      "blob": "49ec9bdc0636f4d423c7e340e1790f187edd576a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/PresentationFramework.resources.dll",
+      "blob": "5524bb99c5696ba930f2c83f5155f4f900e59271",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/PresentationUI.resources.dll",
+      "blob": "6f4a94ca0c4ad67563848b10f1f33f4747afface",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/ReachFramework.resources.dll",
+      "blob": "77ccc3c91d1a074b2cc0f9bbf392289583a4386b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "dd5d5711f6a78317d1a5b45c435213d10c99a01f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/System.Windows.Forms.Design.resources.dll",
+      "blob": "4738180aae507cd357e52314991c2dd57d1d2542",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "af8465de9c96ba5c0c6d0141c910c6691a42d8f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/System.Windows.Forms.resources.dll",
+      "blob": "03ac9d680b2a8b2edd7a7e873d6af053b17038c0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "a9295256b9a5c31e7e4d3b9fda3ef12096b3ae89",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/System.Xaml.resources.dll",
+      "blob": "d18f2099cde174953ae44e7aedaf8dcfb387b7a7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/UIAutomationClient.resources.dll",
+      "blob": "c7355aa3b077c153acc0ea2efa02adc5c45ba815",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/UIAutomationClientSideProviders.resources.dll",
+      "blob": "0495a0d0f1d9f0b244a01363db141ce4c6c585a4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/UIAutomationProvider.resources.dll",
+      "blob": "fa5a016300b5ce282e3470a04430332f27cafe9a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/UIAutomationTypes.resources.dll",
+      "blob": "32d17b0ac7204e83084aae6fe99fb817400eb35c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/WindowsBase.resources.dll",
+      "blob": "ced3829ab577a0d3223664f939914f654f172901",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/pt-BR/WindowsFormsIntegration.resources.dll",
+      "blob": "57e531c59805a69fddb11031002642cf937ae9c1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "5055e36157c9fb6032ff4af2a30aadc1ae1744c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/PresentationCore.resources.dll",
+      "blob": "d8287eece9347ad58c3f301b6e0ccc4bcef87095",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/PresentationFramework.resources.dll",
+      "blob": "4fe317fba7e058018f718bf5952b5d5b3b6d6ce7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/PresentationUI.resources.dll",
+      "blob": "f2c9bca3336c3b9d86a791f04fe5d6bdef366078",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/ReachFramework.resources.dll",
+      "blob": "e540720f9d015186b8697bfda799a58d3aa8ad11",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "2dce339092c5d53f3df40c4e6143715d672e283e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/System.Windows.Forms.Design.resources.dll",
+      "blob": "ae56b7487e6c77c30cd354fb0335f3dff340f138",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "f30094ad82277ba30e00b8e2fd6334cdea586765",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/System.Windows.Forms.resources.dll",
+      "blob": "5b065b91a5620896116b18f0b2a3080f1b008caf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "b9cc9e8379a8cba1a922d102df2ac5801ebea952",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/System.Xaml.resources.dll",
+      "blob": "f29592976c516c544e2a4dbf0d9db42b2d793b27",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/UIAutomationClient.resources.dll",
+      "blob": "e51f2505a688940b3bc6d38d91cf7bd0a5d8e8fd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/UIAutomationClientSideProviders.resources.dll",
+      "blob": "4316f6333daa54e4e8da19b549443e03ff9ac68f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/UIAutomationProvider.resources.dll",
+      "blob": "af3b6df248a53e1000dc861ca99d291d75fbc89c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/UIAutomationTypes.resources.dll",
+      "blob": "df8d71aeeddd5ec848af1e205c7c33b3b14ccd7a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/WindowsBase.resources.dll",
+      "blob": "e3b612310e3351cc80c7fa65e21a48815f64ac2f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/ru/WindowsFormsIntegration.resources.dll",
+      "blob": "de02ec2f88693a06cd729d364963298b3946bdb0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "dbf55a08283e4a305c35284f2c66df367a69770f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/PresentationCore.resources.dll",
+      "blob": "6fd3c491ecd963ace6425d78454107080d5f533e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/PresentationFramework.resources.dll",
+      "blob": "f646e7e9b2e334c558df5029ea4b17a082266482",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/PresentationUI.resources.dll",
+      "blob": "d1559944130ca5ae7c98a14f078b12480c8151ca",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/ReachFramework.resources.dll",
+      "blob": "bf7c455cffbcf56ba0cd2346a2e55d0b949fae5e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "51d4d510f248818c58a70589be6334bfd6e47294",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/System.Windows.Forms.Design.resources.dll",
+      "blob": "6d4cd6f3f3e6e40ced9e5eb18e91720c848f9b71",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "319c44359eafca0b7ad89136c4608671df3ef953",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/System.Windows.Forms.resources.dll",
+      "blob": "238d11c75d3baa2522038016aa38181730417845",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "3ffc6861f11f81635e56c5aab4f22a6476971e33",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/System.Xaml.resources.dll",
+      "blob": "ebd5c6101195ece57db3346e72be315c505b5c94",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/UIAutomationClient.resources.dll",
+      "blob": "20eeef13b6e3a8dde64ebd3871ea14606136580d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/UIAutomationClientSideProviders.resources.dll",
+      "blob": "7d624674457a6e7abf8bbd8bf67ffb5090e9dda5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/UIAutomationProvider.resources.dll",
+      "blob": "5976dcb8b3180b6442233bfd6ddf69f2cd1aa2b9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/UIAutomationTypes.resources.dll",
+      "blob": "fc076bdcfe1e3cb0f4b4988d96e679fc524b02b7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/WindowsBase.resources.dll",
+      "blob": "6015e0275f0088ef1c0f30bc5b8604b70e733ff0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/tr/WindowsFormsIntegration.resources.dll",
+      "blob": "c32cc538aa4832ade9f4f8b9cc1c1c595f160bb6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/vcruntime140_cor3.dll",
+      "blob": "5786e9386ca41c772931d508615e185b8f67f55c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/wpfgfx_cor3.dll",
+      "blob": "6b2c47b7d405f76642efff23249c8ce348a44fee",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "a99982140697ab6b58a7c7187d7deb58a7fcbad3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/PresentationCore.resources.dll",
+      "blob": "b7fcb4405ea86b128d3eec1b80a0b9755643d08a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/PresentationFramework.resources.dll",
+      "blob": "ba682111232f1fdee4b57b09a8aff87a7c4a73d0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/PresentationUI.resources.dll",
+      "blob": "c989de619b2b92f285ced29386e9ca807871285c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/ReachFramework.resources.dll",
+      "blob": "b8d07cdc310eb0c84af98464b831c488e794e3b5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "1b3928966764686917b8664ba32cf6681064ccfc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/System.Windows.Forms.Design.resources.dll",
+      "blob": "c6b8dd5ef514ef8873e4b7c3f691f6093f83bbb7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "903e6b684a1f48845039fa9f6bcd2530dfa2f18a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/System.Windows.Forms.resources.dll",
+      "blob": "014f05eccf125ab67ae40b14469a83ece968dd68",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "13d59e491c206cefa3c6e330944045d89da8cc6b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/System.Xaml.resources.dll",
+      "blob": "18df1d1a607e9c4b8ec0272c18cd689a97a404ce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/UIAutomationClient.resources.dll",
+      "blob": "e2fe4c090ae12e6250990822d1e116979d1b6b06",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/UIAutomationClientSideProviders.resources.dll",
+      "blob": "8cd5c8e60532ddfaa9e38f58265594d7091fcd1b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/UIAutomationProvider.resources.dll",
+      "blob": "0f35c03341121c398b82ae6582d461f38ba7effe",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/UIAutomationTypes.resources.dll",
+      "blob": "3ed897a109a2e271e5e058ec5830afbf4a12c09f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/WindowsBase.resources.dll",
+      "blob": "e6c40dbf039e065d43ce42902075c5235d96c054",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hans/WindowsFormsIntegration.resources.dll",
+      "blob": "f5bda3652d6790777076a00cab4a5b96c465d3eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/Microsoft.VisualBasic.Forms.resources.dll",
+      "blob": "136ed5e05d2c29997765e2be8636ca45957720bc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/PresentationCore.resources.dll",
+      "blob": "b58e4db3ceae7c693d347e17351a22c855f355bf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/PresentationFramework.resources.dll",
+      "blob": "2fa9bbe68d94a81d2adf83ff7b44bcdf129a3dc0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/PresentationUI.resources.dll",
+      "blob": "3745e413356693139a7c6ae1935c597eee4b6041",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/ReachFramework.resources.dll",
+      "blob": "96eafde8b7757f113943a2c03a10cd9a829bba91",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/System.Windows.Controls.Ribbon.resources.dll",
+      "blob": "6ce515f392d17c3f8dfe5009dcc3771f8eb22d50",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/System.Windows.Forms.Design.resources.dll",
+      "blob": "3486153076688d5e8c89880b6d8cd93fd92a542a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/System.Windows.Forms.Primitives.resources.dll",
+      "blob": "516dc4304521d3774918a71b3c07c999b8edd173",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/System.Windows.Forms.resources.dll",
+      "blob": "efd8288508eba8c663fab8838b697a44fc5c16f0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/System.Windows.Input.Manipulations.resources.dll",
+      "blob": "48dccdad64f44c3a2508ddfd144a028821beb1ff",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/System.Xaml.resources.dll",
+      "blob": "d2ced6f9175490fc2db808326d867f333701f97e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/UIAutomationClient.resources.dll",
+      "blob": "0f775663ba976d0ef0cca1edd794d260d3c2a8c8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/UIAutomationClientSideProviders.resources.dll",
+      "blob": "abb82bef9f0b8bfbadec6f509662ac6891316309",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/UIAutomationProvider.resources.dll",
+      "blob": "5c987dbfbc372a975e9184d8f0f149396aff9d2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/UIAutomationTypes.resources.dll",
+      "blob": "d1506b540622c60e97068df8b485fe6a2ac497fc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/WindowsBase.resources.dll",
+      "blob": "9c5df094c44cb720a131f365269e0e92b7a6c373",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/folder/zh-Hant/WindowsFormsIntegration.resources.dll",
+      "blob": "19b974b0ab5d001e0c583b359eefd8e209b6d9a4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/audio.png",
+      "blob": "120438f76328d90bc71d4ed618ca5e3adb9b684d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/csv.png",
+      "blob": "0e1083b74a5c9c056aa76434d09d0fe592668cf0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/drawio.png",
+      "blob": "c6af3f8bad9aea98d22b9401a394c8a18105e5e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/email.png",
+      "blob": "3b41278b36c298ce68e1d663d9f380ac50741324",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/epub.png",
+      "blob": "3dff74231fbf065c003a7822ad7da7df7112f290",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/excalidraw.png",
+      "blob": "08f3331354456d64e8d92334ce6f8e2f6f911db5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/file.png",
+      "blob": "f3ee8fac30b4039e0f674dbbedb9c17a73d0c46e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/folder.png",
+      "blob": "d2d61ad975a72906c00022ba9d53092475c4f7c6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/html.png",
+      "blob": "221d195a33e1d2549a5a364daad65ff5c47c30a4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/image.png",
+      "blob": "de7a84bb02d53f2379498a8a8b9ba68923b1f84e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/javascript.png",
+      "blob": "8638160a3f412eb25ca9386b57546aeac72c7850",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/json.png",
+      "blob": "11acbb38ac8f84ee2f9654b676892239797842e4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/markdown.png",
+      "blob": "3d28cfb292d92f1eabfd79c71fdd7779285727bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/pdf.png",
+      "blob": "3a14a6d5de302dd94d0f6b65a39fc29dc7fc61cf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/python.png",
+      "blob": "4b97d31111c1cb79f7d9d6479baa74841c1be34a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/task.png",
+      "blob": "339d3d30a8dce6b48ab819c7e845067398600ae3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/txt.png",
+      "blob": "98fd3f7da396c1bf2e8a937de558ea7488bee2c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/typescript.png",
+      "blob": "75cefa04c78f5adc17010006374eb847a0db658d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/video.png",
+      "blob": "ee67a64d69103857ed037e27a7f8a4a70f572d44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/xml.png",
+      "blob": "258c321124c918be8cc83c61b54c655c69f1f4c4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/yaml.png",
+      "blob": "2e8e769bec397964782e30207f1c40d8f274fe9a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/Assets/catppuccin/zip.png",
+      "blob": "bac26dfa2bf26aed95b163ebdeb239bfe2da9c93",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/publish/single-file/LocalSearchLauncher.exe",
+      "blob": "dacf58db5b939e5c7fb39d25bba0468fccc980eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "launcher/windows/setup-dotnet.ps1",
+      "blob": "340cd39766deaef8c77a0436f7eefd76b8aa0341",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "spec/phase1.md",
+      "blob": "89c0a20f812f48e8751dd27a28aa350da04a4b5a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "spec/product_spec.md",
+      "blob": "2d864618f38cc3ed3e02e52dfa77ecd3008a80a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "start_dev.sh",
+      "blob": "84051112c40b4a3d08c6898a2d86308c4c51c077",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "start_windows.bat",
+      "blob": "508122dd296d3b9cc7fd5333ddc7199f53b920bf",
+      "mode": "100644",
+      "type": "blob"
+    }
+  ],
+  "signature": "9b35484230ce1df1d928c6788e727ac6b8eafd5cf832b3fef03cf23d3422fb1d"
+}

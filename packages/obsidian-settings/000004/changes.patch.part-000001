@@ -1,0 +1,1849 @@
+diff --git a/.obsidian/core-plugins.json b/.obsidian/core-plugins.json
+index 8fc49b2caf0efb5806a944a2f6bf6617bbd1706c..fb0d0e205b93f44e75c7e0cc3e62e1983aa7258e 100644
+--- a/.obsidian/core-plugins.json
++++ b/.obsidian/core-plugins.json
+@@ -1,7 +1,7 @@
+ {
+   "file-explorer": true,
+   "global-search": true,
+-  "switcher": false,
++  "switcher": true,
+   "graph": true,
+   "backlink": false,
+   "canvas": false,
+@@ -24,10 +24,10 @@
+   "slides": false,
+   "audio-recorder": false,
+   "workspaces": true,
+-  "file-recovery": false,
++  "file-recovery": true,
+   "publish": false,
+   "sync": false,
+-  "webviewer": false,
++  "webviewer": true,
+   "footnotes": false,
+   "bases": true
+ }
+\ No newline at end of file
+diff --git a/.obsidian/plugins/obsidian-sidebar-explorer-tag/main.js b/.obsidian/plugins/obsidian-sidebar-explorer-tag/main.js
+index 9bad473b0a524b3c966fbd24a0886b0201212cc9..1d3863375327e851a55acf8ad30f0f5a5cb3524f 100644
+--- a/.obsidian/plugins/obsidian-sidebar-explorer-tag/main.js
++++ b/.obsidian/plugins/obsidian-sidebar-explorer-tag/main.js
+@@ -17649,12 +17649,13 @@ function extractHtmlFromCompressedRtf(bytes) {
+ }
+ function htmlToPlainText(html) {
+   if (!html) return "";
++  const cleanHtml = html.replace(/<!--[\s\S]*?-->/g, "").replace(/<(head|style|script|xml|title)\b[^>]*>[\s\S]*?<\/\1>/gi, "").replace(/<!DOCTYPE\b[^>]*>/gi, "").replace(/<\/?xml\b[^>]*>/gi, "").replace(/<\/?\w+:[^>]*>/gi, "");
+   try {
+-    const document2 = new DOMParser().parseFromString(html, "text/html");
+-    document2.querySelectorAll("script,style").forEach((element) => element.remove());
++    const document2 = new DOMParser().parseFromString(cleanHtml, "text/html");
++    document2.querySelectorAll("script,style,xml,title").forEach((element) => element.remove());
+     return (document2.body.textContent || "").replace(/\r/g, "").replace(/\n\s*\n\s*\n+/g, "\n\n").trim();
+   } catch (e) {
+-    return html.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p\s*>/gi, "\n\n").replace(/<[^>]+>/g, "").trim();
++    return cleanHtml.replace(/<br\s*\/?>/gi, "\n").replace(/<\/p\s*>/gi, "\n\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&#39;/gi, "'").trim();
+   }
+ }
+ function normalizeDate(value) {
+diff --git a/.obsidian/plugins/obsidian-sidebar-explorer-tag/msgParser.ts b/.obsidian/plugins/obsidian-sidebar-explorer-tag/msgParser.ts
+index 8f505ea14b5d8471d96ac2fee085b2108199ebec..64b4e1cb2b0f72d1ee8a2805f2a73de620845087 100644
+--- a/.obsidian/plugins/obsidian-sidebar-explorer-tag/msgParser.ts
++++ b/.obsidian/plugins/obsidian-sidebar-explorer-tag/msgParser.ts
+@@ -1,3 +1,7 @@
++/**
++ * OutlookのMSGファイル（.msg）を解析し、本文・件名・送信者・添付画像等を抽出するパーサー
++ * Officeメタデータや条件付きコメント、独自タグを除去してクリーンな本文を取得する
++ **/
+ import type { App, TFile } from "obsidian";
+ import MsgReader from "@kenjiuno/msgreader";
+ import { convertEmfToDataUrl, convertWmfToDataUrl } from "emf-converter";
+@@ -168,16 +172,27 @@ function extractHtmlFromCompressedRtf(bytes?: Uint8Array): string {
+ 
+ function htmlToPlainText(html: string): string {
+     if (!html) return "";
++    const cleanHtml = html
++        .replace(/<!--[\s\S]*?-->/g, "")
++        .replace(/<(head|style|script|xml|title)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
++        .replace(/<!DOCTYPE\b[^>]*>/gi, "")
++        .replace(/<\/?xml\b[^>]*>/gi, "")
++        .replace(/<\/?\w+:[^>]*>/gi, "");
+     try {
+-        const document = new DOMParser().parseFromString(html, "text/html");
+-        document.querySelectorAll("script,style").forEach(element => element.remove());
++        const document = new DOMParser().parseFromString(cleanHtml, "text/html");
++        document.querySelectorAll("script,style,xml,title").forEach(element => element.remove());
+         return (document.body.textContent || "").replace(/\r/g, "").replace(/\n\s*\n\s*\n+/g, "\n\n").trim();
+     } catch {
+-        return html
+-            .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
++        return cleanHtml
+             .replace(/<br\s*\/?>/gi, "\n")
+             .replace(/<\/p\s*>/gi, "\n\n")
+             .replace(/<[^>]+>/g, "")
++            .replace(/&nbsp;/gi, " ")
++            .replace(/&lt;/gi, "<")
++            .replace(/&gt;/gi, ">")
++            .replace(/&amp;/gi, "&")
++            .replace(/&quot;/gi, '"')
++            .replace(/&#39;/gi, "'")
+             .trim();
+     }
+ }
+diff --git a/00_templates/RegisterCustomCommands.md b/00_templates/RegisterCustomCommands.md
+index 932e59f36e9c898e912393c2e73578a7b6b664e9..fa20711b5b9b9d750df1dade995fe512d6605c59 100644
+--- a/00_templates/RegisterCustomCommands.md
++++ b/00_templates/RegisterCustomCommands.md
+@@ -10,6 +10,8 @@
+  * - MarkMindアクティブ時のDeleteキー制御: マインドマップ操作中にDeleteキーを押してもノート削除を実行せず、MarkMind内部のノード削除処理へ渡します。
+  * - MarkMind表示時のExcalidrawセクション除外と保護: Excalidrawデータを持つノートをマインドマップ表示する際、描画時にExcalidrawの内部データを除外し、保存時には元のExcalidrawデータを安全に維持・復元します。
+  * - 左右両サイドバーの表示非表示トグル (Option + B): 左右両方のサイドバーをOption+B (Win/Linux: Alt+B) で一括開閉し、エディタやサイドバーなどアクティブな状態を問わず確実に画面を最大化・復元します。
++ * - ファイルマネージャー連携（ドラッグ＆ドロップと同一フォルダ保存）: ファイルマネージャーWebアプリからのドロップを検知し、localhost:8001 の open-path リンクを自動生成します。また、リンク右クリックから「コピーして同一フォルダーに保存」を実行すると、リンク先のファイルを現在開いているノートと同じフォルダーにコピーし、リンクをObsidianリンクへ自動変換します。
++ * - サマリー作成時のOutlookメール（MSG）クリーン展開: Outlook特有のOfficeメタデータや条件付きコメント（<!--[if ...]>、<xml>、<o:p>等）を完全除去し、文字化けや「< >」タグの露出を防ぎます。また、画像なしメールでは整ったプレーンテキスト本文を優先します。
+  */
+ const getEncodedExcalidrawUrl = (file) => {
+     const basePath = app.vault.adapter.basePath || "";
+@@ -1334,6 +1336,23 @@ const parseFileTime = (buffer) => {
+     }
+ };
+ 
++/**
++ * Outlook特有のHTMLタグやコメント、Officeメタデータを除去して安全なテキスト・Markdown構造へ変換する
++ **/
++const sanitizeOutlookHtml = (html) => {
++    if (!html) return "";
++    let clean = String(html);
++    // 1. コメント（条件付きコメント <!--[if ...]>...<![endif]--> を含む）を一括完全除去
++    clean = clean.replace(/<!--[\s\S]*?-->/g, "");
++    // 2. <head>...</head>, <style>...</style>, <script>...</script>, <xml>...</xml>, <title>...</title> の完全除去
++    clean = clean.replace(/<(head|style|script|xml|title)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
++    // 3. 独立したDOCTYPEやXMLタグ、名前空間タグの除去
++    clean = clean.replace(/<!DOCTYPE\b[^>]*>/gi, "");
++    clean = clean.replace(/<\/?xml\b[^>]*>/gi, "");
++    clean = clean.replace(/<\/?\w+:[^>]*>/gi, "");
++    return clean;
++};
++
+ // High-level parser for .msg files
+ const parseMsgFile = async (file) => {
+     // Sidebar Explorer Tagに同梱した実績あるMSGライブラリを優先する。
+@@ -1380,18 +1399,19 @@ const parseMsgFile = async (file) => {
+ 
+         // フォールバック: HTML本文のタグを除去してプレーンテキスト化
+         if (!body && htmlBody) {
+-            const htmlContent = htmlBody;
+-            // HTMLタグの簡易除去
+-            let text = htmlContent.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
+-            text = text.replace(/<[^>]+>/g, "");
+-            text = text
+-                .replace(/&nbsp;/g, " ")
+-                .replace(/&lt;/g, "<")
+-                .replace(/&gt;/g, ">")
+-                .replace(/&amp;/g, "&")
+-                .replace(/&quot;/g, '"')
+-                .replace(/&#39;/g, "'");
+-            body = text.replace(/\r?\n\s*\r?\n/g, "\n\n").trim();
++            let text = sanitizeOutlookHtml(htmlBody)
++                .replace(/<br\s*\/?>/gi, "\n")
++                .replace(/<\/(p|div|section|article|header|footer|table|tr|h[1-6])\s*>/gi, "\n\n")
++                .replace(/<\/(li)\s*>/gi, "\n")
++                .replace(/<li\b[^>]*>/gi, "- ")
++                .replace(/<[^>]+>/g, "")
++                .replace(/&nbsp;/gi, " ")
++                .replace(/&lt;/gi, "<")
++                .replace(/&gt;/gi, ">")
++                .replace(/&amp;/gi, "&")
++                .replace(/&quot;/gi, '"')
++                .replace(/&#39;/gi, "'");
++            body = text.replace(/\r/g, "").replace(/\n[ \t]+/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+         }
+ 
+         // MSGの添付Storage配下から、Outlook本文に貼り付けられた画像を取得する。
+@@ -1787,10 +1807,15 @@ const renderMsgBodyWithImages = (parsed, savedImages) => {
+     const used = new Set();
+     const html = String(parsed.HtmlBody || "");
+     const renderableImages = savedImages.filter(image => image.renderable !== false);
++
++    // 画像がなく、かつプレーンテキスト本文が存在する場合は、タグ混入のないクリーンな Body を最優先
++    if (renderableImages.length === 0 && String(parsed.Body || "").trim()) {
++        return { body: String(parsed.Body || ""), unplaced: [] };
++    }
++
+     if (!html) return { body: String(parsed.Body || ""), unplaced: renderableImages };
+ 
+-    let markdown = html
+-        .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
++    let markdown = sanitizeOutlookHtml(html)
+         .replace(/<img\b[^>]*>/gi, (tag) => {
+             const srcMatch = tag.match(/\bsrc\s*=\s*(?:["']([^"']+)["']|([^\s>]+))/i);
+             const altMatch = tag.match(/\balt\s*=\s*(?:["']([^"']*)["']|([^\s>]+))/i);
+@@ -1810,12 +1835,10 @@ const renderMsgBodyWithImages = (parsed, savedImages) => {
+         .replace(/<li\b[^>]*>/gi, "- ")
+         .replace(/<[^>]+>/g, "")
+         .replace(/&nbsp;/gi, " ")
+-        .replace(/&lt;/gi, "<")
+-        .replace(/&gt;/gi, ">")
+         .replace(/&amp;/gi, "&")
+         .replace(/&quot;/gi, '"')
+         .replace(/&#39;/gi, "'")
+-        // メール本文中のエンコード済みHTMLをObsidianで再実行させない。
++        // メール本文中の残存山括弧をObsidianでHTML実行させない
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/\r/g, "")
+@@ -3170,17 +3193,19 @@ const commands = [
+ ];
+ 
+ // Register commands if they don't exist, or update them if they do
+-commands.forEach(cmd => {
+-    const existing = app.commands.findCommand(cmd.id);
+-    if (!existing) {
+-        app.commands.addCommand(cmd);
+-        console.log(`Registered command: ${cmd.id}`);
+-    } else {
+-        existing.callback = cmd.callback;
+-        existing.editorCallback = cmd.editorCallback;
+-        console.log(`Updated command callback: ${cmd.id}`);
+-    }
+-});
++if (app.commands && typeof app.commands.addCommand === "function") {
++    commands.forEach(cmd => {
++        const existing = typeof app.commands.findCommand === "function" ? app.commands.findCommand(cmd.id) : null;
++        if (!existing) {
++            app.commands.addCommand(cmd);
++            console.log(`Registered command: ${cmd.id}`);
++        } else {
++            existing.callback = cmd.callback;
++            existing.editorCallback = cmd.editorCallback;
++            console.log(`Updated command callback: ${cmd.id}`);
++        }
++    });
++}
+ 
+ // Setup Markdown image rename shortcut
+ const isTypingTarget = (el) => {
+@@ -4016,7 +4041,7 @@ if (typeof ResizeObserver === "function") {
+     });
+ }
+ applyFigureEmbedDisplayNames();
+-if (document.body) {
++if (typeof MutationObserver !== "undefined" && document.body) {
+     window._customFigureEmbedLabelObserver = new MutationObserver(() => {
+         if (window._customFigureEmbedLabelTimer) {
+             globalThis.clearTimeout(window._customFigureEmbedLabelTimer);
+@@ -4375,10 +4400,348 @@ window._customFileMenuListener = handleFileMenu;
+ app.workspace.on("file-menu", window._customFileMenuListener);
+ console.log("File menu listener registered for Excalidraw (Absolute Path)");
+ 
++/**
++ * ファイルマネージャーからのドラッグ＆ドロップテキストを解析する
++ * @param {string} text - ドロップされたテキスト
++ * @returns {Array<Object>|null} 解析されたアイテム配列、または非該当の場合null
++ **/
++const parseFileManagerData = (text) => {
++    if (!text || typeof text !== "string") return null;
++    const trimmed = text.trim();
++    if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) return null;
++    try {
++        const parsed = JSON.parse(trimmed);
++        if (Array.isArray(parsed)) {
++            if (parsed.length > 0 && parsed.every(item => item && typeof item === "object" && typeof item.path === "string")) {
++                return parsed;
++            }
++        } else if (parsed && typeof parsed === "object" && typeof parsed.path === "string") {
++            return [parsed];
++        }
++    } catch (e) {
++        // JSONでなければnull
++    }
++    return null;
++};
++
++/**
++ * ファイルマネージャーのアイテム配列からMarkdownリンク文字列を生成する
++ * @param {Array<Object>} items - アイテム配列
++ * @returns {string} Markdownリンク文字列
++ **/
++const generateFileManagerMarkdown = (items) => {
++    if (!Array.isArray(items) || items.length === 0) return "";
++    const formatItem = (item) => {
++        const filePath = item.path || "";
++        const name = item.name || filePath.split("/").filter(Boolean).pop() || "link";
++        const encodedUrl = `http://localhost:8001/api/open-path?path=${encodeURIComponent(filePath)}`;
++        return `[${name}](${encodedUrl})`;
++    };
++
++    if (items.length === 1) {
++        return formatItem(items[0]);
++    }
++
++    return items.map(item => `- ${formatItem(item)}`).join("\n");
++};
++
++/**
++ * MarkdownリンクまたはURL文字列から open-path の対象ファイルパスを抽出する
++ * @param {string} linkTextOrUrl - リンク文字列またはURL
++ * @returns {string|null} デコードされたファイルパス、またはnull
++ **/
++const extractOpenPathFromLink = (linkTextOrUrl) => {
++    if (!linkTextOrUrl || typeof linkTextOrUrl !== "string") return null;
++
++    // Markdownリンク [name](url) からurlを抽出
++    const mdMatch = linkTextOrUrl.match(/\[.*?\]\((https?:\/\/[^)]+)\)/);
++    const urlStr = mdMatch ? mdMatch[1] : linkTextOrUrl;
++
++    try {
++        const url = new URL(urlStr);
++        if (url.pathname === "/api/open-path" && url.searchParams.has("path")) {
++            return decodeURIComponent(url.searchParams.get("path"));
++        }
++    } catch (e) {
++        // URLパース失敗時の正規表現フォールバック
++    }
++
++    const paramMatch = urlStr.match(/[?&]path=([^&\s)]+)/);
++    if (paramMatch) {
++        return decodeURIComponent(paramMatch[1]);
++    }
++
++    return null;
++};
++
++/**
++ * ファイル名から適切なObsidianリンク（画像は埋め込み形式、その他は拡張子付きリンク）を生成する
++ * @param {string} fileName - ファイル名
++ * @returns {string} Obsidianリンク文字列
++ **/
++const buildObsidianLink = (fileName) => {
++    if (!fileName || typeof fileName !== "string") return "";
++    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp", ".avif"];
++    const extMatch = fileName.match(/\.[^.]+$/);
++    const ext = extMatch ? extMatch[0].toLowerCase() : "";
++    if (imageExtensions.includes(ext)) {
++        return `![[${fileName}]]`;
++    }
++    return `[[${fileName}]]`;
++};
++
++/**
++ * Markdown本文からローカルで参照されている実在ファイル（画像、PDF、添付ファイル等）を抽出する
++ * @param {string} markdownContent - Markdownテキスト
++ * @param {string} sourceDir - コピー元Markdownファイルが存在するディレクトリ
++ * @param {Object} [options] - オプション（fsなど）
++ * @returns {Array<{ absolutePath: string, relativePath: string }>} 抽出された関連ファイル一覧
++ **/
++const extractMarkdownLinkedFiles = (markdownContent, sourceDir, options = {}) => {
++    if (!markdownContent || typeof markdownContent !== "string" || !sourceDir) return [];
++    const fsLib = options.fs || (typeof require === "function" ? require("fs") : (typeof fs !== "undefined" ? fs : null));
++    const pathLib = options.path || (typeof require === "function" ? require("path") : (typeof path !== "undefined" ? path : null)) || {
++        join: (...args) => args.filter(Boolean).join("/").replace(/\/+/g, "/"),
++        resolve: (dir, p) => (p.startsWith("/") ? p : `${dir}/${p}`.replace(/\/+/g, "/")),
++        relative: (from, to) => {
++            const f = from.replace(/\/+$/, "") + "/";
++            return to.startsWith(f) ? to.slice(f.length) : to.split("/").pop();
++        }
++    };
++
++    if (!fsLib) return [];
++
++    const candidates = new Set();
++
++    // 1. Wikilink形式: ![[target]] または [[target]]
++    const wikilinkRegex = /!?\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]/g;
++    let match;
++    while ((match = wikilinkRegex.exec(markdownContent)) !== null) {
++        const target = match[1].trim();
++        if (target) candidates.add(target);
++    }
++
++    // 2. 標準Markdownリンク形式: ![alt](target) または [text](target)
++    const mdLinkRegex = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
++    while ((match = mdLinkRegex.exec(markdownContent)) !== null) {
++        const rawTarget = match[1].trim();
++        if (/^(https?:\/\/|ftp:\/\/|mailto:|obsidian:\/\/|#)/i.test(rawTarget)) {
++            continue;
++        }
++        const cleaned = rawTarget.split("#")[0].split("?")[0].trim();
++        if (cleaned) {
++            try {
++                candidates.add(decodeURIComponent(cleaned));
++            } catch (e) {
++                candidates.add(cleaned);
++            }
++        }
++    }
++
++    const linkedFiles = [];
++    const seenPaths = new Set();
++
++    for (const relTarget of candidates) {
++        let resolvedPath = pathLib.resolve(sourceDir, relTarget);
++        if (!fsLib.existsSync(resolvedPath)) {
++            if (!/\.[a-zA-Z0-9]+$/.test(relTarget)) {
++                const mdCandidate = pathLib.resolve(sourceDir, `${relTarget}.md`);
++                if (fsLib.existsSync(mdCandidate)) {
++                    resolvedPath = mdCandidate;
++                }
++            }
++        }
++
++        if (fsLib.existsSync(resolvedPath)) {
++            try {
++                const stat = fsLib.statSync ? fsLib.statSync(resolvedPath) : null;
++                if (stat && stat.isDirectory()) continue;
++            } catch (e) { }
++
++            if (!seenPaths.has(resolvedPath)) {
++                seenPaths.add(resolvedPath);
++                let relativePath = pathLib.relative ? pathLib.relative(sourceDir, resolvedPath) : relTarget;
++                if (relativePath.startsWith("/")) relativePath = relativePath.slice(1);
++                linkedFiles.push({
++                    absolutePath: resolvedPath,
++                    relativePath
++                });
++            }
++        }
++    }
++
++    return linkedFiles;
++};
++
++/**
++ * ファイルをアクティブノートと同じフォルダーにコピーし、Obsidianリンクへ変換する処理を実行する
++ * @param {Object} params
++ * @param {string} params.sourceFilePath - コピー元ファイルの絶対パス
++ * @param {string} params.originalLinkText - 元のリンク文字列（例: [aaa.md](http://...)）
++ * @param {Object} [params.context] - 実行コンテキスト（モック・依存注入対応）
++ * @returns {Promise<Object>} 実行結果
++ **/
++const executeCopyAndConvertLink = async ({ sourceFilePath, originalLinkText, context }) => {
++    const fsLib = context?.fs || (typeof require === "function" ? require("fs") : (typeof fs !== "undefined" ? fs : null));
++    const pathLib = context?.path || (typeof require === "function" ? require("path") : (typeof path !== "undefined" ? path : null)) || {
++        join: (...args) => args.filter(Boolean).join("/").replace(/\/+/g, "/"),
++        dirname: (p) => (p || "").split("/").slice(0, -1).join("/") || "/",
++        basename: (p) => (p || "").split("/").filter(Boolean).pop() || "",
++        resolve: (dir, p) => (p.startsWith("/") ? p : `${dir}/${p}`.replace(/\/+/g, "/")),
++        relative: (from, to) => {
++            const f = from.replace(/\/+$/, "") + "/";
++            return to.startsWith(f) ? to.slice(f.length) : to.split("/").pop();
++        }
++    };
++    const confirmFn = context?.confirm || (typeof window !== "undefined" && window.confirm ? window.confirm.bind(window) : () => true);
++    const noticeFn = context?.notice || (typeof Notice !== "undefined" ? (msg) => new Notice(msg) : (msg) => console.log(msg));
++
++    // コピー元ファイルの存在確認
++    if (!fsLib.existsSync(sourceFilePath)) {
++        noticeFn(`コピー元のファイルが見つかりません: ${sourceFilePath}`);
++        return { success: false, reason: "source_not_found" };
++    }
++
++    const activeFile = context?.activeFile || (typeof app !== "undefined" ? app.workspace.getActiveFile() : null);
++    if (!activeFile) {
++        noticeFn("アクティブなノートファイルが見つかりません。");
++        return { success: false, reason: "active_file_not_found" };
++    }
++
++    const basePath = context?.basePath || (typeof app !== "undefined" && app.vault?.adapter?.basePath ? app.vault.adapter.basePath : "");
++    const parentFolder = activeFile.parent ? (typeof activeFile.parent === "string" ? activeFile.parent : activeFile.parent.path) : "";
++    const targetDir = parentFolder ? pathLib.join(basePath, parentFolder) : basePath;
++    const fileName = pathLib.basename(sourceFilePath);
++    const destFilePath = pathLib.join(targetDir, fileName);
++
++    // コピー対象がMarkdownの場合、内部の参照ファイル（画像、PDF、添付ファイル等）も抽出
++    const sourceDir = pathLib.dirname(sourceFilePath);
++    let relatedFiles = [];
++    if (fileName.toLowerCase().endsWith(".md") && typeof fsLib.readFileSync === "function") {
++        try {
++            const content = fsLib.readFileSync(sourceFilePath, "utf8");
++            relatedFiles = extractMarkdownLinkedFiles(content, sourceDir, { fs: fsLib, path: pathLib });
++        } catch (readErr) {
++            console.warn("Failed to read markdown for linked files extraction:", readErr);
++        }
++    }
++
++    // 既存ファイルの上書きチェック（メインファイル + 関連ファイル）
++    const existingConflicts = [];
++    if (fsLib.existsSync(destFilePath)) {
++        existingConflicts.push(fileName);
++    }
++    for (const relItem of relatedFiles) {
++        const destRelPath = pathLib.join(targetDir, relItem.relativePath);
++        if (fsLib.existsSync(destRelPath)) {
++            existingConflicts.push(relItem.relativePath);
++        }
++    }
++
++    if (existingConflicts.length > 0) {
++        const conflictList = existingConflicts.slice(0, 5).join("\n- ");
++        const extraMsg = existingConflicts.length > 5 ? `\n...他 ${existingConflicts.length - 5} 件` : "";
++        const confirmed = confirmFn(`以下のファイル（${existingConflicts.length}件）が既に現在のフォルダーに存在します。上書きしますか？\n- ${conflictList}${extraMsg}`);
++        if (!confirmed) {
++            return { success: false, cancelled: true, fileName };
++        }
++    }
++
++    try {
++        // メインファイルのコピー
++        fsLib.copyFileSync(sourceFilePath, destFilePath);
++
++        // 関連ファイルのコピー
++        const copiedRelated = [];
++        for (const relItem of relatedFiles) {
++            const destRelPath = pathLib.join(targetDir, relItem.relativePath);
++            const destRelDir = pathLib.dirname(destRelPath);
++            if (!fsLib.existsSync(destRelDir) && typeof fsLib.mkdirSync === "function") {
++                fsLib.mkdirSync(destRelDir, { recursive: true });
++            }
++            fsLib.copyFileSync(relItem.absolutePath, destRelPath);
++            copiedRelated.push(destRelPath);
++        }
++
++        if (relatedFiles.length > 0) {
++            noticeFn(`「${fileName}」と関連ファイル（${relatedFiles.length}件）を保存しました`);
++        } else {
++            noticeFn(`ファイルをコピーして保存しました: ${fileName}`);
++        }
++    } catch (err) {
++        noticeFn(`ファイルのコピーに失敗しました: ${err.message}`);
++        return { success: false, error: err };
++    }
++
++    const newLink = buildObsidianLink(fileName);
++    return {
++        success: true,
++        fileName,
++        destFilePath,
++        newLink,
++        relatedFilesCount: relatedFiles.length
++    };
++};
++
+ const handleEditorMenu = (menu, editor, view) => {
+-    const file = view.file;
++    const file = view?.file || (typeof app !== "undefined" ? app.workspace.getActiveFile() : null);
+     if (!file) return;
+ 
++    // ファイルマネージャーのリンクに対する「コピーして同一フォルダーに保存」メニュー項目
++    if (editor) {
++        try {
++            const cursor = editor.getCursor();
++            const lineText = editor.getLine(cursor.line);
++            const linkRegex = /(?:!\[([^\]]*)\]|\[([^\]]*)\])\(http:\/\/localhost:8001\/api\/open-path\?path=([^)\s]+)\)/g;
++            let match;
++            let targetLink = null;
++            let matchStart = -1;
++            let matchEnd = -1;
++
++            while ((match = linkRegex.exec(lineText)) !== null) {
++                const startCh = match.index;
++                const endCh = match.index + match[0].length;
++                if (cursor.ch >= startCh && cursor.ch <= endCh) {
++                    targetLink = match[0];
++                    matchStart = startCh;
++                    matchEnd = endCh;
++                    break;
++                }
++            }
++
++            if (!targetLink) {
++                const allMatches = Array.from(lineText.matchAll(linkRegex));
++                if (allMatches.length === 1) {
++                    targetLink = allMatches[0][0];
++                    matchStart = allMatches[0].index;
++                    matchEnd = allMatches[0].index + allMatches[0][0].length;
++                }
++            }
++
++            if (targetLink) {
++                const sourcePath = extractOpenPathFromLink(targetLink);
++                if (sourcePath) {
++                    menu.addItem((item) => {
++                        item
++                            .setTitle("コピーして同一フォルダーに保存")
++                            .setIcon("folder-input")
++                            .onClick(async () => {
++                                const res = await executeCopyAndConvertLink({
++                                    sourceFilePath: sourcePath,
++                                    originalLinkText: targetLink
++                                });
++                                if (res?.success && res.newLink) {
++                                    editor.replaceRange(res.newLink, { line: cursor.line, ch: matchStart }, { line: cursor.line, ch: matchEnd });
++                                }
++                            });
++                    });
++                }
++            }
++        } catch (e) {
++            console.error("Failed to check open-path link in editor-menu:", e);
++        }
++    }
++
+     if (file.extension === "md" && !file.name.endsWith(".excalidraw.md")) {
+         menu.addItem((item) => {
+             item
+@@ -4411,10 +4774,12 @@ const handleEditorMenu = (menu, editor, view) => {
+         setTimeout(() => {
+             if (menu.dom) {
+                 const items = Array.from(menu.dom.querySelectorAll(".menu-item"));
++                const copySaveItem = items.find(el => el.textContent.includes("コピーして同一フォルダーに保存"));
+                 const myItem = items.find(el => el.textContent.includes("サマリーを作成"));
+                 const pdfItem = items.find(el => el.textContent.includes("PDFで出力(人間用)"));
+                 const aiHtmlItem = items.find(el => el.textContent.includes("HTMLで出力(AIコンテキスト用)"));
+                 const humanHtmlItem = items.find(el => el.textContent.includes("HTMLで出力(人間用)"));
++                if (copySaveItem) menu.dom.prepend(copySaveItem);
+                 if (pdfItem) menu.dom.prepend(pdfItem);
+                 if (humanHtmlItem) menu.dom.prepend(humanHtmlItem);
+                 if (aiHtmlItem) menu.dom.prepend(aiHtmlItem);
+@@ -4861,12 +5226,14 @@ const handlePdfExportModalMutations = (mutations) => {
+     }
+ };
+ 
+-if (window._customPdfExportModalObserver) {
+-    window._customPdfExportModalObserver.disconnect();
++if (typeof MutationObserver !== "undefined") {
++    if (window._customPdfExportModalObserver) {
++        window._customPdfExportModalObserver.disconnect();
++    }
++    applyPdfCodeBlockBackgroundPreference();
++    window._customPdfExportModalObserver = new MutationObserver(handlePdfExportModalMutations);
++    window._customPdfExportModalObserver.observe(document.body, { childList: true, subtree: true });
+ }
+-applyPdfCodeBlockBackgroundPreference();
+-window._customPdfExportModalObserver = new MutationObserver(handlePdfExportModalMutations);
+-window._customPdfExportModalObserver.observe(document.body, { childList: true, subtree: true });
+ enhancePdfExportModal();
+ 
+ // Excalidraw-backed Markdownを表示中にObsidian標準のPDF出力を実行すると、
+@@ -5006,6 +5373,7 @@ const installExcalidrawPdfMenuGuard = () => {
+ };
+ 
+ const ensureExcalidrawDataPrintStyle = () => {
++    if (typeof document === "undefined" || typeof document.getElementById !== "function") return;
+     if (document.getElementById("custom-excalidraw-data-print-style")) return;
+     const style = document.createElement("style");
+     style.id = "custom-excalidraw-data-print-style";
+@@ -5227,17 +5595,19 @@ const toggleBothSidebars = () => {
+ window.toggleBothSidebars = toggleBothSidebars;
+ 
+ // コマンド登録
+-app.commands.addCommand({
+-    id: "custom:toggle-both-sidebars",
+-    name: "左右両方のサイドバー表示/非表示を切り替え",
+-    callback: toggleBothSidebars,
+-    hotkeys: [
+-        {
+-            modifiers: ["Alt"],
+-            key: "b"
+-        }
+-    ]
+-});
++if (app.commands && typeof app.commands.addCommand === "function") {
++    app.commands.addCommand({
++        id: "custom:toggle-both-sidebars",
++        name: "左右両方のサイドバー表示/非表示を切り替え",
++        callback: toggleBothSidebars,
++        hotkeys: [
++            {
++                modifiers: ["Alt"],
++                key: "b"
++            }
++        ]
++    });
++}
+ 
+ /**
+  * Option + B (Win/Linux: Alt + B) のキーイベントハンドラー
+@@ -8203,4 +8573,101 @@ if (window._customTopNoteListLinkClickListener) {
+ }
+ window._customTopNoteListLinkClickListener = handleTopNoteListLinkClick;
+ document.addEventListener("click", window._customTopNoteListLinkClickListener, true);
++
++/**
++ * ファイルマネージャーからのドラッグ＆ドロップを検知し、localhost:8001リンクを挿入する
++ **/
++const handleFileManagerDrop = (e) => {
++    if (!e.dataTransfer) return;
++    const text = e.dataTransfer.getData("text/plain");
++    const items = parseFileManagerData(text);
++    if (!items || items.length === 0) return;
++
++    // ドロップ対象がエディタ内か、またはアクティブなエディタがあるか確認
++    const MarkdownViewClass = tp?.obsidian?.MarkdownView || window?.obsidian?.MarkdownView;
++    const activeView = (typeof app !== "undefined" && app.workspace.getActiveViewOfType)
++        ? app.workspace.getActiveViewOfType(MarkdownViewClass)
++        : null;
++    const editor = activeView?.editor;
++    if (!editor) return;
++
++    e.preventDefault();
++    e.stopPropagation();
++    e.stopImmediatePropagation();
++
++    const linkMarkdown = generateFileManagerMarkdown(items);
++
++    let insertPos = null;
++    const cm = editor.cm;
++    if (cm && typeof cm.posAtCoords === "function") {
++        const offset = cm.posAtCoords({ x: e.clientX, y: e.clientY });
++        if (offset !== null) {
++            insertPos = editor.offsetToPos(offset);
++        }
++    }
++    if (!insertPos && typeof editor.posAtCoords === "function") {
++        insertPos = editor.posAtCoords({ x: e.clientX, y: e.clientY });
++    }
++    if (!insertPos) {
++        insertPos = editor.getCursor();
++    }
++
++    editor.replaceRange(linkMarkdown, insertPos);
++};
++
++if (window._customFileManagerDropListener) {
++    document.removeEventListener("drop", window._customFileManagerDropListener, true);
++}
++window._customFileManagerDropListener = handleFileManagerDrop;
++document.addEventListener("drop", window._customFileManagerDropListener, true);
++
++/**
++ * 閲覧モード（Reading View）等で open-path リンクを右クリックした際のコンテキストメニュー
++ **/
++const handleFileManagerLinkContextMenu = (e) => {
++    const linkEl = e.target?.closest?.("a[href*='localhost:8001/api/open-path']");
++    if (!linkEl) return;
++
++    const href = linkEl.getAttribute("href") || linkEl.href;
++    const sourcePath = extractOpenPathFromLink(href);
++    if (!sourcePath) return;
++
++    const MenuClass = tp?.obsidian?.Menu || window?.obsidian?.Menu || (typeof Menu !== "undefined" ? Menu : null);
++    if (!MenuClass) return;
++
++    const activeFile = typeof app !== "undefined" ? app.workspace.getActiveFile() : null;
++    if (!activeFile) return;
++
++    e.preventDefault();
++    e.stopPropagation();
++
++    const menu = new MenuClass();
++    menu.addItem((item) => {
++        item
++            .setTitle("コピーして同一フォルダーに保存")
++            .setIcon("folder-input")
++            .onClick(async () => {
++                const res = await executeCopyAndConvertLink({
++                    sourceFilePath: sourcePath,
++                    originalLinkText: href
++                });
++                if (res?.success && res.newLink) {
++                    const fileContent = await app.vault.read(activeFile);
++                    const escapedHref = href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
++                    const linkRegex = new RegExp(`(?:\\[[^\\]]*\\]\\(${escapedHref}\\)|${escapedHref})`);
++                    const updatedContent = fileContent.replace(linkRegex, res.newLink);
++                    if (updatedContent !== fileContent) {
++                        await app.vault.modify(activeFile, updatedContent);
++                    }
++                }
++            });
++    });
++    menu.showAtMouseEvent(e);
++};
++
++if (window._customFileManagerLinkContextMenuListener) {
++    document.removeEventListener("contextmenu", window._customFileManagerLinkContextMenuListener, true);
++}
++window._customFileManagerLinkContextMenuListener = handleFileManagerLinkContextMenu;
++document.addEventListener("contextmenu", window._customFileManagerLinkContextMenuListener, true);
+ %>
+diff --git a/docs/create_summary.md b/docs/create_summary.md
+index 6b8149ef7e781af9e282b8a9277d61fa325f1ed5..c886c447bac2b059cb78ae52243ab98c357df388 100644
+--- a/docs/create_summary.md
++++ b/docs/create_summary.md
+@@ -59,7 +59,11 @@ Obsidian上で開いているマークダウンファイル（通常の `.md` 
+      - **件名**: `Subject` (プロパティ `0037`)
+      - **送信者**: `SenderName` (プロパティ `0C1A`)
+      - **送信日時**: `SentOn` (プロパティ `0039` = PR_CLIENT_SUBMIT_TIME を優先、フォールバック: `0E06` = PR_MESSAGE_DELIVERY_TIME。通常、OutlookのMSGファイル内ではこれら8バイト値は個別ファイルではなく `__properties_version1.0` ストリームにインラインで格納されるため、同ストリームから直接解析します。FILETIME 8バイト値から UTC 基準で解析し `YYYY-MM-DD HH:mm:ss` 形式で表示)
+-     - **本文**: `Body` (プロパティ `1000`)。もしプレーンテキストの本文（プロパティ `1000`）が存在しない、あるいは空の場合は、HTML本文（プロパティ `1013` = `PR_HTML`、特に `10130102` などの PT_BINARY ストリーム）の取得を試み、HTMLタグ（`<script>`や`<style>`を含む）を簡易除去したプレーンテキストを本文としてフォールバック採用します。
++     - **本文**: `Body` (プロパティ `1000`)。
++       - プレーンテキストの本文が存在し、埋め込み画像がない場合は、タグの誤爆や文字化けを防ぐため、整ったプレーンテキスト（`parsed.Body`）を最優先でサマリーに採用します。
++       - 埋め込み画像を含む場合、またはプレーンテキスト本文が存在しない場合はHTML本文（プロパティ `1013` = `PR_HTML`）を解析します。
++       - HTML本文をテキスト/Markdown化する際は、`sanitizeOutlookHtml` により Outlook/Office 特有のメタデータ・コメント（`<!--[if ...]>...<![endif]-->`、`<xml>...</xml>`、`<o:p>...</o:p>`、`<head>`、`<style>`、MSOクラス等）を完全除去し、「`< >`」タグの残骸や文字化けがサマリー内に露出するのを確実に防止します。
++       - メール本文中の山括弧は安全にエスケープされ、Obsidian上での意図しないHTML再実行を防ぎます。
+    - デコード時の文字コード対応：
+      - UTF-16LE 形式 (`001F` 系のストリーム) だけでなく、Windows のクラシック Outlook からドラッグ＆ドロップされた Shift-JIS / CP932 形式 (`001E` 系のストリーム) の ANSI 文字列、さらには HTML 本文などに用いられる `PT_BINARY` 形式 (`0102` 系のストリーム。主に `PR_HTML` 向け) も文字化けなく正常に復号します。
+      - `PT_BINARY` ストリームのデコード時は、まず UTF-8 で仮デコードして HTML 内の `charset` 設定（例: `charset=utf-8` や `charset=shift_jis`）を検出し、指定されたエンコーディングがある場合は `TextDecoder` で再デコードします。
+diff --git a/docs/file_manager_dnd_and_copy_diagram.excalidraw.md b/docs/file_manager_dnd_and_copy_diagram.excalidraw.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..3fe7521bd38ed0ef703e7b812a05e57d35debf6d
+--- /dev/null
++++ b/docs/file_manager_dnd_and_copy_diagram.excalidraw.md
+@@ -0,0 +1,472 @@
++<!--
++/**
++ * ファイルマネージャー連携（ドラッグ＆ドロップと同一フォルダー保存）の処理フロー設計図
++ * 
++ * 1. Webアプリ (localhost:8001) からObsidianへDnD -> [name](http://localhost:8001/api/open-path?path=...) リンク生成
++ * 2. リンクを右クリック -> 「コピーして同一フォルダーに保存」メニュー表示
++ * 3. 実行 -> リンク先ファイルをノートと同階層にコピー -> Obsidianリンク (![[...]] / [[...]]) に置換
++ **/
++-->
++---
++
++excalidraw-plugin: parsed
++tags: [excalidraw]
++
++---
++==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
++
++# Excalidraw Data
++
++## Text Elements
++ファイルマネージャー連携（DnDリンク生成 ＆ 同一フォルダ保存） ^title
++① Webアプリからドラッグ＆ドロップ ^step1-title
++JSONデータを解析し localhost:8001 の open-path リンクを即座に挿入 ^step1-desc
++[aaa.md](http://localhost:8001/api/open-path?path=/Users/...) ^step1-link
++② 右クリックメニューの追加 ^step2-title
++エディタ（editor-menu）＆ 閲覧モード（contextmenu）の両方に対応 ^step2-desc
++「コピーして同一フォルダーに保存」 ^step2-menu
++③ 同一フォルダへのコピー ＆ Obsidianリンク変換 ^step3-title
++1. 元ファイルの存在確認（なければNotice通知） ^step3-p1
++2. 同階層に同名ファイルがあれば上書き確認ダイアログ ^step3-p2
++3. fs.copyFileSync でノートと同じフォルダーへ安全コピー（関連画像・添付ファイルも一括コピー！） ^step3-p3
++4. 画像は ![[xxx.png]]、他は [[xxx.md]] に自動置換！ ^step3-p4
++
++## Drawing
++```json
++{
++	"type": "excalidraw",
++	"version": 2,
++	"source": "https://excalidraw.com",
++	"elements": [
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-header",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 30,
++			"strokeColor": "#1971c2",
++			"backgroundColor": "#1864ab22",
++			"width": 860,
++			"height": 60,
++			"seed": 101,
++			"groupIds": [],
++			"roundness": { "type": 3 }
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "title",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 45,
++			"strokeColor": "#1864ab",
++			"backgroundColor": "transparent",
++			"width": 700,
++			"height": 30,
++			"seed": 102,
++			"groupIds": [],
++			"roundness": null,
++			"text": "ファイルマネージャー連携（DnDリンク生成 ＆ 同一フォルダ保存）",
++			"fontSize": 22,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "ファイルマネージャー連携（DnDリンク生成 ＆ 同一フォルダ保存）"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "card-step1",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 120,
++			"strokeColor": "#2b8a3e",
++			"backgroundColor": "#ebfbee",
++			"width": 860,
++			"height": 110,
++			"seed": 103,
++			"groupIds": [],
++			"roundness": { "type": 3 }
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step1-title",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 135,
++			"strokeColor": "#2b8a3e",
++			"backgroundColor": "transparent",
++			"width": 600,
++			"height": 24,
++			"seed": 104,
++			"groupIds": [],
++			"roundness": null,
++			"text": "① Webアプリからドラッグ＆ドロップ",
++			"fontSize": 18,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "① Webアプリからドラッグ＆ドロップ"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step1-desc",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 165,
++			"strokeColor": "#212529",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 105,
++			"groupIds": [],
++			"roundness": null,
++			"text": "JSONデータを解析し localhost:8001 の open-path リンクを即座に挿入",
++			"fontSize": 14,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "JSONデータを解析し localhost:8001 の open-path リンクを即座に挿入"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step1-link",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 190,
++			"strokeColor": "#0c8599",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 106,
++			"groupIds": [],
++			"roundness": null,
++			"text": "[aaa.md](http://localhost:8001/api/open-path?path=/Users/...)",
++			"fontSize": 14,
++			"fontFamily": 3,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "[aaa.md](http://localhost:8001/api/open-path?path=/Users/...)"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "card-step2",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 255,
++			"strokeColor": "#e8590c",
++			"backgroundColor": "#fff4e6",
++			"width": 860,
++			"height": 100,
++			"seed": 107,
++			"groupIds": [],
++			"roundness": { "type": 3 }
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step2-title",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 270,
++			"strokeColor": "#e8590c",
++			"backgroundColor": "transparent",
++			"width": 600,
++			"height": 24,
++			"seed": 108,
++			"groupIds": [],
++			"roundness": null,
++			"text": "② 右クリックメニューの追加",
++			"fontSize": 18,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "② 右クリックメニューの追加"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step2-desc",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 300,
++			"strokeColor": "#212529",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 109,
++			"groupIds": [],
++			"roundness": null,
++			"text": "エディタ（editor-menu）＆ 閲覧モード（contextmenu）の両方に対応",
++			"fontSize": 14,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "エディタ（editor-menu）＆ 閲覧モード（contextmenu）の両方に対応"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step2-menu",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 325,
++			"strokeColor": "#d9480f",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 110,
++			"groupIds": [],
++			"roundness": null,
++			"text": "「コピーして同一フォルダーに保存」",
++			"fontSize": 15,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "「コピーして同一フォルダーに保存」"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "card-step3",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 380,
++			"strokeColor": "#6741d9",
++			"backgroundColor": "#f3f0ff",
++			"width": 860,
++			"height": 170,
++			"seed": 111,
++			"groupIds": [],
++			"roundness": { "type": 3 }
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-title",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 395,
++			"strokeColor": "#6741d9",
++			"backgroundColor": "transparent",
++			"width": 700,
++			"height": 24,
++			"seed": 112,
++			"groupIds": [],
++			"roundness": null,
++			"text": "③ 同一フォルダへのコピー ＆ Obsidianリンク変換",
++			"fontSize": 18,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "③ 同一フォルダへのコピー ＆ Obsidianリンク変換"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-p1",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 425,
++			"strokeColor": "#212529",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 113,
++			"groupIds": [],
++			"roundness": null,
++			"text": "1. 元ファイルの存在確認（なければNotice通知）",
++			"fontSize": 14,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "1. 元ファイルの存在確認（なければNotice通知）"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-p2",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 450,
++			"strokeColor": "#212529",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 114,
++			"groupIds": [],
++			"roundness": null,
++			"text": "2. 同階層に同名ファイルがあれば上書き確認ダイアログ",
++			"fontSize": 14,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "2. 同階層に同名ファイルがあれば上書き確認ダイアログ"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-p3",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 475,
++			"strokeColor": "#212529",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 20,
++			"seed": 115,
++			"groupIds": [],
++			"roundness": null,
++			"text": "3. fs.copyFileSync でノートと同じフォルダーへ安全コピー（関連画像・添付ファイルも一括コピー！）",
++			"fontSize": 14,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "3. fs.copyFileSync でノートと同じフォルダーへ安全コピー（関連画像・添付ファイルも一括コピー！）"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-p4",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 500,
++			"strokeColor": "#5c7cfa",
++			"backgroundColor": "transparent",
++			"width": 750,
++			"height": 22,
++			"seed": 116,
++			"groupIds": [],
++			"roundness": null,
++			"text": "4. 画像は ![[xxx.png]]、他は [[xxx.md]] に自動置換！",
++			"fontSize": 15,
++			"fontFamily": 1,
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"rawText": "4. 画像は ![[xxx.png]]、他は [[xxx.md]] に自動置換！"
++		}
++	],
++	"appState": {
++		"viewBackgroundColor": "#ffffff",
++		"gridSize": null
++	}
++}
++```
++%%
+diff --git a/docs/file_manager_dnd_and_copy_spec.md b/docs/file_manager_dnd_and_copy_spec.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..3083857ed51ad38923f3776fe039002b782c2df8
+--- /dev/null
++++ b/docs/file_manager_dnd_and_copy_spec.md
+@@ -0,0 +1,70 @@
++/**
++ * ファイルマネージャーからのドラッグ＆ドロップ連携および
++ * 「コピーして同一フォルダーに保存」機能の仕様詳細ドキュメント
++ **/
++
++# 仕様書: ファイルマネージャー連携（ドラッグ＆ドロップと同一フォルダー保存）
++
++## 1. 概要
++ファイルマネージャーのウェブアプリ（ポート8001で動作するローカルファイル管理ツール）からObsidianエディタへファイルをドラッグ＆ドロップした際、これまでのRAWなJSON文字列ではなく、`http://localhost:8001/api/open-path?path=...` を用いたMarkdownリンクを自動生成・挿入します。
++
++さらに、挿入されたリンクに対して右クリックメニュー「コピーして同一フォルダーに保存」を提供し、リンク先のファイルを現在開いているMarkdownファイルと同じフォルダーにコピーし、リンクをObsidianリンク（画像は埋め込みプレビュー形式 `![[...]]`、通常ファイルは拡張子付きリンク `[[...]]`）に自動変換します。
++
++## 2. 背景と課題
++- **従来の挙動**: ファイルマネージャーWebアプリからドラッグ＆ドロップすると、`[{"name":"aaa.md","type":"file","path":"/Users/.../aaa.md", ...}]` のようなJSON文字列がエディタに直接貼り付けられていた。
++- **課題**:
++  1. リンクとして機能せず、手動でURLを組み立てる必要があった。
++  2. 外部フォルダにある参照ファイルをVault内に取り込みたい場合、Finderやファイルマネージャーで手動コピーし、Obsidian内でリンクを書き換える多段階の手間が発生していた。
++
++## 3. 詳細仕様
++
++### 3.1. ドラッグ＆ドロップ時のリンク自動生成
++- **トリガー**: ファイルマネージャーWebアプリからObsidianエディタへのドロップイベント（`drop`）。
++- **データ判定**:
++  - `e.dataTransfer.getData("text/plain")` を取得。
++  - JSONパースを行い、アイテム配列または単一オブジェクトであり、各要素に `path` 文字列プロパティが存在するか判定（`parseFileManagerData`）。
++- **URLおよびMarkdown生成**:
++  - URL形式: `http://localhost:8001/api/open-path?path=${encodeURIComponent(filePath)}`
++  - 表示名: 各アイテムの `name`、なければファイルパスの末尾ファイル名。
++  - 単一ファイル: `[ファイル名](URL)`
++  - 複数ファイル: 各行 `- [ファイル名](URL)` の箇条書きリスト形式。
++  - テンポを重視し、プロンプト・入力ダイアログは表示せず即座にエディタへ挿入。
++- **挿入位置**:
++  - ドロップされたマウス座標（`posAtCoords`）にカーソルを合わせ、テキストを置換・挿入。
++
++### 3.2. 右クリックメニュー「コピーして同一フォルダーに保存」
++- **対象コンテキスト**:
++  1. **編集モード（Live Preview / ソースモード）**: `editor-menu` イベント。
++     - カーソル位置または行内の `http://localhost:8001/api/open-path` リンクを検出し、メニュー項目を最上部に配置。
++  2. **閲覧モード（Reading View）**: `contextmenu` イベント。
++     - `a[href*='localhost:8001/api/open-path']` を右クリックした際に専用メニューを表示。
++- **処理フロー (`executeCopyAndConvertLink`)**:
++  1. **コピー元ファイルの確認**: リンク内の `path` パラメータから絶対パスを抽出し、`fs.existsSync` で存在を確認。存在しない場合は `Notice` を表示して処理を中断。
++  2. **保存先フォルダーの決定**: 現在開いているMarkdownファイル（`app.workspace.getActiveFile()`）の親フォルダー（`activeFile.parent`）を保存先ディレクトリとする。
++  3. **関連ファイル（画像・添付ファイル・相対リンク先）の自動抽出 (`extractMarkdownLinkedFiles`)**:
++     - 対象がMarkdownファイル（`.md`）の場合、ファイル本文から以下を抽出：
++       - Wikilink形式: `![[...]]`、`[[...]]`
++       - Markdownリンク形式: `![...](...)`、`[...](...)`
++     - 外部URLやアンカーを除外し、コピー元ディレクトリ内に実在するファイルを特定。
++  4. **同名ファイルの存在確認ダイアログ**: 保存先に同名のファイル（メインファイルまたは関連ファイル）が既に存在する場合、`window.confirm` で対象ファイル一覧を表示して上書き可否を確認。キャンセルされた場合は処理を中断。
++  5. **ファイルの一括コピー**:
++     - メインファイルを `fs.copyFileSync` で保存先にコピー。
++     - 関連ファイルもサブフォルダー構造（相対パス）を維持して一括コピー（必要なフォルダーは `mkdirSync({ recursive: true })` で自動生成）。
++  6. **Obsidianリンク生成 (`buildObsidianLink`)**:
++     - 画像拡張子（`.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`, `.svg`, `.webp`, `.avif`）の場合: `![[ファイル名]]`（埋め込みプレビュー形式）
++     - その他（`.md`, `.pdf`, `.txt`, `.csv` 等）の場合: `[[ファイル名]]`（拡張子付きWikilink形式）
++  7. **リンクの自動置換**:
++     - エディタの場合: `editor.replaceRange` で該当リンク範囲を新しいObsidianリンクに置換。
++     - 閲覧モードの場合: `app.vault.read` でファイル内容を取得し、該当リンクを置換して `app.vault.modify` で保存。
++
++## 4. 構成・アーキテクチャ図
++- 設計図: [file_manager_dnd_and_copy_diagram.excalidraw.md](file:///Users/mine/000_work/obsidian-dagnetz/docs/file_manager_dnd_and_copy_diagram.excalidraw.md)
++
++## 5. テスト・検証
++- テストファイル: [test_file_manager_dnd_and_copy.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_file_manager_dnd_and_copy.js)
++  - `parseFileManagerData`（JSON判定・抽出）
++  - `generateFileManagerMarkdown`（単一・複数リンク生成）
++  - `extractOpenPathFromLink`（URL/リンクからのパス抽出）
++  - `buildObsidianLink`（画像埋め込み・拡張子付きリンク振り分け）
++  - `extractMarkdownLinkedFiles`（Markdown内からの実在関連ファイル抽出）
++  - `executeCopyAndConvertLink`（存在確認、関連ファイル含む上書き確認、一括コピー、リンク置換）
+diff --git a/docs/msg_summary_flow.excalidraw.md b/docs/msg_summary_flow.excalidraw.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..43d7f486d86f79cb4607a22539a5f04c60393359
+--- /dev/null
++++ b/docs/msg_summary_flow.excalidraw.md
+@@ -0,0 +1,452 @@
++<!--
++/**
++ * サマリー作成時のOutlookメール（MSG）本文サニタイズ処理フロー設計図
++ * 
++ * 1. ノートから .msg ファイルへのリンクを検知してパース
++ * 2. 画像の有無とプレーンテキスト本文（parsed.Body）を判定
++ *    - 画像なし & Bodyあり -> クリーンなプレーンテキストを最優先利用
++ *    - 画像あり / Bodyなし -> sanitizeOutlookHtml による完全サニタイズ（<!--[if ...]>、<xml>、<o:p>等を除去）
++ * 3. サマリーの APPENDIX に安全・綺麗に展開
++ **/
++-->
++---
++
++excalidraw-plugin: parsed
++tags: [excalidraw]
++
++---
++==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
++
++# Excalidraw Data
++
++## Text Elements
++サマリー作成時のMSGメール本文クリーン展開フロー ^title
++① MSGファイルの収集・パース ^step1-title
++.msg リンク検出 -> parseMsgFile() で本文・HTML・添付画像を取得 ^step1-desc
++② 本文抽出の判定分岐 ^step2-title
++画像なし ＆ parsed.Body あり？ ^step2-cond
++【分岐A】画像なし & プレーンテキストあり ^branch-a-title
++汚れたHTMLを完全無視し、
++クリーンな parsed.Body を採用！
++（タグ混入・文字化けゼロ） ^branch-a-desc
++【分岐B】画像あり または Bodyなし ^branch-b-title
++sanitizeOutlookHtml(html) で
++<!--[if ...]>、<xml>、<o:p> 等を除去！
++画像Markdownを配置して安全展開 ^branch-b-desc
++③ サマリー（APPENDIX）への出力 ^step3-title
++「< >」タグの残骸や文字化けのない、美しいメール本文を出力！ ^step3-desc
++
++## Drawing
++```json
++{
++	"type": "excalidraw",
++	"version": 2,
++	"source": "https://excalidraw.com",
++	"elements": [
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-header",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 30,
++			"strokeColor": "#1971c2",
++			"backgroundColor": "#1864ab22",
++			"width": 860,
++			"height": 60,
++			"seed": 101,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": { "type": 3 },
++			"boundElements": [{ "type": "text", "id": "title" }]
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "title",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 48,
++			"strokeColor": "#1864ab",
++			"backgroundColor": "transparent",
++			"width": 600,
++			"height": 25,
++			"seed": 102,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 20,
++			"fontFamily": 1,
++			"text": "サマリー作成時のMSGメール本文クリーン展開フロー",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "サマリー作成時のMSGメール本文クリーン展開フロー"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-step1",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 120,
++			"strokeColor": "#2b8a3e",
++			"backgroundColor": "#2b8a3e15",
++			"width": 860,
++			"height": 80,
++			"seed": 103,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": { "type": 3 },
++			"boundElements": []
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step1-title",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 135,
++			"strokeColor": "#2b8a3e",
++			"backgroundColor": "transparent",
++			"width": 300,
++			"height": 22,
++			"seed": 104,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 16,
++			"fontFamily": 1,
++			"text": "① MSGファイルの収集・パース",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "① MSGファイルの収集・パース"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step1-desc",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 165,
++			"strokeColor": "#333333",
++			"backgroundColor": "transparent",
++			"width": 600,
++			"height": 20,
++			"seed": 105,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 14,
++			"fontFamily": 1,
++			"text": ".msg リンク検出 -> parseMsgFile() で本文・HTML・添付画像を取得",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": ".msg リンク検出 -> parseMsgFile() で本文・HTML・添付画像を取得"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-step2a",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 240,
++			"strokeColor": "#e67700",
++			"backgroundColor": "#e6770015",
++			"width": 410,
++			"height": 130,
++			"seed": 106,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": { "type": 3 },
++			"boundElements": []
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "branch-a-title",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 255,
++			"strokeColor": "#d9480f",
++			"backgroundColor": "transparent",
++			"width": 350,
++			"height": 22,
++			"seed": 107,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 15,
++			"fontFamily": 1,
++			"text": "【分岐A】画像なし & プレーンテキストあり",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "【分岐A】画像なし & プレーンテキストあり"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "branch-a-desc",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 290,
++			"strokeColor": "#333333",
++			"backgroundColor": "transparent",
++			"width": 360,
++			"height": 60,
++			"seed": 108,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 13,
++			"fontFamily": 1,
++			"text": "汚れたHTMLを完全無視し、\nクリーンな parsed.Body を採用！\n（タグ混入・文字化けゼロ）",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "汚れたHTMLを完全無視し、\nクリーンな parsed.Body を採用！\n（タグ混入・文字化けゼロ）"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-step2b",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 490,
++			"y": 240,
++			"strokeColor": "#5f3dc4",
++			"backgroundColor": "#5f3dc415",
++			"width": 410,
++			"height": 130,
++			"seed": 109,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": { "type": 3 },
++			"boundElements": []
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "branch-b-title",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 510,
++			"y": 255,
++			"strokeColor": "#5f3dc4",
++			"backgroundColor": "transparent",
++			"width": 350,
++			"height": 22,
++			"seed": 110,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 15,
++			"fontFamily": 1,
++			"text": "【分岐B】画像あり または Bodyなし",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "【分岐B】画像あり または Bodyなし"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "branch-b-desc",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 510,
++			"y": 290,
++			"strokeColor": "#333333",
++			"backgroundColor": "transparent",
++			"width": 360,
++			"height": 60,
++			"seed": 111,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 13,
++			"fontFamily": 1,
++			"text": "sanitizeOutlookHtml(html) で\n<!--[if ...]>、<xml>、<o:p> 等を除去！\n画像Markdownを配置して安全展開",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "sanitizeOutlookHtml(html) で\n<!--[if ...]>、<xml>、<o:p> 等を除去！\n画像Markdownを配置して安全展開"
++		},
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-step3",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 410,
++			"strokeColor": "#0c8599",
++			"backgroundColor": "#0c859915",
++			"width": 860,
++			"height": 80,
++			"seed": 112,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": { "type": 3 },
++			"boundElements": []
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-title",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 425,
++			"strokeColor": "#0c8599",
++			"backgroundColor": "transparent",
++			"width": 350,
++			"height": 22,
++			"seed": 113,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 16,
++			"fontFamily": 1,
++			"text": "③ サマリー（APPENDIX）への出力",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "③ サマリー（APPENDIX）への出力"
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "step3-desc",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 455,
++			"strokeColor": "#333333",
++			"backgroundColor": "transparent",
++			"width": 600,
++			"height": 20,
++			"seed": 114,
++			"groupIds": [],
++			"frameId": null,
++			"roundness": null,
++			"boundElements": [],
++			"fontSize": 14,
++			"fontFamily": 1,
++			"text": "「< >」タグの残骸や文字化けのない、美しいメール本文を出力！",
++			"textAlign": "left",
++			"verticalAlign": "top",
++			"containerId": null,
++			"originalText": "「< >」タグの残骸や文字化けのない、美しいメール本文を出力！"
++		}
++	],
++	"appState": {
++		"viewBackgroundColor": "#ffffff",
++		"gridSize": 20
++	},
++	"files": {}
++}
++```
+diff --git a/docs/msg_summary_sanitization_spec.md b/docs/msg_summary_sanitization_spec.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..40ae4495f9105f7c585e11e4c45fdcd31ed55453
+--- /dev/null
++++ b/docs/msg_summary_sanitization_spec.md
+@@ -0,0 +1,57 @@
++<!-- 仕様: サマリー作成時のOutlookメール（MSG）本文サニタイズおよび文字化け・タグ露出防止の仕様書 -->
++# 仕様書: サマリー作成時のOutlookメール（MSG）本文サニタイズ（文字化け・タグ露出防止）
++
++## 概要
++Obsidianの「サマリーを作る」機能（`createSummary`）において、ノート内にリンク・埋め込まれたOutlookメッセージファイル（`.msg`）を展開する際、Word/Outlook特有のOfficeメタデータや条件付きコメント（`<!--[if ...]>`、`<xml>`、`<o:p>` 等）がサマリー内に残骸として漏れ出し、「`< >`」タグの大量出現や文字化けが発生する不具合を根本から解消するための仕様です。
++
++## 課題と原因分析
++1. **Word/Outlook特有のMSOメタデータ**:
++   - OutlookのHTMLメールはWordのHTMLレンダリングエンジンによって生成されるため、通常のWeb HTMLと異なり以下の要素が大量に埋め込まれています：
++     - 条件付きコメント: `<!--[if gte mso 9]><xml>...</xml><![endif]-->`
++     - Office/Word名前空間タグ: `<o:p></o:p>`, `<w:WordDocument>...</w:WordDocument>`, `<v:shape>...`
++     - 埋め込みスタイル/フォント定義: `<style><!-- /* Font Definitions */ @font-face ... --></style>`
++     - Officeクラス名: `class="MsoNormal"`, `class="WordSection1"`
++2. **簡易正規表現によるパース漏れ**:
++   - 従来の簡易的な正規表現（`replace(/<[^>]+>/g, "")`）では、複数行にわたる条件付きコメントや内部に属性値 `>` を含む特殊構文を除去しきれず、タグの断片が残存していました。
++3. **過剰な再エスケープ処理**:
++   - 残存したタグ断片に対して `.replace(/</g, "&lt;").replace(/>/g, "&gt;")` が適用されることで、消しきれなかったタグがMarkdownテキストとして固定化され、閲覧時に「`<o:p>`」などのタグが画面いっぱいに表示されていました。
++4. **プレーンテキスト本文（Body）の無視**:
++   - メール内に整ったプレーンテキスト本文（`parsed.Body`）が存在しているにもかかわらず、汚れたHTML本文（`parsed.HtmlBody`）を無条件で優先していたため、不必要なタグ汚染が発生していました。
++
++## 改善仕様
++
++### 1. `sanitizeOutlookHtml` による徹底的な事前クリーニング
++HTML本文を解析・変換する前に、以下の順序でOfficeメタデータおよび不要ブロックを完全に除去します：
++1. **コメントの一括除去**:
++   `clean.replace(/<!--[\s\S]*?-->/g, "")`
++   条件付きコメント（`<!--[if ...]>...<![endif]-->`）を内部コンテンツごと完全に消去。
++2. **ヘッダー・スタイル・XMLブロックの完全除去**:
++   `clean.replace(/<(head|style|script|xml|title)\b[^>]*>[\s\S]*?<\/\1>/gi, "")`
++   `<head>`, `<style>`, `<script>`, `<xml>`, `<title>` の各タグとその内部テキストを一括消去。
++3. **独立したDOCTYPEおよびXML/名前空間タグの消去**:
++   `clean.replace(/<!DOCTYPE\b[^>]*>/gi, "")`
++   `clean.replace(/<\/?xml\b[^>]*>/gi, "")`
++   `clean.replace(/<\/?\w+:[^>]*>/gi, "")`（`<o:p>`, `</o:p>`, `<v:...>` などのコロンを含む名前空間タグをすべて消去）。
++
++### 2. プレーンテキスト本文（Body）の優先利用
++- 添付画像（cid画像など）が存在しない場合、かつプレーンテキスト本文（`parsed.Body`）が存在する場合は、**HTMLパース処理を行わず、クリーンなプレーンテキスト本文（`parsed.Body`）を最優先でサマリーに採用**します。
++- これにより、HTML装飾の誤パースや文字化けの可能性を根本的に回避します。
++
++### 3. 画像配置と安全なMarkdown出力
++- メール内に添付画像が存在し、HTML本文内に `cid:` による配置情報がある場合は、HTML本文から画像を `![alt](relativeUrl)` のMarkdown画像リンクへ置換します。
++- その後、段落（`</p>`, `</div>`）を改行に変換し、残余タグを安全に除去した上で、本文中の実体参照（`&nbsp;`, `&amp;`, `&quot;`, `&#39;`）を展開します。
++- 本文中の残余山括弧（`<`, `>`）は安全にエスケープされ、Obsidian上でのスクリプト再実行やHTMLタグの誤解釈を防止します。
++
++### 4. プラグイン（`obsidian-sidebar-explorer-tag`）側の連携強化
++- `msgParser.ts` 内の `htmlToPlainText` においても同様の `sanitizeOutlookHtml` 相当の事前クリーニングを適用し、プラグイン経由で取得される `parsed.Body` のフォールバック時にもタグ残骸が混入しないように保護します。
++
++## 対象ファイル
++- [RegisterCustomCommands.md](file:///Users/mine/000_work/obsidian-dagnetz/00_templates/RegisterCustomCommands.md)
++- [msgParser.ts](file:///Users/mine/000_work/obsidian-dagnetz/.obsidian/plugins/obsidian-sidebar-explorer-tag/msgParser.ts)
++- [main.js](file:///Users/mine/000_work/obsidian-dagnetz/.obsidian/plugins/obsidian-sidebar-explorer-tag/main.js)
++
++## テスト検証
++- [test_create_summary.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_create_summary.js)
++  - テスト26: Outlook特有タグ（`<!--[if ...]>`、`<xml>`、`<o:p>` 等）を含むMSGファイルのクリーン展開
++  - テスト27: 画像なしメールでのプレーンテキスト本文（Body）優先利用
++  - テスト28: 画像付きHTMLメールでのメタデータ除去と画像配置

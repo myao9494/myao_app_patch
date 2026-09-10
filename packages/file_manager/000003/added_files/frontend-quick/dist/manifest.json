@@ -1,0 +1,17 @@
+{
+  "name": "Quick - スマホ検索・編集",
+  "short_name": "Quick",
+  "description": "端末内データのクイック検索・連絡先確認・編集アプリ",
+  "start_url": "/quick/",
+  "scope": "/quick/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/quick/vite.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

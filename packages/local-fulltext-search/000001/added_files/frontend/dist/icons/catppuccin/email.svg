@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>email</title>
+    <g id="email" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <rect id="body" stroke="#1E66F5" x="1.5" y="3.5" width="13" height="9" rx="1.5"></rect>
+        <path d="M2,4.5 L8,8.5 L14,4.5" id="flap" stroke="#1E66F5"></path>
+    </g>
+</svg>
