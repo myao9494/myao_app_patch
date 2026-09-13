@@ -1,0 +1,48 @@
+/**
+ * テーブルのヘッダー行（一番上の項目行）を中央揃えにし、
+ * 背景色と文字色を強調して項目であることを際立たせるスタイル。
+ * また、リスト配下にインデントされた表（Nested Markdown Renderer）の幅・罫線長さを
+ * 通常の表と同じくセルの内容に応じた自然なサイズに統一する。
+ **/
+
+/* 閲覧モードおよびライブプレビューモードのテーブルヘッダーに適用 */
+.markdown-rendered th,
+.cm-embed-block th,
+table th {
+    text-align: center !important;
+    background-color: var(--background-secondary-alt) !important;
+    color: var(--text-accent) !important;
+    font-weight: bold !important;
+    border-bottom: 2px solid var(--background-modifier-border) !important;
+}
+
+/* すべてのテーブル全体に枠線を付与し、セル間にもグリッド線を表示 */
+.markdown-rendered table,
+.cm-embed-block table,
+table {
+    border-collapse: collapse !important;
+    border: 1px solid var(--background-modifier-border) !important;
+}
+
+.markdown-rendered th,
+.markdown-rendered td,
+.cm-embed-block th,
+.cm-embed-block td,
+table th,
+table td {
+    border: 1px solid var(--background-modifier-border) !important;
+    padding: 6px 10px !important;
+}
+
+/* リスト配下のインデントされた表（Nested Markdown Renderer）の幅と罫線長さを通常の表に合わせる */
+.nmr-table-widget {
+    width: auto !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+}
+
+.nmr-table-widget > table {
+    width: auto !important;
+    min-width: unset !important;
+}
+

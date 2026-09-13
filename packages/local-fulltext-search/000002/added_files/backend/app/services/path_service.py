@@ -1,0 +1,96 @@
+r"""
+Windows の UNC パスと通常パスの正規化、および子孫パス検索用の境界計算を扱う。
+`\\server\share\...` 形式は共有名を壊さずに保持し、検索用文字列では POSIX 風区切りへそろえる。
+"""
+
+from pathlib import Path, PureWindowsPath
+import re
+
+
+class AbsolutePathRequiredError(ValueError):
+    """
+    検索・インデックス対象に相対パスが渡されたことを表す。
+    """
+
+
+def normalize_path(raw_path: str | Path) -> Path:
+    """
+    実ファイルアクセス向けの Path を返す。
+    Windows の UNC パスは `resolve()` で壊さないよう、そのまま `Path` として扱う。
+    """
+    raw_value = str(raw_path)
+    if is_windows_absolute_path(raw_value):
+        return Path(raw_value).expanduser()
+    candidate = Path(raw_path).expanduser()
+    if not candidate.is_absolute():
+        raise AbsolutePathRequiredError("Absolute path is required.")
+    return candidate.resolve()
+
+
+def normalize_path_str(raw_path: str | Path) -> str:
+    """
+    DB 保存や検索比較用に、Windows の UNC パスを `//server/share/...` 形式へ正規化する。
+    """
+    raw_value = str(raw_path)
+    if is_windows_absolute_path(raw_value):
+        return PureWindowsPath(raw_value).as_posix()
+    return normalize_path(raw_path).as_posix()
+
+
+def get_descendant_path_prefix(root_path: str) -> str:
+    """
+    あるディレクトリ配下の子孫パスに限定するための前方一致接頭辞を返す。
+    ルートディレクトリでは `/` や `C:/` を二重スラッシュ化しない。
+    """
+    return root_path if root_path.endswith("/") else f"{root_path}/"
+
+
+def get_descendant_path_range(root_path: str) -> tuple[str, str]:
+    """
+    子孫パスの前方一致を B-tree 範囲検索へ変換する。
+    接頭辞に最大コードポイントを連結し、root パスでも壊れない上限を作る。
+    """
+    prefix = get_descendant_path_prefix(root_path)
+    return prefix, f"{prefix}{chr(0x10FFFF)}"
+
+
+def get_relative_path(root_path: Path, target_path: Path) -> Path:
+    return target_path.relative_to(root_path)
+
+
+def get_depth(relative_path: Path) -> int:
+    return len(relative_path.parts) - 1
+
+
+def _is_windows_unc_path(raw_path: str) -> bool:
+    """
+    Windows の UNC 共有パスかどうかを判定する。
+    """
+    return raw_path.startswith("\\\\") or raw_path.startswith("//")
+
+
+def is_windows_absolute_path(raw_path: str) -> bool:
+    """
+    Windows の UNC パスまたはドライブレター付き絶対パスかどうかを OS 非依存で判定する。
+    """
+    return _is_windows_unc_path(raw_path) or PureWindowsPath(raw_path).is_absolute()
+
+
+def matches_exclude_keyword(target_name: str, keyword: str) -> bool:
+    """
+    対象名（ファイル名・フォルダ名・ステム等）が除外キーワードに一致するか判定する。
+    1. キーワードが対象名に含まれている（部分一致）かをチェックする。
+    2. ただし、4文字以下の英数字のみの短いASCIIキーワード（例: "old", "env", "bin", "git"）については、
+       "older", "environment", "digital", "combine" 等の通常単語への過剰除外を防ぐため、
+       非英数字記号境界（単語境界）でマッチしているかを確認する。
+    """
+    kw = keyword.strip().lower()
+    if not kw:
+        return False
+    target_lower = target_name.lower()
+    if kw not in target_lower:
+        return False
+    if len(kw) <= 4 and kw.isalnum() and kw.isascii():
+        pattern = rf"(^|[^a-zA-Z0-9]){re.escape(kw)}([^a-zA-Z0-9]|$)"
+        return bool(re.search(pattern, target_lower))
+    return True

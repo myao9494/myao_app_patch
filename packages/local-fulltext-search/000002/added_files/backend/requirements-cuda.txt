@@ -1,0 +1,12 @@
+# ==============================================================================
+# Windows NVIDIA GPU (RTX A500 等) 専用 requirements
+# 
+# 使用方法:
+#   pip install -r requirements-cuda.txt
+# 
+# これにより、PyTorch 公式の CUDA 12.4 対応 wheel が自動取得され、
+# Windows 環境で GPU (CUDA) 高速化が有効化されます。
+# ==============================================================================
+
+--extra-index-url https://download.pytorch.org/whl/cu124
+-r requirements.txt

@@ -1,0 +1,781 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+const appPath = path.join(currentDirectory, "App.tsx");
+const clientPath = path.join(currentDirectory, "api", "client.ts");
+const appStylesPath = path.join(currentDirectory, "styles", "app.css");
+const typePath = path.join(currentDirectory, "types.ts");
+
+/**
+ * ハンバーガーメニューからスケジューラー画面へ遷移できる。
+ */
+test("設定メニューにスケジューラー導線を追加する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /type PageView = "search" \| "indexed-targets" \| "search-targets" \| "scheduler"/);
+  assert.match(source, /スケジューラー/);
+  assert.match(source, /handleOpenSchedulerPage/);
+  assert.match(source, /pageView === "scheduler"/);
+  assert.match(clientSource, /fetchSchedulerSettings/);
+  assert.match(clientSource, /startScheduler/);
+  assert.match(styleSource, /\.scheduler-panel\s*\{/);
+});
+
+/**
+ * スケジューラー画面では複数パスと開始日時を指定し、ログを確認できる。
+ */
+test("スケジューラー画面に複数パス設定と開始ログ表示を追加する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /schedulerPaths/);
+  assert.match(source, /schedulerStartAt/);
+  assert.match(source, /handleAddSchedulerPath/);
+  assert.match(source, /handleStartScheduler/);
+  assert.match(source, /type="datetime-local"/);
+  assert.match(source, /フォルダを追加/);
+  assert.match(source, /開始日時/);
+  assert.match(source, /スケジュール開始/);
+  assert.match(source, /schedulerState\.logs\.map/);
+  assert.match(source, /ログ/);
+});
+
+/**
+ * ハンバーガーメニュー内に、確認付きで DB 初期化を呼べる危険操作ボタンを置く。
+ */
+test("設定メニューにデータベース初期化ボタンを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /データベースを初期化/);
+  assert.match(source, /window\.confirm/);
+  assert.match(source, /className="secondary-button danger"/);
+});
+
+/**
+ * 除外キーワードは自動保存せず、保存ボタンで明示的に確定できるようにする。
+ */
+test("設定メニューの除外キーワードに保存ボタンと保存状態表示を置く", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /savedExcludeKeywords/);
+  assert.match(source, /excludeKeywordsDraft/);
+  assert.match(source, /handleSaveExcludeKeywords/);
+  assert.match(source, /className="secondary-button settings-save-button"/);
+  assert.match(source, /未保存の変更があります/);
+  assert.match(source, /保存済み/);
+  assert.match(source, /fetchAppSettings/);
+  assert.match(source, /updateAppSettings/);
+  assert.doesNotMatch(source, /localStorage\.setItem\("exclude_keywords"/);
+  assert.doesNotMatch(source, /localStorage\.getItem\("exclude_keywords"/);
+  assert.doesNotMatch(source, /exclude_keywords: savedExcludeKeywords/);
+  assert.match(clientSource, /export async function fetchAppSettings/);
+  assert.match(clientSource, /export async function updateAppSettings/);
+  assert.match(clientSource, /"\/api\/index\/settings"/);
+  assert.match(styleSource, /\.settings-action-row\s*\{/);
+  assert.match(styleSource, /\.settings-save-status\.dirty\s*\{/);
+});
+
+/**
+ * 検索結果からの「無視」は除外キーワード保存を再利用し、結果一覧から即座に取り除く。
+ */
+test("検索結果の無視ボタンは除外キーワードへ追記して結果一覧から外す", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /isIgnoringResultPath/);
+  assert.match(source, /handleResultIgnore/);
+  assert.match(source, /normalizeExcludeKeywords\(\[savedExcludeKeywords, fullPath\]\.filter\(Boolean\)\.join\("\\n"\)\)/);
+  assert.match(source, /await updateAppSettings\(\{ exclude_keywords: nextExcludeKeywords \}\)/);
+  assert.match(source, /setResults\(\(current\) => current\.filter\(\(item\) => item\.full_path !== fullPath\)\)/);
+  assert.match(source, /setSearchTotal\(\(current\) => Math\.max\(0, current - 1\)\)/);
+  assert.match(source, /onResultIgnore=\{handleResultIgnore\}/);
+  assert.match(clientSource, /updateAppSettings/);
+});
+
+/**
+ * 同義語リストは検索ルール管理ページから保存でき、バックエンドのテキストファイル設定を使う。
+ */
+test("検索ルール管理ページに同義語リストの自動保存状態を表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /savedSynonymGroups/);
+  assert.match(source, /synonymGroupsDraft/);
+  assert.match(source, /handleSaveSynonymGroups/);
+  assert.match(source, /同義語リスト/);
+  assert.match(source, /自動保存済み/);
+  assert.match(source, /synonym_groups: normalized/);
+  assert.match(clientSource, /synonym_groups\?: string/);
+});
+
+/**
+ * 件数が増えた検索ルールは設定ドロワーではなく専用画面で検索・追加・確認できる。
+ */
+test("検索ルール管理画面で除外キーワードと同義語を検索して編集できる", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /"rule-management"/);
+  assert.match(source, /検索ルール管理/);
+  assert.match(source, /excludeRuleFilterText/);
+  assert.match(source, /synonymRuleFilterText/);
+  assert.match(source, /filteredExcludeKeywordEntries/);
+  assert.match(source, /filteredSynonymGroupEntries/);
+  assert.match(source, /handleAddExcludeKeyword/);
+  assert.match(source, /handleAddSynonymGroup/);
+  assert.match(source, /除外リストに登録済み/);
+  assert.match(source, /同義語内で重複/);
+  assert.match(styleSource, /\.rule-management-panel\s*\{/);
+});
+
+/**
+ * 頻繁に使う検索ルール管理は、上部のページ切替列から直接開けるようにする。
+ */
+test("検索ルール管理を上部のページ切替へ追加し、ヘッダーをコンパクトにする", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /pageView === "rule-management"/);
+  assert.match(source, /handleChangePage\("rule-management"\)/);
+  assert.match(styleSource, /\.top-nav\s*\{[\s\S]*?padding: 12px 0 10px;/);
+  assert.match(styleSource, /\.view-switcher\s*\{[\s\S]*?gap: 8px;/);
+  assert.match(styleSource, /\.page-tab\s*\{[\s\S]*?padding: 7px 12px;/);
+});
+
+/**
+ * 検索ルールは一覧を詰め、ダブルクリック編集・自動保存・取り消し操作を提供する。
+ */
+test("検索ルール管理は自動保存と取り消し可能なインライン編集を提供する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /onDoubleClick/);
+  assert.match(source, /handleUndoRuleChange/);
+  assert.match(source, /handleRedoRuleChange/);
+  assert.match(source, /event\.ctrlKey \|\| event\.metaKey/);
+  assert.match(source, /Ctrl\+Z/);
+  assert.match(source, /window\.confirm\("本当に削除しますか？"\)/);
+  assert.match(source, /自動保存/);
+  assert.match(styleSource, /\.rule-list-card\s*\{[\s\S]*?padding: 12px;/);
+  assert.match(styleSource, /\.rule-list-item\s*\{[\s\S]*?padding: 6px 8px;/);
+});
+
+/**
+ * 日本語 IME の確定中 Enter を避け、ルール行の文脈操作と並べ替えを可能にする。
+ */
+test("検索ルール管理はIME対応Enter追加・右クリック削除・ドラッグ並べ替えを提供する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /event\.nativeEvent\.isComposing/);
+  assert.match(source, /handleAddExcludeKeyword\(\)/);
+  assert.match(source, /handleMoveRuleItem/);
+  assert.match(source, /onContextMenu/);
+  assert.match(source, /draggable/);
+  assert.match(source, /onDoubleClick=\{\(\) =>/);
+  assert.match(styleSource, /\.rule-context-menu\s*\{/);
+});
+
+/**
+ * 追加操作は一覧見出しの右側から開くポップアップへ集約する。
+ */
+test("検索ルール管理の見出し右側に追加ボタンと追加ポップアップを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /isRuleAddModalOpen/);
+  assert.match(source, /handleOpenRuleAddModal/);
+  assert.match(source, /className="rule-add-modal"/);
+  assert.match(source, /追加する/);
+  assert.match(styleSource, /\.rule-add-modal\s*\{/);
+});
+
+/**
+ * ルール検索は各カードで独立して行い、画面上部の共通検索欄は置かない。
+ */
+test("除外・同義語カードごとに検索欄を置き、右クリックを確実に捕捉する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /excludeRuleFilterText/);
+  assert.match(source, /synonymRuleFilterText/);
+  assert.match(source, /onContextMenuCapture/);
+  assert.doesNotMatch(source, /id="rule-filter"/);
+});
+
+/**
+ * 選択中カードは視覚化し、テキスト入力中を除く A キーでそのカードの追加画面を開く。
+ */
+test("アクティブなルールカードでA追加ショートカットを提供する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /activeRuleKind/);
+  assert.match(source, /event\.key\.toLowerCase\(\) !== "a"/);
+  assert.match(source, /HTMLInputElement/);
+  assert.match(source, /handleOpenRuleAddModal\(activeRuleKind\)/);
+  assert.match(source, /rule-list-card.*active/);
+  assert.match(styleSource, /\.rule-list-card\.active\s*\{/);
+});
+
+/**
+ * 個別ルールも選択状態を持ち、入力中以外は Delete キーで確認削除できる。
+ */
+test("選択したルール行を視覚化しDeleteキーで削除できる", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /selectedRuleItem/);
+  assert.match(source, /event\.key !== "Delete"/);
+  assert.match(source, /handleDeleteRuleItem\(selectedRuleItem\.kind, selectedRuleItem\.item\)/);
+  assert.match(source, /rule-list-item.*selected/);
+  assert.match(styleSource, /\.rule-list-item\.selected\s*\{/);
+});
+
+/**
+ * 設定ドロワーからアプリ全体の表示倍率を変更し、次回も維持できる。
+ */
+test("設定メニューに表示倍率スライダーを置きアプリ全体へ反映する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /uiZoom/);
+  assert.match(source, /localStorage\.setItem\("ui_zoom"/);
+  assert.match(source, /document\.body\.style\.zoom/);
+  assert.match(source, /表示倍率/);
+  assert.match(source, /type="range"/);
+  assert.match(styleSource, /\.rule-management-panel > \.section-header \.menu-button/);
+});
+
+/**
+ * Obsidian sidebar-explorer の data.json パスは設定メニューから保存でき、バックエンド共有設定として扱う。
+ */
+test("設定メニューに Obsidian sidebar-explorer data.json パス入力を表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /savedObsidianSidebarExplorerDataPath/);
+  assert.match(source, /obsidianSidebarExplorerDataPathDraft/);
+  assert.match(source, /handleSaveObsidianSidebarExplorerDataPath/);
+  assert.match(source, /Obsidian sidebar-explorer data\.json パス/);
+  assert.match(source, /sidebar-explorer `data\.json` を指定します/);
+  assert.match(clientSource, /obsidian_sidebar_explorer_data_path\?: string/);
+});
+
+/**
+ * gantt parent は Web 側の設定メニューで保存し、ランチャーのメモ追加が共有設定として読む。
+ */
+test("設定メニューに gantt parent 入力と保存導線を表示する", () => {
+  const source = readFileSync(appPath, "utf8");
+  const clientSource = readFileSync(clientPath, "utf8");
+  const typeSource = readFileSync(typePath, "utf8");
+
+  assert.match(source, /id="gantt-parent"/);
+  assert.match(source, /handleSaveGanttParent/);
+  assert.match(source, /updateAppSettings\(\{ gantt_parent: normalized \}\)/);
+  assert.match(clientSource, /gantt_parent\?: number/);
+  assert.match(typeSource, /gantt_parent: number/);
+});
+
+test("Web取得方式は会社環境向けEdgeを選択して共有設定へ保存できる", () => {
+  const source = readFileSync(appPath, "utf8");
+  const clientSource = readFileSync(clientPath, "utf8");
+
+  assert.match(source, /id="web-fetch-mode"/);
+  assert.match(source, /Microsoft Edge（会社環境向け）/);
+  assert.match(source, /updateAppSettings\(\{ web_fetch_mode: nextMode \}\)/);
+  assert.match(clientSource, /web_fetch_mode\?: "http" \| "edge" \| "chrome"/);
+});
+
+/**
+ * 既定検索フォルダ設定は廃止し、検索対象フォルダ管理へ統合する。
+ */
+test("設定メニューから既定の検索フォルダ入力を廃止する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.doesNotMatch(source, /savedDefaultSearchPath/);
+  assert.doesNotMatch(source, /defaultSearchPathDraft/);
+  assert.doesNotMatch(source, /default_search_path/);
+  assert.doesNotMatch(source, /検索既定フォルダ/);
+});
+
+/**
+ * 検索欄のパスが空でも、検索対象フォルダ全体を検索できる。
+ */
+test("検索時は入力パスが空でもフォルダ入力エラーにしない", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /const normalizedInputPath = fullPath\.trim\(\);/);
+  assert.match(source, /const resolvedSearchPath = normalizedInputPath;/);
+  assert.doesNotMatch(source, /検索対象フォルダのフルパスを入力してください。/);
+  assert.match(source, /full_path: resolvedSearchPath,/);
+  assert.match(source, /search_all_enabled: isSearchAllEnabled,/);
+  assert.match(source, /const response = await fetchSearchPage\(\{/);
+  assert.match(source, /setResults\(response\.items\);/);
+  assert.match(source, /response\.background_refresh_scheduled/);
+  assert.match(source, /response\.used_existing_index/);
+});
+
+/**
+ * 全 DB 検索中に入力欄が空なら、全階層を検索する。
+ */
+test("全データベース検索かつフォルダ未指定なら既定フォルダへフォールバックしない", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /const resolvedSearchPath = normalizedInputPath;/);
+  assert.doesNotMatch(source, /savedDefaultSearchPath/);
+});
+
+/**
+ * 検索バー横にインデックス状態表示と中止ボタンを置き、操作状態を見やすくする。
+ */
+test("検索バー横にインデックス状態表示と中止ボタンを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /インデックス取得中/);
+  assert.match(source, /インデックス取得を中止中/);
+  assert.match(source, /インデックス待機中/);
+  assert.match(source, /取得を中止/);
+  assert.match(source, /handleCancelIndexing/);
+  assert.match(source, /indexStatusLabel/);
+});
+
+/**
+ * フォルダ指定欄の左側に全データベース検索ボタンを置き、未指定でも検索できるモードを用意する。
+ */
+test("検索バーに全データベース検索ボタンを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const searchBarSource = readFileSync(path.join(currentDirectory, "components", "SearchBar.tsx"), "utf-8");
+
+  assert.match(searchBarSource, /全データベース/);
+  assert.match(searchBarSource, /isSearchAllEnabled/);
+  assert.match(searchBarSource, /onSearchAllToggle/);
+  assert.match(source, /setIsSearchAllEnabled/);
+});
+
+/**
+ * 全データベース検索中でもフォルダ入力と選択から通常検索へ戻せるよう、入力欄は無効化しない。
+ */
+test("全データベース検索中でもフォルダ入力欄と選択ボタンを操作できる", () => {
+  const searchBarSource = readFileSync(path.join(currentDirectory, "components", "SearchBar.tsx"), "utf-8");
+
+  assert.doesNotMatch(searchBarSource, /placeholder=\{isSearchAllEnabled \? "全データベース検索中" : "フルパス"\}\s+disabled=\{isSearchAllEnabled\}/);
+  assert.doesNotMatch(searchBarSource, /<button[\s\S]*onClick=\{onPickFolder\}[\s\S]*disabled=\{isSearchAllEnabled\}/);
+});
+
+/**
+ * 全データベース検索中でもフォルダ入力や選択は保持し、検索モードは自動で切り替えない。
+ */
+test("フォルダ入力と選択で全データベース検索を自動解除しない", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.doesNotMatch(source, /setIsSearchAllEnabled\(false\);\s*setFullPath\(payload\.full_path \?\? ""\);/);
+  assert.doesNotMatch(source, /function handleFullPathChange\(value: string\): void \{\s*setIsSearchAllEnabled\(false\);/);
+  assert.match(source, /setFullPath\(payload\.full_path \?\? ""\);/);
+  assert.match(source, /function handleFullPathChange\(value: string\): void \{\s*setFullPath\(value\);/);
+  assert.match(source, /onFullPathChange=\{handleFullPathChange\}/);
+});
+
+/**
+ * クライアント API は、全 DB 検索フラグと保持中のパスを同時にバックエンドへ渡せる。
+ */
+test("検索 API に全データベースフラグを追加する", () => {
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(clientSource, /search_all_enabled\?: boolean/);
+  assert.match(clientSource, /body: JSON\.stringify\(\{/);
+});
+
+/**
+ * 対象拡張子メニューに XLSM と作図系テキスト拡張子を含め、検索・インデックス対象へ加える。
+ */
+test("対象拡張子に XLSM と Excalidraw / DIO を含める", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /"\.xlsm"/);
+  assert.match(source, /"\.excalidraw"/);
+  assert.match(source, /"\.dio"/);
+  assert.match(source, /"\.xml"/);
+});
+
+/**
+ * 検索バーの拡張子フィルタは手入力で操作し、空欄なら全拡張子対象のままにする。
+ */
+test("検索バーに独立した検索拡張子の手入力フィルタを追加する", () => {
+  const searchBarSource = readFileSync(path.join(currentDirectory, "components", "SearchBar.tsx"), "utf-8");
+  const appSource = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(searchBarSource, /extension-filter-input/);
+  assert.match(searchBarSource, /検索拡張子フィルタ/);
+  assert.match(searchBarSource, /placeholder="md excalidraw"/);
+  assert.match(searchBarSource, /onSearchFilterTextChange/);
+  assert.match(appSource, /selectedIndexExtensions/);
+  assert.match(appSource, /searchFilterText/);
+  assert.match(appSource, /index_types: selectedIndexExtensions\.join\(" "\)/);
+  assert.match(appSource, /const visibleResults = filterSearchResultsByExtensions\(sortedResults, searchFilterText\);/);
+  assert.match(appSource, /search_filter_extensions/);
+  assert.match(appSource, /index_selected_extensions/);
+  assert.match(appSource, /const DEFAULT_SEARCH_FILTER_TEXT = ""/);
+  assert.match(searchBarSource, /top-filters-status/);
+  assert.match(styleSource, /\.top-filters-status\s*\{/);
+  assert.match(styleSource, /\.extension-filter-input\s*\{/);
+});
+
+/**
+ * 検索バーに検索種別フィルタを置き、本文・ファイル名・フォルダ名の対象範囲を切り替えられる。
+ */
+test("検索バーに検索種別フィルタを追加する", () => {
+  const searchBarSource = readFileSync(path.join(currentDirectory, "components", "SearchBar.tsx"), "utf-8");
+  const appSource = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(searchBarSource, /検索種別/);
+  assert.match(searchBarSource, /<option value="all">すべて<\/option>/);
+  assert.match(searchBarSource, /<option value="body">中身のみ<\/option>/);
+  assert.match(searchBarSource, /<option value="filename">ファイル名<\/option>/);
+  assert.match(searchBarSource, /<option value="folder">フォルダ名<\/option>/);
+  assert.match(searchBarSource, /<option value="filename_and_folder">ファイル名\+フォルダ名<\/option>/);
+  assert.match(searchBarSource, /onSearchTargetChange/);
+  assert.match(appSource, /const \[searchTarget, setSearchTarget\]/);
+  assert.match(appSource, /search_target: searchTarget,/);
+  assert.match(clientSource, /search_target\?: "all" \| "body" \| "filename" \| "folder" \| "filename_and_folder"/);
+});
+
+/**
+ * Windows のフォント描画でも検索対象トグルのラベルが縦に折れないようにする。
+ */
+test("検索対象トグルはラベルを折り返さず表示する", () => {
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(styleSource, /\.source-toggle\s*\{[\s\S]*flex-shrink:\s*0/);
+  assert.match(styleSource, /button\.source-toggle-button\s*\{[\s\S]*min-width:\s*86px/);
+  assert.match(styleSource, /button\.source-toggle-button\s*\{[\s\S]*white-space:\s*nowrap/);
+  assert.match(styleSource, /button\.small-btn\s*\{[\s\S]*flex-shrink:\s*0/);
+  assert.match(styleSource, /button\.small-btn\s*\{[\s\S]*white-space:\s*nowrap/);
+  assert.match(styleSource, /\.path-group\s*\{[\s\S]*flex:\s*1 1 760px/);
+  assert.match(styleSource, /\.path-picker-row\.top-path-picker\s*\{[\s\S]*flex-wrap:\s*wrap/);
+});
+
+/**
+ * 検索バーにファイル作成日の開始・終了フィルタを置き、検索 API へそのまま渡せる。
+ */
+test("検索バーに作成日フィルタを追加する", () => {
+  const searchBarSource = readFileSync(path.join(currentDirectory, "components", "SearchBar.tsx"), "utf-8");
+  const appSource = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(searchBarSource, /日付種別/);
+  assert.match(searchBarSource, /<option value="created">ファイル作成日<\/option>/);
+  assert.match(searchBarSource, /<option value="modified">ファイル編集日<\/option>/);
+  assert.match(searchBarSource, /aria-label=\{dateField === "created" \? "作成日以降" : "編集日以降"\}/);
+  assert.match(searchBarSource, /aria-label=\{dateField === "created" \? "作成日以前" : "編集日以前"\}/);
+  assert.match(searchBarSource, /日付指定をキャンセル/);
+  assert.match(searchBarSource, /選択した日付種別の「以降」「以前」として扱います。/);
+  assert.match(searchBarSource, /className="search-subfilters"/);
+  assert.match(searchBarSource, /className="secondary-button date-filter-cancel-button"/);
+  assert.match(searchBarSource, /3日以内/);
+  assert.match(searchBarSource, /1週間以内/);
+  assert.match(searchBarSource, /1ヶ月以内/);
+  assert.match(searchBarSource, /date-filter-shortcut-button/);
+  assert.match(searchBarSource, /onApplyDateShortcut/);
+  assert.match(searchBarSource, /className="small-input date-filter-input"/);
+  assert.match(searchBarSource, /className="small-input date-field-select"/);
+  assert.match(appSource, /const \[dateField, setDateField\] = useState<"created" \| "modified">\("modified"\)/);
+  assert.match(appSource, /const \[createdFrom, setCreatedFrom\] = useState\(""\)/);
+  assert.match(appSource, /const \[createdTo, setCreatedTo\] = useState\(""\)/);
+  assert.match(appSource, /function handleApplyDateShortcut\(days: number\): void \{/);
+  assert.match(appSource, /setCreatedFrom\(resolveRelativeDateInputValue\(days\)\);/);
+  assert.match(appSource, /setCreatedTo\(resolveTodayDateInputValue\(\)\);/);
+  assert.match(appSource, /function handleClearCreatedDateFilter\(\): void \{/);
+  assert.match(appSource, /setCreatedFrom\(""\);/);
+  assert.match(appSource, /setCreatedTo\(""\);/);
+  assert.match(appSource, /date_field: dateField,/);
+  assert.match(appSource, /onApplyDateShortcut=\{handleApplyDateShortcut\}/);
+  assert.match(appSource, /onDateFieldChange=\{setDateField\}/);
+  assert.match(appSource, /onClearCreatedDateFilter=\{handleClearCreatedDateFilter\}/);
+  assert.match(appSource, /created_from: createdFrom \|\| undefined/);
+  assert.match(appSource, /created_to: createdTo \|\| undefined/);
+  assert.match(appSource, /作成日の終了日は開始日以降で入力してください。/);
+  assert.match(clientSource, /date_field\?: "created" \| "modified"/);
+  assert.match(clientSource, /created_from\?: string/);
+  assert.match(clientSource, /created_to\?: string/);
+  assert.match(styleSource, /\.date-filter-panel\s*\{/);
+  assert.match(styleSource, /\.date-filter-group\s*\{/);
+  assert.match(styleSource, /\.search-subfilters\s*\{/);
+  assert.match(styleSource, /\.date-field-select\s*\{/);
+  assert.match(styleSource, /\.date-filter-shortcuts\s*\{/);
+  assert.match(styleSource, /\.date-filter-shortcut-button\s*\{/);
+  assert.match(styleSource, /\.date-filter-input\s*\{/);
+  assert.match(styleSource, /\.date-filter-cancel-button\s*\{/);
+  assert.match(styleSource, /\.date-filter-hint\s*\{/);
+});
+
+/**
+ * 検索バーに並び替え条件を置き、検索 API へそのまま渡せる。
+ */
+test("検索バーに並び替え条件を追加する", () => {
+  const searchBarSource = readFileSync(path.join(currentDirectory, "components", "SearchBar.tsx"), "utf-8");
+  const appSource = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(searchBarSource, /並び替え/);
+  assert.match(searchBarSource, /<option value="default">default<\/option>/);
+  assert.match(searchBarSource, /<option value="modified">編集日順<\/option>/);
+  assert.match(searchBarSource, /<option value="created">作成日順<\/option>/);
+  assert.match(searchBarSource, /<option value="click_count">アクセス数順<\/option>/);
+  assert.match(searchBarSource, /<option value="desc">新しい順 \/ 多い順<\/option>/);
+  assert.match(searchBarSource, /<option value="asc">古い順 \/ 少ない順<\/option>/);
+  assert.match(appSource, /const \[sortBy, setSortBy\] = useState<"default" \| "created" \| "modified" \| "click_count">\("default"\)/);
+  assert.match(appSource, /const \[sortOrder, setSortOrder\] = useState<"asc" \| "desc">\("desc"\)/);
+  assert.match(appSource, /const sortedResults = sortSearchResults\(results, \{ sortBy, sortOrder \}\);/);
+  assert.match(appSource, /<ResultsList[\s\S]*items=\{visibleResults\}[\s\S]*dateField=\{dateField\}[\s\S]*onResultOpen=\{handleResultOpen\}[\s\S]*onResultDelete=\{handleResultDelete\}[\s\S]*onResultIgnore=\{handleResultIgnore\}[\s\S]*ignoringResultPath=\{isIgnoringResultPath\}[\s\S]*\/>/);
+  assert.match(appSource, /sort_by: sortBy,/);
+  assert.match(appSource, /sort_order: sortOrder,/);
+  assert.match(clientSource, /sort_by\?: "default" \| "created" \| "modified" \| "click_count"/);
+  assert.match(clientSource, /sort_order\?: "asc" \| "desc"/);
+});
+
+/**
+ * 検索ルール管理画面内のインデックス対象拡張子はチェックボックスで選べる。
+ * ハンバーガーメニューからは検索ルール管理画面へ移設されている。
+ */
+test("検索ルール管理のインデックス対象拡張子はチェックボックスで選択・保存でき、設定ドロワーからは移設されている", () => {
+  const appSource = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  // 検索ルール管理内にインデックス対象拡張子が存在することを検証
+  assert.match(appSource, /rule-management-grid[\s\S]*?インデックス対象拡張子/);
+  // 設定ドロワー（settings-drawer）内に対象拡張子ボタンが存在しないこと（移設済み）
+  const drawerMatch = appSource.match(/<aside className=\{`settings-drawer[\s\S]*?<\/aside>/);
+  assert.ok(drawerMatch, "settings-drawer must exist");
+  assert.doesNotMatch(drawerMatch[0], /setIsIndexExtensionMenuOpen/);
+  assert.doesNotMatch(drawerMatch[0], /対象拡張子/);
+
+  assert.match(appSource, /toggleIndexExtension/);
+  assert.match(appSource, /setAllIndexExtensions/);
+  assert.match(appSource, /clearAllIndexExtensions/);
+  assert.match(appSource, /handleSaveIndexExtensions/);
+  assert.match(appSource, /handleAddCustomExtension/);
+  assert.match(appSource, /handleRemoveCustomExtension/);
+  assert.match(appSource, /本文を index 化する追加拡張子/);
+  assert.match(appSource, /ファイル名だけを index 化する追加拡張子/);
+  assert.match(appSource, /customContentExtensions/);
+  assert.match(appSource, /customFilenameExtensions/);
+  assert.match(appSource, /savedIndexExtensions/);
+  assert.match(appSource, /hasUnsavedIndexExtensions/);
+  assert.match(appSource, /selectedIndexExtensions\.includes\(extension\)/);
+  assert.match(appSource, /全解除/);
+  assert.match(appSource, /保存/);
+  assert.match(clientSource, /index_selected_extensions\?: string/);
+  assert.match(clientSource, /custom_content_extensions\?: string/);
+  assert.match(clientSource, /custom_filename_extensions\?: string/);
+  assert.match(appSource, /updateAppSettings\(\{/);
+  assert.match(appSource, /index_selected_extensions: normalizedSelectedIndexExtensions\.join\("\\n"\)/);
+  assert.match(appSource, /custom_content_extensions: normalizedCustomContentExtensions\.join\("\\n"\)/);
+  assert.match(appSource, /custom_filename_extensions: normalizedCustomFilenameExtensions\.join\("\\n"\)/);
+  assert.match(styleSource, /\.extension-menu-actions\s*\{/);
+  assert.match(styleSource, /\.extension-add-grid\s*\{/);
+  assert.match(styleSource, /\.extension-add-row\s*\{/);
+  assert.match(styleSource, /\.extension-custom-row\s*\{/);
+  assert.match(styleSource, /\.extension-remove-button\s*\{/);
+});
+
+/**
+ * フロントエンド API クライアントは DB 初期化用の POST /api/index/reset を呼べる。
+ */
+test("API クライアントにデータベース初期化リクエストを用意する", () => {
+  const source = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /export async function resetDatabase/);
+  assert.match(source, /"\/api\/index\/reset"/);
+});
+
+/**
+ * フロントエンド API クライアントはインデックス中止用の POST /api/index/cancel を呼べる。
+ */
+test("API クライアントにインデックス中止リクエストを用意する", () => {
+  const source = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /export async function cancelIndexing/);
+  assert.match(source, /"\/api\/index\/cancel"/);
+});
+
+/**
+ * インデックス済みフォルダ管理ページを用意し、絞り込み・全選択・削除をまとめて扱えるようにする。
+ */
+test("インデックス済みフォルダ管理ページの UI を表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /インデックス済みフォルダ/);
+  assert.match(source, /キーワードで絞り込み/);
+  assert.match(source, /必要フォルダを隠すキーワード/);
+  assert.match(source, /rows=\{4\}/);
+  assert.match(source, /絞り込みをクリア/);
+  assert.match(source, /非表示をクリア/);
+  assert.match(source, /除外キーワードへ追加/);
+  assert.match(source, /handleOpenIndexedTargetLocation/);
+  assert.match(source, /Finderで開く|Explorerで開く/);
+  assert.match(source, /すべて選択/);
+  assert.match(source, /選択したフォルダのインデックスを削除/);
+  assert.match(source, /handleDeleteIndexedTargets/);
+});
+
+/**
+ * インデックス済みフォルダ画面では、絞り込みキーワードから除外キーワードへ転記できる。
+ */
+test("インデックス済みフォルダ画面のキーワードを除外キーワードへ追加できる", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /function handleClearFilterKeyword\(\): void/);
+  assert.match(source, /function handleClearHideKeyword\(\): void/);
+  assert.match(source, /function handleAppendFilterKeywordToExcludeKeywords\(\): void/);
+  assert.match(source, /setExcludeKeywordsDraft\(\(current\) => normalizeExcludeKeywords/);
+  assert.match(source, /setFilterKeyword\(""\)/);
+});
+
+/**
+ * インデックス済みフォルダ一覧は、絞り込みと非表示キーワードを別々に扱いつつ件数順で表示する。
+ */
+test("インデックス済みフォルダ一覧は除外キーワードを適用して件数順に並べる", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /const normalizedFilterKeyword = filterKeyword\.trim\(\);/);
+  assert.match(source, /const loweredFilterKeyword = normalizedFilterKeyword\.toLowerCase\(\);/);
+  assert.match(source, /const hiddenKeywordList = normalizeHiddenIndexedTargets\(hideKeyword\)/);
+  assert.match(source, /map\(\(item\) => item\.toLowerCase\(\)\)/);
+  assert.match(source, /normalizeHiddenIndexedTargets\(appSettings\.hidden_indexed_targets\)/);
+  assert.match(source, /updateAppSettings\(\{ hidden_indexed_targets: normalized \}\)/);
+  assert.match(clientSource, /hidden_indexed_targets\?: string;/);
+  assert.match(source, /const filteredTargets = indexedTargets/);
+  assert.match(source, /if \(loweredFilterKeyword && !normalizedPath\.includes\(loweredFilterKeyword\)\) \{/);
+  assert.match(source, /if \(hiddenKeywordList\.some\(\(keyword\) => normalizedPath\.includes\(keyword\)\)\) \{/);
+  assert.match(source, /\.sort\(\(left, right\) => right\.indexed_file_count - left\.indexed_file_count \|\| left\.full_path\.localeCompare\(right\.full_path\)\)/);
+});
+
+/**
+ * トップタブに検索対象フォルダページを追加し、対象ON/OFF管理と追加導線を表示する。
+ */
+test("トップタブに検索対象フォルダページを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const clientSource = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /onClick=\{\(\) => void handleChangePage\("search-targets"\)\}/);
+  assert.match(source, /検索対象フォルダ/);
+  assert.match(source, /fetchSearchTargets/);
+  assert.match(source, /setSearchTargetEnabled/);
+  assert.match(source, /addSearchTarget/);
+  assert.match(source, /deleteSearchTargets/);
+  assert.match(source, /checked=\{item\.is_enabled\}/);
+  assert.match(source, /handleToggleSearchTarget\(item\.full_path, event\.target\.checked\)/);
+  assert.match(source, /削除/);
+  assert.match(source, /インデックス削除/);
+  assert.match(source, /インデックス再取得/);
+  assert.match(source, /インデックス取得/);
+  assert.match(source, /最終取得:/);
+  assert.match(clientSource, /export async function fetchSearchTargets/);
+  assert.match(clientSource, /export async function setSearchTargetEnabled/);
+  assert.match(clientSource, /export async function addSearchTarget/);
+  assert.match(clientSource, /export async function deleteSearchTargets/);
+  assert.match(clientSource, /"\/api\/index\/search-targets"/);
+});
+
+/**
+ * フォルダ入力値が検索対象外なら、検索対象へ追加するボタンを表示する。
+ */
+test("フォルダ入力値が検索対象外なら追加ボタンを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /const candidateSearchTargetPath = fullPath\.trim\(\);/);
+  assert.match(source, /isPathCoveredByTarget\(candidateSearchTargetPath, searchTargets\)/);
+  assert.match(source, /検索対象に追加/);
+  assert.match(source, /handleAddCurrentPathToSearchTarget/);
+});
+
+/**
+ * インデックス済みフォルダ画面でも設定ドロワーを開けるよう、同じハンバーガーメニュー導線を置く。
+ */
+test("インデックス済みフォルダ画面にもハンバーガーメニューを表示する", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(source, /pageView === "indexed-targets" \|\| pageView === "search-targets"[\s\S]*className="menu-button"/);
+  assert.match(source, /<aside className=\{`settings-drawer \$\{isMenuOpen \? "open" : ""\}`\} aria-hidden=\{!isMenuOpen\}>/);
+});
+
+/**
+ * インデックス済みフォルダ画面では、操作ヘッダーを固定したまま一覧だけをスクロールできる。
+ */
+test("インデックス済みフォルダ画面は操作エリアを固定し一覧だけスクロールする", () => {
+  const appSource = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(appSource, /className="indexed-targets-panel-header"/);
+  assert.match(appSource, /className="form-help indexed-targets-selection-status"/);
+  assert.match(styleSource, /\.indexed-targets-panel\s*\{/);
+  assert.match(styleSource, /\.indexed-targets-panel-header\s*\{/);
+  assert.match(styleSource, /\.indexed-targets-list\s*\{[\s\S]*overflow-y:\s*auto/);
+  assert.match(styleSource, /\.indexed-targets-list\s*\{[\s\S]*min-height:\s*0/);
+});
+
+/**
+ * フロントエンド API クライアントはインデックス済みフォルダ一覧取得と削除を呼べる。
+ */
+test("API クライアントにインデックス済みフォルダ一覧取得と削除リクエストを用意する", () => {
+  const source = readFileSync(clientPath, "utf-8");
+
+  assert.match(source, /export async function fetchIndexedTargets/);
+  assert.match(source, /export async function deleteIndexedTargets/);
+  assert.match(source, /"\/api\/index\/targets"/);
+  assert.match(source, /method:\s*"DELETE"/);
+});
+
+/**
+ * Web ページの削除では、実行中の取得状態と削除後の一覧検証を画面に残す。
+ */
+test("インデックス済みWebページ画面は処理中表示と削除結果の再確認を行う", () => {
+  const source = readFileSync(appPath, "utf-8");
+  const styleSource = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /className="indexed-targets-operation-status"/);
+  assert.match(source, /インデックス取得中のため、削除は完了後に実行できます。/);
+  assert.match(source, /削除後の一覧確認で.*件が残っています/);
+  assert.match(source, /一覧への反映を確認しました/);
+  assert.match(styleSource, /\.indexed-targets-operation-status\s*\{/);
+  assert.match(styleSource, /\.indexed-targets-progress-bar\s*\{/);
+});
+
+/**
+ * 成功通知はエラー表示と分けて青系の notice banner で描画する。
+ */
+test("DB 初期化の成功通知用スタイルを定義する", () => {
+  const source = readFileSync(appStylesPath, "utf-8");
+
+  assert.match(source, /\.notice-banner\s*\{/);
+  assert.match(source, /\.index-status-pill\s*\{/);
+  assert.match(source, /\.index-cancel-button\s*\{/);
+  assert.match(source, /\.indexed-targets-panel\s*\{/);
+  assert.match(source, /\.target-list-item\s*\{/);
+});
+
+/**
+ * 検索結果の並び替え関数は、TypeScript で解釈できるオブジェクト引数として定義する。
+ */
+test("検索結果並び替え関数は TypeScript のオブジェクト引数記法を使う", () => {
+  const source = readFileSync(appPath, "utf-8");
+
+  assert.match(
+    source,
+    /function sortSearchResults\(\s*items: readonly SearchResult\[],\s*\{\s*sortBy,\s*sortOrder,\s*\}: \{\s*sortBy: "default" \| "created" \| "modified" \| "click_count",\s*sortOrder: "asc" \| "desc",\s*\},\s*\): SearchResult\[] \{/,
+  );
+  assert.doesNotMatch(source, /items: readonly SearchResult\[],\s*\*/);
+});

@@ -4,19 +4,14 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 4,
-      "manifest_path": "packages/obsidian-settings/000004/manifest.json"
-    },
-    {
-      "repo_id": "file_manager",
-      "sequence": 3,
-      "manifest_path": "packages/file_manager/000003/manifest.json"
+      "sequence": 5,
+      "manifest_path": "packages/obsidian-settings/000005/manifest.json"
     },
     {
       "repo_id": "local-fulltext-search",
-      "sequence": 1,
-      "manifest_path": "packages/local-fulltext-search/000001/manifest.json"
+      "sequence": 2,
+      "manifest_path": "packages/local-fulltext-search/000002/manifest.json"
     }
   ],
-  "signature": "f8924832cfc8b28bafba18b9cf0d73697250fe7feaaba1560e038ec4d551d6a6"
+  "signature": "f7eb54b28f9e2e57f00d3b272322ea69b219d7b2add9acd1aacfd797cf7cee20"
 }
