@@ -1,0 +1,1 @@
+/Users/example/Vault/.obsidian/plugins/obsidian-sidebar-explorer/data.json

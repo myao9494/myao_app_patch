@@ -1,0 +1,39 @@
+# Python 仮想環境
+backend/.venv/
+backend/venv/
+.venv/
+venv/
+
+
+# フロントエンド依存
+frontend/node_modules/
+
+# 端末固有のデータベース・ログ・キャッシュ（設定ファイル *.txt, config.json は追跡）
+backend/data/*.db
+backend/data/*.db-*
+backend/data/*.log
+backend/data/indexes/
+backend/data/.DS_Store
+/data/
+
+# Python キャッシュ & ログ
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+
+# IDE & OS
+.run/
+.DS_Store
+.env
+.env.*
+
+# ランチャー
+launcher/.offline_cache/
+launcher/windows/**/bin/
+launcher/windows/**/obj/
+
+# ベクトルモデル（別ダウンロードして配置するため Git 除外）
+models/
+backend/models/
+
