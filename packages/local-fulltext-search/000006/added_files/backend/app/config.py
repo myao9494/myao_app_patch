@@ -1,0 +1,157 @@
+import os
+from pathlib import Path
+
+from pydantic import BaseModel, ValidationInfo, field_validator
+
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+PROJECT_ROOT_DIR = BACKEND_DIR.parent
+
+
+class Settings(BaseModel):
+    """
+    アプリ全体で共有する起動設定と保存先設定を保持する。
+    """
+
+    app_name: str = "Local Fulltext Search"
+    bind_host: str = os.getenv("SEARCH_APP_HOST", "127.0.0.1")
+    bind_port: int = int(os.getenv("SEARCH_APP_PORT", "8079"))
+    data_dir: Path = Path(os.getenv("SEARCH_APP_DATA_DIR", str(BACKEND_DIR / "data")))
+    database_name: str = os.getenv("SEARCH_APP_DB_NAME", "search.db")
+    exclude_keywords_name: str = os.getenv("SEARCH_APP_EXCLUDE_KEYWORDS_NAME", "exclude_keywords.txt")
+    web_exclude_keywords_name: str = os.getenv("SEARCH_APP_WEB_EXCLUDE_KEYWORDS_NAME", "web_exclude_keywords.txt")
+    web_fetch_mode_name: str = os.getenv("SEARCH_APP_WEB_FETCH_MODE_NAME", "web_fetch_mode.txt")
+    hidden_indexed_targets_name: str = os.getenv(
+        "SEARCH_APP_HIDDEN_INDEXED_TARGETS_NAME", "hidden_indexed_targets.txt"
+    )
+    synonym_groups_name: str = os.getenv("SEARCH_APP_SYNONYM_GROUPS_NAME", "synonym_groups.txt")
+    obsidian_sidebar_explorer_data_path_name: str = os.getenv(
+        "SEARCH_APP_OBSIDIAN_SIDEBAR_EXPLORER_DATA_PATH_NAME", "obsidian_sidebar_explorer_data_path.txt"
+    )
+    gantt_parent_name: str = os.getenv("SEARCH_APP_GANTT_PARENT_NAME", "gantt_parent.txt")
+    launcher_hotkey_name: str = os.getenv("SEARCH_APP_LAUNCHER_HOTKEY_NAME", "launcher_hotkey.txt")
+    search_target_folders_name: str = os.getenv("SEARCH_APP_SEARCH_TARGET_FOLDERS_NAME", "search_target_folders.txt")
+    index_selected_extensions_name: str = os.getenv("SEARCH_APP_INDEX_SELECTED_EXTENSIONS_NAME", "index_selected_extensions.txt")
+    custom_content_extensions_name: str = os.getenv("SEARCH_APP_CUSTOM_CONTENT_EXTENSIONS_NAME", "custom_content_extensions.txt")
+    custom_filename_extensions_name: str = os.getenv(
+        "SEARCH_APP_CUSTOM_FILENAME_EXTENSIONS_NAME", "custom_filename_extensions.txt"
+    )
+    confirm_index_deletion_name: str = os.getenv("SEARCH_APP_CONFIRM_INDEX_DELETION_NAME", "confirm_index_deletion.txt")
+    frontend_dist_dir: Path = Path(os.getenv("SEARCH_APP_FRONTEND_DIST_DIR", str(PROJECT_ROOT_DIR / "frontend" / "dist")))
+
+    launcher_autostart: bool = os.getenv("SEARCH_APP_LAUNCHER_AUTOSTART", "0").strip().lower() in {"1", "true", "yes", "on"}
+    launcher_log_name: str = os.getenv("SEARCH_APP_LAUNCHER_LOG_NAME", "launcher.log")
+    gantt_api_base_url: str = os.getenv("SEARCH_APP_GANTT_API_BASE_URL", "http://localhost:8000/api")
+
+    @field_validator("data_dir", "frontend_dist_dir", mode="before")
+    @classmethod
+    def _normalize_config_paths(cls, value: str | Path, info: ValidationInfo) -> Path:
+        """
+        設定ファイル系のパスは内部では常に絶対パスへ正規化して保持する。
+        相対指定は data_dir を backend 基準、frontend_dist_dir を project root 基準で解決する。
+        """
+        path = Path(value).expanduser()
+        if path.is_absolute():
+            return path.resolve()
+
+        base_dir = BACKEND_DIR if info.field_name == "data_dir" else PROJECT_ROOT_DIR
+        return (base_dir / path).resolve()
+
+    @field_validator(
+        "database_name",
+        "exclude_keywords_name",
+        "web_exclude_keywords_name",
+        "web_fetch_mode_name",
+        "hidden_indexed_targets_name",
+        "synonym_groups_name",
+        "obsidian_sidebar_explorer_data_path_name",
+        "gantt_parent_name",
+        "launcher_hotkey_name",
+        "search_target_folders_name",
+        "index_selected_extensions_name",
+        "custom_content_extensions_name",
+        "custom_filename_extensions_name",
+        "confirm_index_deletion_name",
+        "launcher_log_name",
+    )
+    @classmethod
+    def _validate_file_name(cls, value: str) -> str:
+        """
+        database_name / exclude_keywords_name はファイル名のみを受け付け、パス区切りや親ディレクトリ指定を混入させない。
+        """
+        if "/" in value or "\\" in value or Path(value).name != value or value in {"", ".", ".."}:
+            raise ValueError("configured file names must not include path separators.")
+        return value
+
+    @property
+    def database_path(self) -> Path:
+        return (self.data_dir / self.database_name).resolve()
+
+    @property
+    def exclude_keywords_path(self) -> Path:
+        return (self.data_dir / self.exclude_keywords_name).resolve()
+
+    @property
+    def web_exclude_keywords_path(self) -> Path:
+        return (self.data_dir / self.web_exclude_keywords_name).resolve()
+
+    @property
+    def web_fetch_mode_path(self) -> Path:
+        """
+        Web取得方式は端末固有のプレーンテキスト設定として保存する。
+        """
+        return (self.data_dir / self.web_fetch_mode_name).resolve()
+
+    @property
+    def web_browser_profiles_dir(self) -> Path:
+        """
+        普段使いのブラウザプロファイルと分離した自動取得専用領域を返す。
+        """
+        return (self.data_dir / "web-browser-profiles").resolve()
+
+    @property
+    def hidden_indexed_targets_path(self) -> Path:
+        return (self.data_dir / self.hidden_indexed_targets_name).resolve()
+
+    @property
+    def synonym_groups_path(self) -> Path:
+        return (self.data_dir / self.synonym_groups_name).resolve()
+
+    @property
+    def search_target_folders_path(self) -> Path:
+        return (self.data_dir / self.search_target_folders_name).resolve()
+
+    @property
+    def obsidian_sidebar_explorer_data_path_path(self) -> Path:
+        return (self.data_dir / self.obsidian_sidebar_explorer_data_path_name).resolve()
+
+    @property
+    def gantt_parent_path(self) -> Path:
+        return (self.data_dir / self.gantt_parent_name).resolve()
+
+    @property
+    def launcher_hotkey_path(self) -> Path:
+        """ランチャーの再起動時に読むショートカット設定ファイルを返す。"""
+        return (self.data_dir / self.launcher_hotkey_name).resolve()
+
+    @property
+    def confirm_index_deletion_path(self) -> Path:
+        return (self.data_dir / self.confirm_index_deletion_name).resolve()
+
+    @property
+    def index_selected_extensions_path(self) -> Path:
+        return (self.data_dir / self.index_selected_extensions_name).resolve()
+
+    @property
+    def custom_content_extensions_path(self) -> Path:
+        return (self.data_dir / self.custom_content_extensions_name).resolve()
+
+    @property
+    def custom_filename_extensions_path(self) -> Path:
+        return (self.data_dir / self.custom_filename_extensions_name).resolve()
+
+    @property
+    def launcher_log_path(self) -> Path:
+        return (BACKEND_DIR / self.launcher_log_name).resolve()
+
+settings = Settings()

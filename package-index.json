@@ -4,9 +4,9 @@
   "packages": [
     {
       "repo_id": "local-fulltext-search",
-      "sequence": 5,
-      "manifest_path": "packages/local-fulltext-search/000005/manifest.json"
+      "sequence": 6,
+      "manifest_path": "packages/local-fulltext-search/000006/manifest.json"
     }
   ],
-  "signature": "9e2c937089df0400f26f1efc31d187a9dace88b0e97705eedcf48a1b96cdcec2"
+  "signature": "45f475a16786ef56c9b1ba8b6f867290d17ac677c31ab5f4b47918b360137b4d"
 }
