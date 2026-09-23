@@ -1,0 +1,2448 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index ead3dbc4691869131f475827086f2902dfd4c2f9..e2197aef13489ace2a37925684a877b8f237a1fc 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -81,7 +81,8 @@
+   - フォーカス喪失時（blur）に自動非表示。
+   - **検索挙動**: 
+     - macOS: 検索時に登録済みフォルダのインデックス更新を許可。
+-    - その他 OS: 既存インデックスのみを使用して高速にレスポンス。
++    - その他 OS: 既存インデックスのみを使用して高速にレスポンス（更新チェックOFF時は `/api/search/indexed` により再インデックス・ベクトル作成を待たず既存DBだけで検索）。
++    - Windows WPF: 「更新」チェックボックスOFF時は既存DB専用API `/api/search/indexed` でインデックス作成を待たずに検索し、「更新」チェックON時は `/api/search` でインデックス作成・更新を待って検索。
+   - 立ち上がった（再表示された）時に、検索欄に残っているテキストを全選択状態にしてフォーカスする。
+   - Web版のデザイン（Glassmorphism）を踏襲。
+   - ウィンドウの表示・非表示時に、キーボードの押下状態（pynputフック）をリセットして、Enterキーが反応しなくなるのを防止する。
+@@ -118,10 +119,13 @@
+ - **ホットキー**: Windows標準APIによる `Shift` の2回押下（400ms以内、間に他キーを挟まない）で表示・非表示を切り替える。入力は遮断せず、`RegisterHotKey` は使用しない。
+ - **仮想デスクトップ**: 非表示時に検索ウィンドウを破棄し、次回表示時にHWNDを再生成して、呼び出した仮想デスクトップへ表示する。
+ - **フォールバック**: 発行済みEXEがない場合だけ既存Python/Flet版を起動する。
+-- **macOS版準拠**: WPF版も検索欄右側の拡張子フィルタ、gantt検索、タスク名・メモ・送信・キャンセル、共有parent、パスコピー、保存場所、フォルダ、ganttリンク、GUIボタン、上下キー循環選択を提供する。`Tab` / `Shift + Tab` は「検索欄 → 拡張子欄 → タスク名 → メモ → 送信 → 検索欄」を循環し、送信後のTabでは検索画面を表示する。`.py`、`.bat`、`.exe`、`.lnk` は8001を経由せず、親フォルダをcurrent directoryとして直接起動する。Windowsの検索性能仕様に従い、gantt未選択時は既存インデックスのみを検索する。
++- **macOS版準拠**: WPF版も検索欄右側の拡張子フィルタ、gantt検索、タスク名・メモ・送信・キャンセル、共有parent、パスコピー、保存場所、フォルダ、ganttリンク、GUIボタン、上下キー循環選択を提供する。`Tab` / `Shift + Tab` は「検索欄 → 拡張子欄 → タスク名 → メモ → 送信 → 検索欄」を循環し、送信後のTabでは検索画面を表示する。`.py`、`.bat`、`.exe`、`.lnk` は8001を経由せず、親フォルダをcurrent directoryとして直接起動する。
+ - **再表示**: 仮想デスクトップ移動のためUIウィンドウを再生成しても検索文字列は保持し、検索欄へ復元して全選択する。WPF初期版は半透明パネルを使用し、DWM/Acrylic背景ブラーは未実装。
+ - **WPF検索結果UI**: 横スクロールなしで結果全体を確認できる幅とし、長いパス・抜粋・操作ボタンは折り返して表示する。ランチャー表示直後は検索欄へフォーカスし、検索結果の先頭が選択済みなら矢印操作なしの `Return` / `Enter` でも選択結果を開く。
+-- **WPF検索対象**: ローカルファイルとWebページの両方を既存DBから横断検索する。WPFからの検索ではインデックス更新を行わない。
++- **WPF検索対象 & インデックス更新連動**:
++  - ローカルファイルとWebページの両方を横断検索する。
++  - 通常時（「更新」チェックOFF）: 既存DB専用API `/api/search/indexed` を使用し、ベクトルのインデックス作成や差分走査を待たずに既存DB（SQLite DB および既存ベクトルインデックス）だけで即座に高速検索する。
++  - 「更新」チェックON時: 統合API `/api/search` を `search_all_enabled: false`, `skip_refresh: false` で呼び出し、登録済みフォルダのインデックス作成・差分更新（ベクトルインデックス同期を含む）の完了を待ってから最新結果を検索する。
+ 
+ ## ウェブページ全文検索
+ - **目的**: 指定したベースURL階層下の全ページをクロール・本文抽出し、ローカルファイルと同様に全文検索可能にする。
+@@ -198,9 +202,10 @@
+   - **CPU自動フォールバック**: GPU 非対応環境、初期化エラー、メモリ不足（OOM）発生時にはプロセスを停止させず、安全かつシームレスに `cpu` にフォールバックして処理を完遂。
+   - **稼働デバイス可視化**: ベクトル管理画面の最上部ヘッダーおよびモデル選択カードに稼働デバイス（`⚡ GPU稼働中: Apple Silicon (Metal)` / `⚡ GPU稼働中: NVIDIA RTX A500 (CUDA)` / `💻 CPU稼働中`）を常時表示。
+   - **Windows NVIDIA GPU (RTX A500) 配布対応**: `requirements-cuda.txt` およびワンクリックセットアップ `setup_windows_cuda.bat` を同梱し、Windows PC でも簡単に CUDA 12.4 環境を構築可能とする。
+-- **FAISS高速エンジン & NumPy自動フォールバック**:
+-  - `faiss-cpu` 導入時は `faiss.IndexFlatIP` で高速内積検索を実行。
+-  - 未導入環境でもプロセス起動を阻害せず、NumPy（`np.dot`）による等価な高速内積計算へ自動フォールバック。
++- **有効ターゲットフォルダ制限 & 実在ファイル実在性検証**:
++  - ベクトル検索およびハイブリッド検索の候補抽出時、現在有効な登録検索対象フォルダ（`targets` テーブルで `is_search_target_enabled = 1` のフォルダ）配下に属するファイルのみをヒット対象とする。登録フォルダ外のファイル（過去の登録解除フォルダやテスト・一時ファイルなど）は結果から自動除外される。
++  - ローカルファイルについてはファイルシステム上の実在性（`Path.is_file()`）も検証し、削除されたファイルのゴーストレコードを検索結果に返さない（スタブ・ダミーサービス時は除く）。
++  - テスト実行環境では `conftest.py` による `vector_state` の一時ディレクトリ自動隔離および `IndexService` のカスタムDB接続時ガードにより、テスト走査による実環境ベクトルDBへの混入・汚染を完全防止する。
+ - **詳細は `docs/vector_search_spec.md` および `docs/ai_context_export_spec.md` 参照。**
+ 
+ ### AIインプット: 呼び出されたメール（MSG/EML）追加 & Base64画像埋め込み
+@@ -214,12 +219,17 @@
+   - `RegisterCustomCommands.md` に準拠し、プロパティがcp1252等と誤認されたMSGファイルに対しても `overrideEncoding='cp932'` 再試行や生ストリーム直接取得、`mojibake_score` による自然な日本語選択を行い、`UnicodeDecodeError` によるHTML生成中断を完全に防止。検索テキスト抽出（`_extract_msg_text`）にも連動。
+ - **詳細は `docs/ai_linked_emails_spec.md`、`docs/msg_encoding_support.md` および `docs/ai_linked_emails_flow.excalidraw.md` 参照。**
+ 
+-### .excalidraw.md の画像ファイル（図面アセット）取り扱い
+-- **目的**: Obsidian の `明和高校.excalidraw.md` のような `.excalidraw.md` ファイルを「文書」ではなく「画像・図面アセット」として取り扱い、大量の Excalidraw JSON やメタデータが生展開されるのを防ぐ。
+-- **文書収集からの除外**: `export_documents_to_html` および AIインプット画面の候補一覧から `.excalidraw.md` や Excalidraw 図面ノートを文書本文収集から除外（スキップ）。
+-- **ノート内リンクの画像置換**: `![[明和高校.excalidraw.md]]`（埋め込み）だけでなく、`[[明和高校.excalidraw.md]]` や `[[明和高校.excalidraw.md|300]]`（`!` なしの通常リンク）も画像ファイルとして検知し、`.excalidraw-cache/` の PNG/SVG または動的生成 SVG を Base64 Data URL の `<img>` タグへ置換。
++### .excalidraw.md の画像ファイル（図面アセット）取り扱い & 貼り付け画像（PNG等）の完全復元
++- **目的**: Obsidian の `明和高校.excalidraw.md` のような `.excalidraw.md` ファイルを「画像・図面アセット」として美しく取り扱い、かつExcalidraw図面内に貼り付けられたPNG画像やアイコンがHTML上で欠損することなく完全に表示・復元されるようにする。
++- **貼り付け画像（PNG等）の多段階自動解決**:
++  - **インラインBase64**: `files[fileId].dataURL` のBase64画像データをそのまま利用。
++  - **`## Embedded Files` WikiLinkマッピング**: Markdownテキスト内の `## Embedded Files` セクションから `{fileId}: [[画像.png]]` を抽出し、カレントフォルダ、Vaultルート、共通画像フォルダ（`01_data/common_image/` 等）、Vault全体から画像実体を自動探索してBase64化。
++  - **ハッシュファイル名探索**: ノートと同フォルダやVault内から `{fileId}.png`, `{fileId}.jpg`, `{fileId}.svg` 等を探索してBase64化。
++  - **SVG内 `<image>` 埋め込み**: 動的SVG生成（`excalidraw_to_svg`）時に `<image href="data:image/png;base64,...">` として確実に展開し、キャッシュ有無に関わらず画像が表示されることを保証。
++- **ノート内リンクの画像置換**: `![[xxx.excalidraw.md]]`（埋め込み）だけでなく、`[[xxx.excalidraw.md]]` や `[[xxx.excalidraw.md|300]]` も画像ファイルとして検知し、`.excalidraw-cache/` の PNG/SVG または動的生成 SVG を Base64 Data URL の `<img>` タグへ置換。
++- **Excalidrawノート直接指定時のレンダリング**: ユーザーがAIインプットの対象ファイルとして Excalidraw ノートを直接選択した場合、スキップせず図面画像（SVGまたはキャッシュPNG）をドキュメント本文（`<article>`）に美麗に描画。
+ - **アイコン統一**: Web画面 (`fileIcon.ts`)、macOS/Flet ランチャー (`file_icons.py`)、Windows WPF ランチャー (`SearchModels.cs`) で `markdown.svg` ではなく `excalidraw.svg`（図面アイコン）を適用。
+-- **詳細は `docs/excalidraw_image_handling_spec.md` および `docs/excalidraw_image_flow.excalidraw.md` 参照。**
++- **詳細は `docs/ai_html_excalidraw_image_spec.md`、`docs/excalidraw_image_handling_spec.md` および `docs/excalidraw_image_flow.excalidraw.md` 参照。**
+ 
+ ### 社内制限環境（pip installのみ可能）自己完結運用 & モデル管理
+ - **目的**: 会社PC等の外部ダウンロード不可・ビルドツール（Node.js, .NET SDK）不可環境でも、`git pull` と `pip install` のみで全機能が完全稼働する。
+diff --git a/backend/app/api/search.py b/backend/app/api/search.py
+index f2497b8a712e1ef2e917cf5e22d5043f527cd7b1..e01212029abf0b93b119a7b6ca930afb4b7a126e 100644
+--- a/backend/app/api/search.py
++++ b/backend/app/api/search.py
+@@ -197,6 +197,59 @@ def _dispatch_search(
+                 return True
+         return False
+ 
++    def _is_path_descendant(path_str: str, root_str: str) -> bool:
++        """あるパスが指定ルートディレクトリまたはその配下に属しているかを判定する"""
++        np = path_str.replace("\\", "/").rstrip("/").lower()
++        nr = root_str.replace("\\", "/").rstrip("/").lower()
++        if np == nr:
++            return True
++        prefix = nr if nr.endswith("/") else f"{nr}/"
++        return np.startswith(prefix)
++
++    target_folder_filter = getattr(params, "full_path", "") or getattr(params, "folder_path", "")
++    target_folder_filter = target_folder_filter.strip().lower()
++
++    # 有効な登録ターゲット一覧を取得
++    enabled_targets: list[str] = []
++    conn = getattr(service, "connection", None)
++    if conn:
++        try:
++            cursor = conn.cursor()
++            cursor.execute("SELECT full_path FROM targets WHERE is_search_target_enabled = 1")
++            enabled_targets = [str(r["full_path"]) for r in cursor.fetchall()]
++        except Exception as e:
++            logger.debug("Failed to query enabled targets: %s", e)
++
++    def _is_valid_candidate_target_and_file(candidate_path: str) -> bool:
++        """
++        検索候補が現在有効な検索対象フォルダ内にあり、実在するファイルであることを検証する
++        """
++        if not candidate_path:
++            return False
++
++        # 1. ターゲットフォルダ絞り込み
++        if target_folder_filter:
++            if not _is_path_descendant(candidate_path, target_folder_filter):
++                return False
++        elif enabled_targets:
++            # 全体検索時: 有効なターゲットが登録されている場合、そのいずれかの配下に属すること
++            if not any(_is_path_descendant(candidate_path, t) for t in enabled_targets):
++                return False
++
++        # 2. ローカル実在ファイル検証（Web URL や特殊スキーム以外、スタブ/ダミー以外）
++        is_stub_or_dummy = type(service).__name__.startswith("Stub") or type(service).__name__.startswith("Dummy")
++        if not is_stub_or_dummy:
++            is_web = candidate_path.startswith("http://") or candidate_path.startswith("https://")
++            is_special = "://" in candidate_path
++            if not is_web and not is_special:
++                try:
++                    if not Path(candidate_path).is_file():
++                        return False
++                except Exception:
++                    return False
++
++        return True
++
+     # 2. ベクトル検索のみ
+     if search_type == "vector":
+         if not searcher or not vector_query:
+@@ -208,6 +261,7 @@ def _dispatch_search(
+                 if not _is_excluded(r.full_path or r.path)
+                 and _matches_filter_ext(r.full_path or r.path)
+                 and not _matches_query_excludes(r.full_path or r.path, f"{r.hit_text or ''} {r.preview or ''}")
++                and _is_valid_candidate_target_and_file(r.full_path or r.path)
+             ]
+             items = [_create_search_item_from_vector(r) for r in filtered_results[:params.limit]]
+             return SearchResponse(
+@@ -241,23 +295,16 @@ def _dispatch_search(
+     rag_md = None
+     detected = None
+ 
+-    target_folder_filter = getattr(params, "full_path", "") or getattr(params, "folder_path", "")
+-    target_folder_filter = target_folder_filter.strip().lower()
+-
+     if searcher and vector_query:
+         try:
+             v_res = searcher.search(query=vector_query, top_k=max(params.limit * 2, 40))
+-            filtered_v = [
++            v_results = [
+                 r for r in v_res.results
+                 if not _is_excluded(r.full_path or r.path)
+                 and _matches_filter_ext(r.full_path or r.path)
+                 and not _matches_query_excludes(r.full_path or r.path, f"{r.hit_text or ''} {r.preview or ''}")
++                and _is_valid_candidate_target_and_file(r.full_path or r.path)
+             ]
+-            if target_folder_filter:
+-                v_results = [r for r in filtered_v if (r.full_path or r.path).lower().startswith(target_folder_filter)]
+-            else:
+-                v_results = filtered_v
+-
+             rag_xml = v_res.rag_context_xml
+             rag_md = v_res.rag_context_markdown
+             detected = v_res.detected_terms
+diff --git a/backend/app/services/change_tracking_service.py b/backend/app/services/change_tracking_service.py
+index 767f41d9405b78e6f641115ebf73ad68efa811f9..8155aba78a022e2a04eeabed8e1a74425b3cfb71 100644
+--- a/backend/app/services/change_tracking_service.py
++++ b/backend/app/services/change_tracking_service.py
+@@ -10,6 +10,7 @@ dirty として記録する。インデックス更新は既存の安全な差
+ from __future__ import annotations
+ 
+ import logging
++import os
+ import platform
+ import threading
+ from collections.abc import Callable
+@@ -85,7 +86,15 @@ class MacFSEventsObserver:
+         def on_events(_stream, _info, _count, event_paths, _flags, _ids) -> None:
+             callback = self._callback
+             if callback is not None:
+-                callback(tuple(str(path) for path in event_paths))
++                decoded_paths = []
++                for path in event_paths:
++                    if isinstance(path, (bytes, bytearray)):
++                        decoded_paths.append(os.fsdecode(path))
++                    elif isinstance(path, str):
++                        decoded_paths.append(path)
++                    else:
++                        decoded_paths.append(str(path))
++                callback(tuple(decoded_paths))
+ 
+         stream = FSEventStreamCreate(
+             None,
+@@ -195,9 +204,21 @@ class ChangeTrackingService:
+         self._windows_tracker = None
+         self._is_running = False
+ 
+-    def mark_changed_paths(self, changed_paths: tuple[str, ...]) -> None:
++    def mark_changed_paths(self, changed_paths: tuple[str | bytes, ...]) -> None:
+         """変更パスを含む登録対象だけを dirty にする。"""
+-        effective_changed_paths = tuple(path for path in changed_paths if not self._is_ignored_path(path))
++        decoded_paths = []
++        for path in changed_paths:
++            if isinstance(path, (bytes, bytearray)):
++                decoded_paths.append(os.fsdecode(path))
++            elif isinstance(path, str):
++                if (path.startswith("b'") and path.endswith("'")) or (path.startswith('b"') and path.endswith('"')):
++                    decoded_paths.append(path[2:-1])
++                else:
++                    decoded_paths.append(path)
++            else:
++                decoded_paths.append(str(path))
++
++        effective_changed_paths = tuple(path for path in decoded_paths if not self._is_ignored_path(path))
+         if not effective_changed_paths:
+             return
+         logger.info(
+diff --git a/backend/app/services/index_service.py b/backend/app/services/index_service.py
+index 0496d013f89d805d826574b8337ff0b98a0d07c2..59f0fb1892d031e3d950159ca09220d75f2be8f8 100644
+--- a/backend/app/services/index_service.py
++++ b/backend/app/services/index_service.py
+@@ -264,6 +264,7 @@ class IndexDrainStats:
+ class IndexService:
+     def __init__(self, connection: Connection | None = None) -> None:
+         self.connection = connection or get_connection()
++        self._is_custom_connection = connection is not None
+         self._run_controller = IndexRunController()
+ 
+     def reset_database(self) -> None:
+@@ -1846,9 +1847,10 @@ class IndexService:
+ 
+         # ベクトルインデックスの自動連動差分更新
+         try:
+-            from app.vector.state import vector_state
+-            all_exclude = "\n".join([*keywords, *sorted(auto_excluded_paths)])
+-            vector_state.sync_index([folder_path.as_posix()], force=False, exclude_keywords=all_exclude)
++            if not getattr(self, "_is_custom_connection", False):
++                from app.vector.state import vector_state
++                all_exclude = "\n".join([*keywords, *sorted(auto_excluded_paths)])
++                vector_state.sync_index([folder_path.as_posix()], force=False, exclude_keywords=all_exclude)
+         except Exception as e:
+             logger.warning("Vector index sync failed for %s: %s", folder_path.as_posix(), e)
+ 
+diff --git a/backend/app/services/search_service.py b/backend/app/services/search_service.py
+index aa6bcd8c5a9780a751d46dd1bc71af3618f14f65..acb2f14c70b2e93350f11191ef60a4bbc6899b35 100644
+--- a/backend/app/services/search_service.py
++++ b/backend/app/services/search_service.py
+@@ -95,7 +95,7 @@ class SearchService:
+ 
+         index_depth = params.index_depth if params.index_depth is not None else 99999
+ 
+-        if not normalized_target_path and not params.search_all_enabled:
++        if not normalized_target_path and not params.search_all_enabled and not params.skip_refresh:
+             self._refresh_search_targets_for_search_without_path(
+                 refresh_window_minutes=params.refresh_window_minutes,
+                 effective_exclude_keywords=effective_exclude_keywords,
+diff --git a/backend/app/vector/html_exporter.py b/backend/app/vector/html_exporter.py
+index ef50072f12d0ee4df0e406ae959e13e82c71a741..59a6b020c6e5e7782db10817c76edfff2394d53d 100644
+--- a/backend/app/vector/html_exporter.py
++++ b/backend/app/vector/html_exporter.py
+@@ -22,7 +22,7 @@ import re
+ import urllib.parse
+ from dataclasses import dataclass
+ from pathlib import Path
+-from typing import Any, Dict, List, Optional, Set, Tuple
++from typing import Any, Dict, List, Optional, Set, Tuple, Union
+ 
+ import lzstring
+ from markdown_it import MarkdownIt
+@@ -81,10 +81,53 @@ def sanitize_outlook_html(html_text: str) -> str:
+     return clean.strip()
+ 
+ 
++def file_to_base64_data_url(file_path: Path) -> Optional[str]:
++    """画像ファイルをBase64 Data URL (data:image/...;base64,...) に変換する（SVGはライトモード正規化を適用）"""
++    try:
++        suffix = file_path.suffix.lower()
++        name_lower = file_path.name.lower()
++
++        if name_lower.endswith((".svg", ".drawio.svg", ".dio.svg")) or suffix == ".svg":
++            mime_type = "image/svg+xml"
++            raw_text = file_path.read_text(encoding="utf-8", errors="replace")
++            sanitized_svg = sanitize_svg_for_light_theme(raw_text)
++            b64 = base64.b64encode(sanitized_svg.encode("utf-8")).decode("ascii")
++            return f"data:{mime_type};base64,{b64}"
++        elif suffix == ".webp":
++            mime_type = "image/webp"
++        elif suffix in (".jpg", ".jpeg"):
++            mime_type = "image/jpeg"
++        elif suffix == ".png":
++            mime_type = "image/png"
++        elif suffix == ".gif":
++            mime_type = "image/gif"
++        elif suffix == ".bmp":
++            mime_type = "image/bmp"
++        else:
++            mime_type, _ = mimetypes.guess_type(str(file_path))
++            if not mime_type or not mime_type.startswith("image/"):
++                return None
++
++        data = file_path.read_bytes()
++        b64 = base64.b64encode(data).decode("ascii")
++        return f"data:{mime_type};base64,{b64}"
++    except Exception:
++        return None
++
++
++def svg_text_to_base64_data_url(svg_text: str) -> str:
++    """SVGテキストを Base64 Data URL に変換する"""
++    sanitized = sanitize_svg_for_light_theme(svg_text)
++    b64 = base64.b64encode(sanitized.encode("utf-8")).decode("ascii")
++    return f"data:image/svg+xml;base64,{b64}"
++
++
+ def extract_excalidraw_data(markdown_or_json_text: str) -> Optional[Dict[str, Any]]:
+-    """MarkdownテキストまたはJSON文字列からExcalidrawのdata辞書を抽出する"""
+-    # 1. ```compressed-json ... ```
++    """MarkdownテキストまたはJSON文字列からExcalidrawのdata辞書を抽出する（## Embedded Files のマッピングも抽出）"""
++    data = None
+     lines = markdown_or_json_text.splitlines()
++
++    # 1. ```compressed-json ... ```
+     in_block = False
+     block_lines = []
+     for line in lines:
+@@ -100,47 +143,156 @@ def extract_excalidraw_data(markdown_or_json_text: str) -> Optional[Dict[str, An
+         decomp = lz.decompressFromBase64(b64)
+         if decomp:
+             try:
+-                data = json.loads(decomp)
+-                if isinstance(data, dict) and "elements" in data:
+-                    return data
++                parsed = json.loads(decomp)
++                if isinstance(parsed, dict) and "elements" in parsed:
++                    data = parsed
+             except Exception:
+                 pass
+ 
+     # 2. ```json ... ```
+-    in_json = False
+-    json_lines = []
+-    for line in lines:
+-        if "```json" in line:
+-            in_json = True
+-        elif in_json and "```" in line:
+-            break
+-        elif in_json:
+-            json_lines.append(line)
+-    if json_lines:
++    if not data:
++        in_json = False
++        json_lines = []
++        for line in lines:
++            if "```json" in line:
++                in_json = True
++            elif in_json and "```" in line:
++                break
++            elif in_json:
++                json_lines.append(line)
++        if json_lines:
++            try:
++                parsed = json.loads("\n".join(json_lines))
++                if isinstance(parsed, dict) and "elements" in parsed:
++                    data = parsed
++            except Exception:
++                pass
++
++    # 3. Direct JSON
++    if not data:
+         try:
+-            data = json.loads("\n".join(json_lines))
+-            if isinstance(data, dict) and "elements" in data:
+-                return data
++            parsed = json.loads(markdown_or_json_text)
++            if isinstance(parsed, dict) and "elements" in parsed:
++                data = parsed
+         except Exception:
+             pass
+ 
+-    # 3. Direct JSON
+-    try:
+-        data = json.loads(markdown_or_json_text)
+-        if isinstance(data, dict) and "elements" in data:
+-            return data
+-    except Exception:
+-        pass
++    if not data:
++        return None
++
++    # 4. ## Embedded Files セクションの抽出 (例: {fileId}: [[filename.png]])
++    embedded_files: Dict[str, str] = {}
++    in_embedded_files = False
++    for line in lines:
++        stripped = line.strip()
++        if stripped.startswith("## Embedded Files"):
++            in_embedded_files = True
++            continue
++        elif in_embedded_files:
++            if stripped.startswith("#") or stripped.startswith("```"):
++                in_embedded_files = False
++            else:
++                m = re.match(r"^([a-zA-Z0-9_-]+)\s*:\s*!?\[\[([^\]|]+)(?:\|[^\]]*)?\]\]", stripped)
++                if m:
++                    fid = m.group(1).strip()
++                    link_target = m.group(2).strip()
++                    embedded_files[fid] = link_target
++
++    data["embedded_files"] = embedded_files
++    return data
++
++
++def resolve_excalidraw_image_data_url(
++    file_id: str,
++    file_entry: Dict[str, Any],
++    embedded_files: Dict[str, str],
++    vault_dir: Optional[Path] = None,
++    current_dir: Optional[Path] = None,
++) -> Optional[str]:
++    """
++    Excalidraw内の画像要素（fileId）に対応するBase64 Data URLを解決する。
++    1. file_entry内のインライン dataURL
++    2. ## Embedded Files でマッピングされたリンクパス（WikiLink形式）
++    3. カレントディレクトリまたはVault内の {file_id}.* ファイル
++    4. Vault全体の再帰探索
++    """
++    # 1. インライン dataURL
++    if file_entry and isinstance(file_entry, dict):
++        durl = file_entry.get("dataURL")
++        if durl and isinstance(durl, str) and durl.startswith("data:image/"):
++            return durl
++
++    # 2. ## Embedded Files のWikiLink解決
++    link_target = embedded_files.get(file_id)
++    search_names = []
++    if link_target:
++        clean_link = link_target.split("|")[0].strip()
++        search_names.append(clean_link)
++
++    # 3. {file_id}.* も候補に追加
++    if file_id:
++        for ext in [".png", ".jpg", ".jpeg", ".svg", ".webp", ".gif", ".bmp"]:
++            search_names.append(f"{file_id}{ext}")
++
++    # 探索先ディレクトリ候補
++    search_dirs = []
++    if current_dir and current_dir.exists():
++        search_dirs.append(current_dir)
++    if vault_dir and vault_dir.exists():
++        search_dirs.append(vault_dir)
++        if vault_dir.parent.exists() and vault_dir.parent != vault_dir:
++            search_dirs.append(vault_dir.parent)
++        for sub in ["01_data/common_image", "common_image", "attachments", "assets", "images"]:
++            sub_p = vault_dir / sub
++            if sub_p.exists() and sub_p.is_dir():
++                search_dirs.append(sub_p)
++
++    # 各探索先で候補名をチェック
++    for name in search_names:
++        for s_dir in search_dirs:
++            p = (s_dir / name).resolve()
++            if p.exists() and p.is_file():
++                durl = file_to_base64_data_url(p)
++                if durl:
++                    return durl
++
++    # Vault全体の再帰探索
++    if vault_dir and vault_dir.exists():
++        target_basenames = {Path(n).name for n in search_names}
++        for root, dirs, files in os.walk(vault_dir):
++            if Path(root).name.startswith("."):
++                continue
++            for fname in files:
++                if fname in target_basenames:
++                    p = Path(root) / fname
++                    if p.is_file():
++                        durl = file_to_base64_data_url(p)
++                        if durl:
++                            return durl
+ 
+     return None
+ 
+ 
+-def excalidraw_to_svg(data: Dict[str, Any]) -> str:
++def excalidraw_to_svg(
++    data: Dict[str, Any],
++    vault_path: Optional[Union[str, Path]] = None,
++    current_file_path: Optional[Union[str, Path]] = None,
++) -> str:
+     """ExcalidrawのJSON辞書から自己完結型の高解像度ベクターSVGを動的生成する"""
+     elements = [e for e in data.get("elements", []) if not e.get("isDeleted", False)]
+     if not elements:
+         return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" style="background-color: #ffffff; color-scheme: light;"></svg>'
+ 
++    v_dir = Path(vault_path).resolve() if vault_path else None
++    cur_dir = None
++    if current_file_path:
++        p = Path(current_file_path)
++        cur_dir = p.parent.resolve() if (p.is_file() or p.suffix) else p.resolve()
++    elif v_dir:
++        cur_dir = v_dir
++
++    embedded_files = data.get("embedded_files", {})
++
+     # バウンディングボックスの計算
+     min_x = float("inf")
+     min_y = float("inf")
+@@ -273,11 +425,21 @@ def excalidraw_to_svg(data: Dict[str, Any]) -> str:
+                 escaped = html.escape(tl)
+                 svg_parts.append(f'<text x="{x}" y="{t_y}" font-size="{font_size}" font-family="{font_family}" fill="{stroke}" opacity="{opacity}"{transform_attr}>{escaped}</text>')
+         elif etype == "image":
+-            file_id = elem.get("fileId")
++            file_id = elem.get("fileId") or ""
+             file_entry = files.get(file_id, {})
+-            data_url = file_entry.get("dataURL", "")
++            data_url = resolve_excalidraw_image_data_url(
++                file_id=file_id,
++                file_entry=file_entry,
++                embedded_files=embedded_files,
++                vault_dir=v_dir,
++                current_dir=cur_dir,
++            )
+             if data_url:
+-                svg_parts.append(f'<image href="{data_url}" x="{x}" y="{y}" width="{w}" height="{h}" opacity="{opacity}"{transform_attr} />')
++                svg_parts.append(
++                    f'<image href="{data_url}" xlink:href="{data_url}" '
++                    f'x="{x}" y="{y}" width="{w}" height="{h}" '
++                    f'opacity="{opacity}"{transform_attr} preserveAspectRatio="none" />'
++                )
+ 
+     svg_parts.append("</svg>")
+     return "\n".join(svg_parts)
+@@ -423,47 +585,6 @@ def find_excalidraw_cache_image(
+     return None
+ 
+ 
+-def file_to_base64_data_url(file_path: Path) -> Optional[str]:
+-    """画像ファイルをBase64 Data URL (data:image/...;base64,...) に変換する（SVGはライトモード正規化を適用）"""
+-    try:
+-        suffix = file_path.suffix.lower()
+-        name_lower = file_path.name.lower()
+-
+-        if name_lower.endswith((".svg", ".drawio.svg", ".dio.svg")) or suffix == ".svg":
+-            mime_type = "image/svg+xml"
+-            raw_text = file_path.read_text(encoding="utf-8", errors="replace")
+-            sanitized_svg = sanitize_svg_for_light_theme(raw_text)
+-            b64 = base64.b64encode(sanitized_svg.encode("utf-8")).decode("ascii")
+-            return f"data:{mime_type};base64,{b64}"
+-        elif suffix == ".webp":
+-            mime_type = "image/webp"
+-        elif suffix in (".jpg", ".jpeg"):
+-            mime_type = "image/jpeg"
+-        elif suffix == ".png":
+-            mime_type = "image/png"
+-        elif suffix == ".gif":
+-            mime_type = "image/gif"
+-        elif suffix == ".bmp":
+-            mime_type = "image/bmp"
+-        else:
+-            mime_type, _ = mimetypes.guess_type(str(file_path))
+-            if not mime_type or not mime_type.startswith("image/"):
+-                return None
+-
+-        data = file_path.read_bytes()
+-        b64 = base64.b64encode(data).decode("ascii")
+-        return f"data:{mime_type};base64,{b64}"
+-    except Exception:
+-        return None
+-
+-
+-def svg_text_to_base64_data_url(svg_text: str) -> str:
+-    """SVGテキストを Base64 Data URL に変換する"""
+-    sanitized = sanitize_svg_for_light_theme(svg_text)
+-    b64 = base64.b64encode(sanitized.encode("utf-8")).decode("ascii")
+-    return f"data:image/svg+xml;base64,{b64}"
+-
+-
+ def resolve_image_or_figure_data_url(
+     vault_path_str: str,
+     raw_link: str,
+@@ -597,7 +718,7 @@ def resolve_image_or_figure_data_url(
+             note_text = target_file.read_text(encoding="utf-8", errors="replace")
+             excalidraw_dict = extract_excalidraw_data(note_text)
+             if excalidraw_dict:
+-                gen_svg = excalidraw_to_svg(excalidraw_dict)
++                gen_svg = excalidraw_to_svg(excalidraw_dict, vault_path=vault_dir, current_file_path=target_file)
+                 data_url = svg_text_to_base64_data_url(gen_svg)
+                 return data_url, True
+         except Exception:
+@@ -1822,9 +1943,59 @@ def export_documents_to_html(
+         if not target_file or not target_file.exists() or not target_file.is_file():
+             continue
+ 
+-        # .excalidraw.md や Excalidraw 図面データを含むファイルは画像ファイル（図面アセット）として扱い、
+-        # 文書記事（<article>）としての本文出力はスキップする (obsidian-dagnetz 仕様準拠)
++        # .excalidraw.md や Excalidraw 図面データを含むファイルの場合
+         if is_excalidraw_backed_markdown(target_file):
++            try:
++                raw_content = target_file.read_text(encoding="utf-8", errors="replace")
++            except Exception:
++                raw_content = ""
++
++            data_url, _ = resolve_image_or_figure_data_url(str(v_dir), target_file.name, str(target_file))
++            if not data_url and raw_content:
++                try:
++                    excalidraw_dict = extract_excalidraw_data(raw_content)
++                    if excalidraw_dict:
++                        gen_svg = excalidraw_to_svg(excalidraw_dict, vault_path=v_dir, current_file_path=target_file)
++                        data_url = svg_text_to_base64_data_url(gen_svg)
++                except Exception:
++                    pass
++
++            if data_url:
++                valid_docs_count += 1
++                doc_title = target_file.stem
++                if doc_title.endswith(".excalidraw"):
++                    doc_title = doc_title[:-11]
++                escaped_doc_title = html.escape(doc_title)
++                escaped_rel_path = html.escape(resolved_rel_path)
++                anchor_id = f"doc-{idx}"
++
++                toc_items.append(f'<li><a href="#{anchor_id}">{escaped_doc_title}</a> <span style="font-size: 11px; color: #94a3b8;">({escaped_rel_path})</span></li>')
++                total_images_embedded += 1
++
++                rendered_body = f'<p class="embedded-image-container excalidraw-export-embed"><img src="{data_url}" alt="{escaped_doc_title}" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); background-color: #ffffff; color-scheme: light;" /></p>'
++
++                raw_section = ""
++                if include_raw_markdown and raw_content:
++                    escaped_raw = html.escape(strip_frontmatter(strip_excalidraw_data(raw_content)))
++                    raw_section = f"""
++                    <details class="doc-raw-markdown" open>
++                        <summary>📝 マークダウンファイルの元データ</summary>
++                        <pre><code>{escaped_raw}</code></pre>
++                    </details>
++                    """
++
++                doc_sections.append(f"""
++                <article class="document-article" id="{anchor_id}">
++                    <div class="document-article-header">
++                        <h2>[{idx}] {escaped_doc_title}</h2>
++                        <div class="document-path-badge">Path: {escaped_rel_path}</div>
++                    </div>
++                    <div class="document-body">
++                        {rendered_body}
++                    </div>
++                    {raw_section}
++                </article>
++                """)
+             continue
+ 
+         try:
+diff --git a/backend/tests/conftest.py b/backend/tests/conftest.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..502f0b7a3cd7e588298f3b9cd20e2087df88245b
+--- /dev/null
++++ b/backend/tests/conftest.py
+@@ -0,0 +1,41 @@
++"""
++pytest 実行時のグローバル設定およびテスト環境隔離 fixture。
++
++仕様:
++- 全テストにおいて、実環境の `backend/data` を汚染しないよう `vector_state.data_dir` を一時ディレクトリに隔離する。
++- テスト終了後に元の状態へ復元する。
++"""
++
++import os
++from pathlib import Path
++import pytest
++
++from app.config import settings
++from app.vector.state import vector_state
++
++
++@pytest.fixture(autouse=True)
++def isolate_vector_state_for_tests(tmp_path: Path):
++    """
++    テスト実行時に実環境のベクトルDBおよび設定ファイルが汚染されるのを防止する。
++    """
++    orig_data_dir = vector_state.data_dir
++    orig_config_path = vector_state.config_path
++    orig_model_path = vector_state.model_path
++    orig_embedder = vector_state.embedder
++    orig_searcher = vector_state.searcher
++
++    # 一時ディレクトリに隔離
++    test_vector_dir = tmp_path / "test_vector_data"
++    test_vector_dir.mkdir(parents=True, exist_ok=True)
++    vector_state.data_dir = test_vector_dir
++    vector_state.config_path = test_vector_dir / "config.json"
++
++    try:
++        yield
++    finally:
++        vector_state.data_dir = orig_data_dir
++        vector_state.config_path = orig_config_path
++        vector_state.model_path = orig_model_path
++        vector_state.embedder = orig_embedder
++        vector_state.searcher = orig_searcher
+diff --git a/backend/tests/test_ai_html_excalidraw_image.py b/backend/tests/test_ai_html_excalidraw_image.py
+index 03bb7456381550b50eb2d40f96777ed7eb7d9142..7aac1f36f5028fcbb7a319d52601fb362f02bf85 100644
+--- a/backend/tests/test_ai_html_excalidraw_image.py
++++ b/backend/tests/test_ai_html_excalidraw_image.py
+@@ -1,125 +1,265 @@
+ """
+-.excalidraw.md を画像ファイル（図面アセット）として取り扱う挙動の単体テスト
+-
+-仕様:
+-1. export_documents_to_html に .excalidraw.md が渡された場合、文書本文としては出力せずスキップする（obsidian-dagnetz 仕様準拠）。
+-2. replace_obsidian_image_embeds において、![[xxx.excalidraw.md]] や ![[xxx.excalidraw.md|300]] の埋め込みが Base64 <img> タグに置換される。
+-3. replace_obsidian_image_embeds において、[[xxx.excalidraw.md]] や [[xxx.excalidraw.md|300]]、[[xxx.excalidraw.md|明和高校]]（! なしの通常リンク）も画像ファイルとして検出され、Base64 <img> タグに置換される。
++Excalidraw図面内の貼り付け画像（PNG等）のHTML表示・復元テスト。
++Markdownの ## Embedded Files セクションのWikiLink解決、fileIdハッシュファイル名の解決、
++および自己完結HTMLエクスポート時の画像埋め込みを検証する。
+ """
+ 
++import base64
+ import json
+ from pathlib import Path
+ import pytest
+ 
+ from app.vector.html_exporter import (
++    extract_excalidraw_data,
++    excalidraw_to_svg,
++    resolve_image_or_figure_data_url,
+     export_documents_to_html,
+-    replace_obsidian_image_embeds,
+ )
+ 
+ 
+-@pytest.fixture
+-def temp_vault_with_excalidraw(tmp_path: Path) -> Path:
+-    """テスト用のObsidian Vaultディレクトリを作成する"""
+-    vault = tmp_path / "test_vault"
+-    vault.mkdir()
++def _create_sample_png_bytes() -> bytes:
++    """1x1ピクセルの透明PNGバイトデータを生成する"""
++    return base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")
++
+ 
+-    # 1. .excalidraw.md ファイル（図面データを含む）
+-    excal_file = vault / "明和高校.excalidraw.md"
+-    excal_content = """---
++def test_extract_excalidraw_data_embedded_files() -> None:
++    """## Embedded Files セクションから fileId と画像リンクのマッピングが正しく抽出されること"""
++    md_content = """---
+ excalidraw-plugin: parsed
+ tags: [excalidraw]
+ ---
++
+ # Excalidraw Data
++
++## Text Elements
++サンプルテキスト ^abc12345
++
++## Embedded Files
++770205659062816e77d5f61a7f516ad2749aa5fe: [[windows.png]]
++0cc49df267a7ab626d20b99d7df69df791f48d52: [[01_data/common_image/obsidian_logo.png]]
++
++## Drawing
+ ```json
+ {
+   "type": "excalidraw",
+   "version": 2,
+-  "source": "https://excalidraw.com",
+   "elements": [
+     {
+-      "id": "rect1",
+-      "type": "rectangle",
++      "id": "elem1",
++      "type": "image",
++      "fileId": "770205659062816e77d5f61a7f516ad2749aa5fe",
+       "x": 100,
+       "y": 100,
+       "width": 200,
+-      "height": 100,
+-      "strokeColor": "#1e1e1e",
+-      "backgroundColor": "transparent"
++      "height": 150
+     }
+   ],
+-  "appState": {
+-    "viewBackgroundColor": "#ffffff"
+-  }
++  "files": {}
+ }
+ ```
+ """
+-    excal_file.write_text(excal_content, encoding="utf-8")
++    data = extract_excalidraw_data(md_content)
++    assert data is not None
++    assert "embedded_files" in data
++    assert data["embedded_files"]["770205659062816e77d5f61a7f516ad2749aa5fe"] == "windows.png"
++    assert data["embedded_files"]["0cc49df267a7ab626d20b99d7df69df791f48d52"] == "01_data/common_image/obsidian_logo.png"
+ 
+-    # 2. 通常のマークダウンノート（明和高校.excalidraw.md へのリンク・埋め込みを含む）
+-    note_file = vault / "高校レポート.md"
+-    note_content = """# 高校レポート
+ 
+-## 埋め込み図面
+-![[明和高校.excalidraw.md|300]]
++def test_excalidraw_to_svg_embedded_files_link(tmp_path: Path) -> None:
++    """## Embedded Files でWikiLink指定されたローカルPNG画像がSVG内に正しく埋め込まれること"""
++    vault_dir = tmp_path / "vault"
++    vault_dir.mkdir()
+ 
+-## 通常リンク図面
+-[[明和高校.excalidraw.md]]
++    # 画像ファイルの作成
++    img_dir = vault_dir / "images"
++    img_dir.mkdir()
++    png_file = img_dir / "sample_pic.png"
++    png_file.write_bytes(_create_sample_png_bytes())
+ 
+-## 別名付き通常リンク図面
+-[[明和高校.excalidraw.md|明和高校の校舎配置図]]
+-"""
+-    note_file.write_text(note_content, encoding="utf-8")
++    file_id = "abc1234567890abcdef1234567890abcdef1234"
++    excalidraw_data = {
++        "type": "excalidraw",
++        "elements": [
++            {
++                "id": "im1",
++                "type": "image",
++                "fileId": file_id,
++                "x": 50,
++                "y": 50,
++                "width": 120,
++                "height": 80,
++            }
++        ],
++        "files": {},
++        "embedded_files": {
++            file_id: "images/sample_pic.png"
++        },
++    }
+ 
+-    return vault
++    # SVG生成
++    svg_output = excalidraw_to_svg(excalidraw_data, vault_path=vault_dir, current_file_path=vault_dir / "note.excalidraw.md")
++    assert "<image" in svg_output
++    assert 'href="data:image/png;base64,' in svg_output
++    assert 'x="50"' in svg_output
++    assert 'width="120"' in svg_output
+ 
+ 
+-def test_export_documents_to_html_skips_excalidraw_md(temp_vault_with_excalidraw: Path):
+-    """
+-    export_documents_to_html に .excalidraw.md が直接指定された場合、
+-    文書記事（<article>）としては出力されずスキップされることを検証する。
+-    """
+-    excal_path = temp_vault_with_excalidraw / "明和高校.excalidraw.md"
+-    html_content, meta = export_documents_to_html(
+-        vault_path=str(temp_vault_with_excalidraw),
+-        file_paths=[str(excal_path)],
+-        title="テスト",
+-    )
++def test_excalidraw_to_svg_hash_file(tmp_path: Path) -> None:
++    """filesにdataURLがなくとも、同フォルダまたはVault内に {fileId}.png があればSVG内に埋め込まれること"""
++    vault_dir = tmp_path / "vault"
++    vault_dir.mkdir()
++
++    note_dir = vault_dir / "sub"
++    note_dir.mkdir()
++
++    file_id = "0fd5abb9830e51ddaf1d5b4f9e3b493519bb6318"
++    hash_png = note_dir / f"{file_id}.png"
++    hash_png.write_bytes(_create_sample_png_bytes())
++
++    excalidraw_data = {
++        "type": "excalidraw",
++        "elements": [
++            {
++                "id": "im2",
++                "type": "image",
++                "fileId": file_id,
++                "x": 10,
++                "y": 20,
++                "width": 300,
++                "height": 200,
++            }
++        ],
++        "files": {
++            file_id: {
++                "mimeType": "image/png",
++                "id": file_id,
++            }
++        },
++    }
+ 
+-    assert meta["total_documents"] == 0
+-    assert "明和高校.excalidraw.md" not in html_content
+-    assert "<article" not in html_content
++    svg_output = excalidraw_to_svg(excalidraw_data, vault_path=vault_dir, current_file_path=note_dir / "test.excalidraw.md")
++    assert "<image" in svg_output
++    assert 'href="data:image/png;base64,' in svg_output
+ 
+ 
+-def test_replace_obsidian_image_embeds_handles_excalidraw_embed(temp_vault_with_excalidraw: Path):
+-    """
+-    ![[明和高校.excalidraw.md|300]] が Base64 <img> タグに置換され、width="300" が反映されることを検証する。
+-    """
+-    content = "![[明和高校.excalidraw.md|300]]"
+-    replaced, count = replace_obsidian_image_embeds(
+-        content=content,
+-        vault_path=str(temp_vault_with_excalidraw),
+-        current_file_path="高校レポート.md",
++def test_export_documents_to_html_with_embedded_excalidraw_image(tmp_path: Path) -> None:
++    """Markdownノート内のExcalidraw埋め込み図面が、内部の貼り付け画像を含めて自己完結HTMLに出力されること"""
++    vault_dir = tmp_path / "vault"
++    vault_dir.mkdir()
++
++    # 貼り付け対象のPNG
++    png_path = vault_dir / "embedded_logo.png"
++    png_path.write_bytes(_create_sample_png_bytes())
++
++    # Excalidrawノート
++    excal_file = vault_dir / "diagram.excalidraw.md"
++    file_id = "770205659062816e77d5f61a7f516ad2749aa5fe"
++    excal_content = f"""---
++excalidraw-plugin: parsed
++tags: [excalidraw]
++---
++
++# Excalidraw Data
++
++## Embedded Files
++{file_id}: [[embedded_logo.png]]
++
++## Drawing
++```json
++{{
++  "type": "excalidraw",
++  "version": 2,
++  "elements": [
++    {{
++      "id": "img_elem",
++      "type": "image",
++      "fileId": "{file_id}",
++      "x": 20,
++      "y": 30,
++      "width": 160,
++      "height": 90
++    }}
++  ],
++  "files": {{}}
++}}
++```
++"""
++    excal_file.write_text(excal_content, encoding="utf-8")
++
++    # 親のMarkdownノート（Excalidrawを埋め込み）
++    main_doc = vault_dir / "main.md"
++    main_doc.write_text("# システム概要\n\n以下は構成図です。\n\n![[diagram.excalidraw.md|400]]\n\n詳細説明テキスト。", encoding="utf-8")
++
++    html_content, stats = export_documents_to_html(
++        vault_path=str(vault_dir),
++        file_paths=[str(main_doc)],
++        prompt="テストプロンプト",
++        title="システム仕様書",
++        include_images=True,
+     )
+ 
+-    assert count == 1
+-    assert "<img src=\"data:image/svg+xml;base64," in replaced
+-    assert 'width="300"' in replaced
+-    assert "excalidraw-export-embed" in replaced
+-
+-
+-def test_replace_obsidian_image_embeds_handles_wikilink_without_exclamation(temp_vault_with_excalidraw: Path):
+-    """
+-    [[明和高校.excalidraw.md]] や [[明和高校.excalidraw.md|明和高校]] のような ! なしの Wikilink も
+-    画像ファイルとして検出され、Base64 <img> タグに置換されることを検証する。
+-    """
+-    content = "図面参照: [[明和高校.excalidraw.md|明和高校の校舎配置図]]"
+-    replaced, count = replace_obsidian_image_embeds(
+-        content=content,
+-        vault_path=str(temp_vault_with_excalidraw),
+-        current_file_path="高校レポート.md",
++    assert stats["total_documents"] == 1
++    assert stats["total_images_embedded"] >= 1
++    assert "data:image/svg+xml;base64," in html_content
++    # 生成されたSVG (Base64) をデコードして、内部に貼り付けPNGのData URLが含まれていることを検証
++    import re
++    img_match = re.search(r'src="data:image/svg\+xml;base64,([^"]+)"', html_content)
++    assert img_match is not None
++    svg_text = base64.b64decode(img_match.group(1)).decode("utf-8")
++    assert "<image" in svg_text
++    assert 'href="data:image/png;base64,' in svg_text
++
++
++def test_export_documents_to_html_excalidraw_direct_file(tmp_path: Path) -> None:
++    """Excalidrawノート自体が直接指定された場合も、図面画像として記事本文に出力されること"""
++    vault_dir = tmp_path / "vault"
++    vault_dir.mkdir()
++
++    png_path = vault_dir / "logo.png"
++    png_path.write_bytes(_create_sample_png_bytes())
++
++    file_id = "abc000111222333444555666777888999aaabbbc"
++    excal_file = vault_dir / "architecture.excalidraw.md"
++    excal_content = f"""---
++excalidraw-plugin: parsed
++tags: [excalidraw]
++---
++
++# Excalidraw Data
++
++## Embedded Files
++{file_id}: [[logo.png]]
++
++## Drawing
++```json
++{{
++  "type": "excalidraw",
++  "version": 2,
++  "elements": [
++    {{
++      "id": "img1",
++      "type": "image",
++      "fileId": "{file_id}",
++      "x": 10,
++      "y": 10,
++      "width": 100,
++      "height": 100
++    }}
++  ],
++  "files": {{}}
++}}
++```
++"""
++    excal_file.write_text(excal_content, encoding="utf-8")
++
++    html_content, stats = export_documents_to_html(
++        vault_path=str(vault_dir),
++        file_paths=[str(excal_file)],
++        title="アーキテクチャ図",
++        include_images=True,
+     )
+ 
+-    assert count == 1
+-    assert "<img src=\"data:image/svg+xml;base64," in replaced
+-    assert "明和高校の校舎配置図" in replaced or "明和高校.excalidraw.md" in replaced
+-    assert "excalidraw-export-embed" in replaced
++    # スキップされず1件として出力されること
++    assert stats["total_documents"] == 1
++    assert "architecture" in html_content
++    assert "data:image/" in html_content
+diff --git a/backend/tests/test_change_tracking_service.py b/backend/tests/test_change_tracking_service.py
+index c6d898b4500089865f8b44bf47e8a39dcf071ee1..6f3b8d129fe7765fe18b3069cc43da24b97b8d9e 100644
+--- a/backend/tests/test_change_tracking_service.py
++++ b/backend/tests/test_change_tracking_service.py
+@@ -96,6 +96,84 @@ def test_ignored_internal_path_does_not_mark_target_dirty(tmp_path: Path) -> Non
+         check_connection.close()
+ 
+ 
++def test_changed_path_bytes_marks_containing_target_dirty(tmp_path: Path) -> None:
++    """macOS FSEvents から届く bytes 型の変更パスでも正しくデコードして dirty にする。"""
++    database_path = tmp_path / "search.db"
++    connection = sqlite3.connect(database_path)
++    connection.row_factory = sqlite3.Row
++    initialize_schema(connection)
++    tracked_root = tmp_path / "tracked"
++    tracked_root.mkdir()
++    connection.execute(
++        """
++        INSERT INTO targets (full_path, index_depth, source_type, created_at, updated_at)
++        VALUES (?, 1, 'local', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
++        """,
++        (str(tracked_root),),
++    )
++    connection.commit()
++    connection.close()
++
++    def create_connection() -> sqlite3.Connection:
++        created = sqlite3.connect(database_path)
++        created.row_factory = sqlite3.Row
++        return created
++
++    # PyObjC FSEvents コールバックで渡される bytes 型パス
++    raw_bytes_path = (tracked_root / "nested" / "note.md").as_posix().encode("utf-8")
++    ChangeTrackingService(connection_factory=create_connection).mark_changed_paths((raw_bytes_path,))
++
++    check_connection = create_connection()
++    try:
++        rows = check_connection.execute(
++            """
++            SELECT targets.full_path, target_change_states.is_dirty
++            FROM targets
++            LEFT JOIN target_change_states ON target_change_states.target_id = targets.id
++            """
++        ).fetchall()
++        assert [(row["full_path"], row["is_dirty"]) for row in rows] == [
++            (str(tracked_root), 1),
++        ]
++    finally:
++        check_connection.close()
++
++
++def test_ignored_internal_path_bytes_does_not_mark_target_dirty(tmp_path: Path) -> None:
++    """bytes 型の無視パス（自身が出力するログやDB更新）でも正しく除外され dirty にしない。"""
++    database_path = tmp_path / "search.db"
++    connection = sqlite3.connect(database_path)
++    connection.row_factory = sqlite3.Row
++    initialize_schema(connection)
++    root = tmp_path / "tracked"
++    ignored_directory = root / "backend-data"
++    ignored_directory.mkdir(parents=True)
++    connection.execute(
++        """
++        INSERT INTO targets (full_path, index_depth, source_type, created_at, updated_at)
++        VALUES (?, 1, 'local', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
++        """,
++        (str(root),),
++    )
++    connection.commit()
++    connection.close()
++
++    def create_connection() -> sqlite3.Connection:
++        created = sqlite3.connect(database_path)
++        created.row_factory = sqlite3.Row
++        return created
++
++    service = ChangeTrackingService(connection_factory=create_connection, ignored_paths=(ignored_directory,))
++    raw_bytes_path = (ignored_directory / "search.db-wal").as_posix().encode("utf-8")
++    service.mark_changed_paths((raw_bytes_path,))
++
++    check_connection = create_connection()
++    try:
++        assert check_connection.execute("SELECT COUNT(*) FROM target_change_states").fetchone()[0] == 0
++    finally:
++        check_connection.close()
++
++
+ class FakeUsnApi:
+     """Windows API を呼ばずに USN の成否を指定するテスト用ラッパー。"""
+ 
+diff --git a/backend/tests/test_search_service.py b/backend/tests/test_search_service.py
+index 5978abfe97a5d5a0bd5fbc0a043f9b524a10100c..ae93893f24a2cb5eaf3709af2c38c26f1df4a586 100644
+--- a/backend/tests/test_search_service.py
++++ b/backend/tests/test_search_service.py
+@@ -2518,6 +2518,53 @@ def test_search_with_skip_refresh_bypasses_refresh_flow(tmp_path: Path) -> None:
+     assert ensure_calls == []
+ 
+ 
++def test_search_without_path_with_skip_refresh_bypasses_refresh_flow(tmp_path: Path) -> None:
++    """
++    フォルダ未指定かつ search_all_enabled=False でも、skip_refresh=True のときは再インデックスを行わない。
++    """
++    connection = _create_connection(tmp_path)
++    service = SearchService(connection=connection)
++    target = tmp_path / "docs"
++    target.mkdir()
++
++    # 検索対象フォルダとして登録
++    service.index_service._ensure_target(
++        full_path=str(target),
++        exclude_keywords="",
++        index_depth=1,
++        selected_extensions=".md",
++    )
++
++    _insert_indexed_markdown(
++        connection=connection,
++        file_name="memo.md",
++        full_path=str(target / "memo.md"),
++        created_at=datetime(2026, 4, 10, tzinfo=UTC),
++        mtime=datetime(2026, 4, 10, tzinfo=UTC),
++        body="alpha memo",
++        click_count=0,
++    )
++
++    ensure_calls: list[dict[str, object]] = []
++    service.index_service.ensure_fresh_target = lambda **kwargs: ensure_calls.append(kwargs)
++
++    result = service.search(
++        SearchQueryParams(
++            q="alpha",
++            full_path="",
++            search_all_enabled=False,
++            skip_refresh=True,
++            index_depth=1,
++            refresh_window_minutes=0,
++        )
++    )
++
++    assert result.total == 1
++    assert [item.file_name for item in result.items] == ["memo.md"]
++    assert ensure_calls == []
++
++
++
+ def test_schedule_background_refresh_throttles_repeated_requests(tmp_path: Path) -> None:
+     """
+     同じ条件のバックグラウンド再インデックスは短時間に何度も予約しない。
+diff --git a/backend/tests/test_search_target_filtering.py b/backend/tests/test_search_target_filtering.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..f1701c14073be363df58f75c01c100e95d350105
+--- /dev/null
++++ b/backend/tests/test_search_target_filtering.py
+@@ -0,0 +1,207 @@
++"""
++検索APIにおける登録検索対象フォルダ制限および実ファイル実在性検証のテスト。
++
++仕様:
++- search_type="vector" および "hybrid" の検索時、現在有効な登録フォルダ（targets）外のファイルは検索結果から除外される。
++- search_type="vector" および "hybrid" の検索時、ディスク上に実体が存在しない（削除済み）ファイルは除外される。
++- 有効な登録フォルダ配下に実在するファイルのみが検索結果として返される。
++"""
++
++import sqlite3
++from pathlib import Path
++from unittest.mock import MagicMock
++import pytest
++from fastapi.testclient import TestClient
++
++from app.main import app
++from app.api.deps import get_db_connection
++from app.db.schema import initialize_schema
++from app.vector.searcher import (
++    SearchResultItem as VectorSearchResultItem,
++    SearchResponse as VectorSearchResponse,
++)
++from app.vector.state import vector_state
++
++
++@pytest.fixture
++def search_test_env(tmp_path: Path):
++    """
++    テスト用の一時ディレクトリ、DB、およびベクトルモックを構築する fixture。
++    """
++    # フォルダ準備
++    data_dir = tmp_path / "data"
++    data_dir.mkdir(parents=True, exist_ok=True)
++    allowed_dir = tmp_path / "allowed_workspace"
++    allowed_dir.mkdir(parents=True, exist_ok=True)
++    outside_dir = tmp_path / "outside_workspace"
++    outside_dir.mkdir(parents=True, exist_ok=True)
++
++    # 実在するファイルを作成
++    valid_file = allowed_dir / "valid_doc.md"
++    valid_file.write_text("これは許可されたフォルダ内の実在する文書です。", encoding="utf-8")
++
++    outside_file = outside_dir / "outside_doc.md"
++    outside_file.write_text("これは登録外のフォルダの文書です。", encoding="utf-8")
++
++    # 存在しない（削除された）ファイルパス
++    ghost_file = allowed_dir / "deleted_ghost_doc.md"
++
++    # テスト用一時DBの作成とスキーマ初期化
++    test_db_path = tmp_path / "test_search.db"
++    test_conn = sqlite3.connect(test_db_path, check_same_thread=False)
++    test_conn.row_factory = sqlite3.Row
++    test_conn.execute("PRAGMA foreign_keys = ON;")
++    initialize_schema(test_conn)
++
++    # targets テーブルに allowed_dir を登録
++    test_conn.execute(
++        """
++        INSERT INTO targets (
++            full_path, is_search_target_enabled, source_type, indexed_file_count,
++            created_at, updated_at
++        ) VALUES (?, 1, 'local', 1, datetime('now'), datetime('now'))
++        """,
++        (allowed_dir.as_posix(),),
++    )
++    test_conn.commit()
++
++    # FastAPI 依存性注入の差し替え
++    def _override_db():
++        conn = sqlite3.connect(test_db_path, check_same_thread=False)
++        conn.row_factory = sqlite3.Row
++        try:
++            yield conn
++        finally:
++            conn.close()
++
++    app.dependency_overrides[get_db_connection] = _override_db
++
++    # vector_state の退避と設定
++    orig_embedder = vector_state.embedder
++    orig_searcher = vector_state.searcher
++    orig_model_path = vector_state.model_path
++    orig_data_dir = vector_state.data_dir
++    orig_config_path = vector_state.config_path
++
++    vector_state.data_dir = data_dir
++    vector_state.config_path = data_dir / "config.json"
++    vector_state.load_model(use_mock=True, mock_dim=64)
++
++    # モックの検索結果（3件: 許可内実在, 登録外実在, 許可内実在せずゴースト）
++    mock_results = [
++        VectorSearchResultItem(
++            chunk_id=1,
++            document_id=1,
++            path=valid_file.as_posix(),
++            full_path=valid_file.as_posix(),
++            title=valid_file.name,
++            chunk_index=0,
++            score=0.95,
++            hit_text="実在する文書",
++            salient_sentence="実在する文書",
++        ),
++        VectorSearchResultItem(
++            chunk_id=2,
++            document_id=2,
++            path=outside_file.as_posix(),
++            full_path=outside_file.as_posix(),
++            title=outside_file.name,
++            chunk_index=0,
++            score=0.90,
++            hit_text="登録外の文書",
++            salient_sentence="登録外の文書",
++        ),
++        VectorSearchResultItem(
++            chunk_id=3,
++            document_id=3,
++            path=ghost_file.as_posix(),
++            full_path=ghost_file.as_posix(),
++            title=ghost_file.name,
++            chunk_index=0,
++            score=0.85,
++            hit_text="削除済みゴースト文書",
++            salient_sentence="削除済みゴースト文書",
++        ),
++    ]
++
++    mock_searcher = MagicMock()
++    mock_searcher.search.return_value = VectorSearchResponse(
++        query="文書",
++        results=mock_results,
++        mode="dense",
++        total_candidates=len(mock_results),
++        query_embedding_time_ms=1.0,
++        search_time_ms=1.0,
++        total_time_ms=2.0,
++        detected_terms=[],
++        rag_context_xml="",
++        rag_context_markdown="",
++    )
++    vector_state.searcher = mock_searcher
++
++    client = TestClient(app)
++
++    try:
++        yield {
++            "client": client,
++            "allowed_dir": allowed_dir,
++            "outside_dir": outside_dir,
++            "valid_file": valid_file,
++            "outside_file": outside_file,
++            "ghost_file": ghost_file,
++        }
++    finally:
++        app.dependency_overrides.pop(get_db_connection, None)
++        test_conn.close()
++
++        vector_state.embedder = orig_embedder
++        vector_state.searcher = orig_searcher
++        vector_state.model_path = orig_model_path
++        vector_state.data_dir = orig_data_dir
++        vector_state.config_path = orig_config_path
++
++
++def test_vector_search_filters_outside_targets_and_ghost_files(search_test_env):
++    """
++    vector 検索時、有効な登録フォルダ外のファイルや実在しないファイルは除外され、
++    有効フォルダ内に実在するファイルのみが返ること。
++    """
++    client = search_test_env["client"]
++    valid_file = search_test_env["valid_file"]
++    outside_file = search_test_env["outside_file"]
++    ghost_file = search_test_env["ghost_file"]
++
++    res = client.get(
++        "/api/search",
++        params={"q": "文書", "search_type": "vector", "search_all_enabled": True},
++    )
++    assert res.status_code == 200
++    items = res.json()["items"]
++    paths = [it["full_path"] for it in items]
++
++    assert valid_file.as_posix() in paths
++    assert outside_file.as_posix() not in paths
++    assert ghost_file.as_posix() not in paths
++
++
++def test_hybrid_search_filters_outside_targets_and_ghost_files(search_test_env):
++    """
++    hybrid 検索時、有効な登録フォルダ外のファイルや実在しないファイルは除外され、
++    有効フォルダ内に実在するファイルのみが返ること。
++    """
++    client = search_test_env["client"]
++    valid_file = search_test_env["valid_file"]
++    outside_file = search_test_env["outside_file"]
++    ghost_file = search_test_env["ghost_file"]
++
++    res = client.get(
++        "/api/search",
++        params={"q": "文書", "search_type": "hybrid", "search_all_enabled": True},
++    )
++    assert res.status_code == 200
++    items = res.json()["items"]
++    paths = [it["full_path"] for it in items]
++
++    assert valid_file.as_posix() in paths
++    assert outside_file.as_posix() not in paths
++    assert ghost_file.as_posix() not in paths
+diff --git a/backend/tests/test_search_type_api.py b/backend/tests/test_search_type_api.py
+index 4cfd0d94549263ba0fbaf102da692b1701be0195..10485bd9aff1f29f24e895009b599fc116e5faed 100644
+--- a/backend/tests/test_search_type_api.py
++++ b/backend/tests/test_search_type_api.py
+@@ -6,10 +6,14 @@
+ - client fixture では vector_state の data_dir を一時ディレクトリに隔離し、本番環境の config.json 汚染を防止。
+ """
+ 
++from pathlib import Path
++import sqlite3
+ from pathlib import Path
+ import pytest
+ from fastapi.testclient import TestClient
+ from app.main import app
++from app.api.deps import get_db_connection
++from app.db.schema import initialize_schema
+ from app.vector.state import vector_state
+ 
+ 
+@@ -28,9 +32,41 @@ def client(tmp_path: Path) -> TestClient:
+     vector_state.config_path = test_data_dir / "config.json"
+     vector_state.load_model(use_mock=True, mock_dim=64)
+ 
++    # テスト用一時DBの作成とスキーマ初期化
++    test_db_path = tmp_path / "test_type_search.db"
++    test_conn = sqlite3.connect(test_db_path, check_same_thread=False)
++    test_conn.row_factory = sqlite3.Row
++    test_conn.execute("PRAGMA foreign_keys = ON;")
++    initialize_schema(test_conn)
++
++    work_dir = tmp_path / "work"
++    work_dir.mkdir(parents=True, exist_ok=True)
++    test_conn.execute(
++        """
++        INSERT INTO targets (
++            full_path, is_search_target_enabled, source_type, indexed_file_count,
++            created_at, updated_at
++        ) VALUES (?, 1, 'local', 1, datetime('now'), datetime('now'))
++        """,
++        (work_dir.as_posix(),),
++    )
++    test_conn.commit()
++
++    def _override_db():
++        conn = sqlite3.connect(test_db_path, check_same_thread=False)
++        conn.row_factory = sqlite3.Row
++        try:
++            yield conn
++        finally:
++            conn.close()
++
++    app.dependency_overrides[get_db_connection] = _override_db
++
+     try:
+         yield TestClient(app)
+     finally:
++        app.dependency_overrides.pop(get_db_connection, None)
++        test_conn.close()
+         vector_state.embedder = orig_embedder
+         vector_state.searcher = orig_searcher
+         vector_state.model_path = orig_model_path
+@@ -63,7 +99,7 @@ def test_search_type_vector(client: TestClient) -> None:
+     assert data.get("search_type") == "vector"
+ 
+ 
+-def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient, monkeypatch) -> None:
++def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient, monkeypatch, tmp_path: Path) -> None:
+     """除外キーワードに一致するファイルは、ハイブリッド検索およびベクトル検索の結果から除外されること"""
+     from unittest.mock import MagicMock
+     from app.vector.searcher import SearchResultItem as VectorSearchResultItem, SearchResponse as VectorSearchResponse, SearchMode
+@@ -71,12 +107,19 @@ def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient,
+     searcher = vector_state.get_searcher()
+     assert searcher is not None
+ 
++    p1 = tmp_path / "work" / "data" / "gantt_diff_summary.json"
++    p2 = tmp_path / "work" / "data" / "2026_gantt_diff_summary_v1.md"
++    p3 = tmp_path / "work" / "notes" / "normal_project.md"
++    for p in (p1, p2, p3):
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_text("test", encoding="utf-8")
++
+     mock_v_results = [
+         VectorSearchResultItem(
+             chunk_id=1,
+             document_id=1,
+-            path="/work/data/gantt_diff_summary.json",
+-            full_path="/work/data/gantt_diff_summary.json",
++            path=p1.as_posix(),
++            full_path=p1.as_posix(),
+             title="gantt_diff_summary.json",
+             chunk_index=0,
+             score=0.9,
+@@ -86,8 +129,8 @@ def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient,
+         VectorSearchResultItem(
+             chunk_id=2,
+             document_id=2,
+-            path="/work/data/2026_gantt_diff_summary_v1.md",
+-            full_path="/work/data/2026_gantt_diff_summary_v1.md",
++            path=p2.as_posix(),
++            full_path=p2.as_posix(),
+             title="2026_gantt_diff_summary_v1.md",
+             chunk_index=0,
+             score=0.88,
+@@ -97,8 +140,8 @@ def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient,
+         VectorSearchResultItem(
+             chunk_id=3,
+             document_id=3,
+-            path="/work/notes/normal_project.md",
+-            full_path="/work/notes/normal_project.md",
++            path=p3.as_posix(),
++            full_path=p3.as_posix(),
+             title="normal_project.md",
+             chunk_index=0,
+             score=0.85,
+@@ -130,9 +173,9 @@ def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient,
+     assert res.status_code == 200
+     items = res.json()["items"]
+     paths = [it["full_path"] for it in items]
+-    assert "/work/notes/normal_project.md" in paths
+-    assert "/work/data/gantt_diff_summary.json" not in paths
+-    assert "/work/data/2026_gantt_diff_summary_v1.md" not in paths
++    assert p3.as_posix() in paths
++    assert p1.as_posix() not in paths
++    assert p2.as_posix() not in paths
+ 
+     # 2. hybrid 検索で exclude_keywords="gantt_diff_summary" を渡したとき
+     res_hybrid = client.get(
+@@ -147,12 +190,12 @@ def test_hybrid_and_vector_search_respects_exclude_keywords(client: TestClient,
+     assert res_hybrid.status_code == 200
+     items_hybrid = res_hybrid.json()["items"]
+     paths_hybrid = [it["full_path"] for it in items_hybrid]
+-    assert "/work/notes/normal_project.md" in paths_hybrid
+-    assert "/work/data/gantt_diff_summary.json" not in paths_hybrid
+-    assert "/work/data/2026_gantt_diff_summary_v1.md" not in paths_hybrid
++    assert p3.as_posix() in paths_hybrid
++    assert p1.as_posix() not in paths_hybrid
++    assert p2.as_posix() not in paths_hybrid
+ 
+ 
+-def test_hybrid_and_vector_search_respects_negative_query_and_extension(client: TestClient, monkeypatch) -> None:
++def test_hybrid_and_vector_search_respects_negative_query_and_extension(client: TestClient, monkeypatch, tmp_path: Path) -> None:
+     """
+     クエリ内の除外語（-.md 等）や拡張子フィルタの除外（types='-json'）が、
+     ベクトル検索およびハイブリッド検索の結果から確実に除外されること。
+@@ -163,12 +206,19 @@ def test_hybrid_and_vector_search_respects_negative_query_and_extension(client:
+     searcher = vector_state.get_searcher()
+     assert searcher is not None
+ 
++    p1 = tmp_path / "work" / "data" / "report.json"
++    p2 = tmp_path / "work" / "data" / "document.md"
++    p3 = tmp_path / "work" / "data" / "image.png"
++    for p in (p1, p2, p3):
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_text("test", encoding="utf-8")
++
+     mock_v_results = [
+         VectorSearchResultItem(
+             chunk_id=1,
+             document_id=1,
+-            path="/work/data/report.json",
+-            full_path="/work/data/report.json",
++            path=p1.as_posix(),
++            full_path=p1.as_posix(),
+             title="report.json",
+             chunk_index=0,
+             score=0.9,
+@@ -178,8 +228,8 @@ def test_hybrid_and_vector_search_respects_negative_query_and_extension(client:
+         VectorSearchResultItem(
+             chunk_id=2,
+             document_id=2,
+-            path="/work/data/document.md",
+-            full_path="/work/data/document.md",
++            path=p2.as_posix(),
++            full_path=p2.as_posix(),
+             title="document.md",
+             chunk_index=0,
+             score=0.88,
+@@ -189,8 +239,8 @@ def test_hybrid_and_vector_search_respects_negative_query_and_extension(client:
+         VectorSearchResultItem(
+             chunk_id=3,
+             document_id=3,
+-            path="/work/data/image.png",
+-            full_path="/work/data/image.png",
++            path=p3.as_posix(),
++            full_path=p3.as_posix(),
+             title="image.png",
+             chunk_index=0,
+             score=0.85,
+@@ -222,8 +272,8 @@ def test_hybrid_and_vector_search_respects_negative_query_and_extension(client:
+     )
+     assert res_ext.status_code == 200
+     ext_paths = [it["full_path"] for it in res_ext.json()["items"]]
+-    assert "/work/data/document.md" in ext_paths
+-    assert "/work/data/report.json" not in ext_paths
++    assert p2.as_posix() in ext_paths
++    assert p1.as_posix() not in ext_paths
+ 
+     # 2. q="テスト -.md" で .md がクエリ除外されること、かつベクトル検索には "テスト" だけが渡されること
+     res_query = client.get(
+@@ -236,7 +286,7 @@ def test_hybrid_and_vector_search_respects_negative_query_and_extension(client:
+     )
+     assert res_query.status_code == 200
+     query_paths = [it["full_path"] for it in res_query.json()["items"]]
+-    assert "/work/data/report.json" in query_paths
+-    assert "/work/data/document.md" not in query_paths
++    assert p1.as_posix() in query_paths
++    assert p2.as_posix() not in query_paths
+     # ベクトル検索にはポジティブ語 "テスト" のみが渡されたことを検証
+     assert search_mock.call_args[1]["query"] == "テスト"
+diff --git a/claude.md b/claude.md
+index 2a617801f1c96e05b654fb6bdfc6ec8d18a4ca06..6e71b27258d80f24f5d1e1f2f316641d4590c54b 100644
+--- a/claude.md
++++ b/claude.md
+@@ -81,9 +81,13 @@
+    - 並び替えに「ハイブリッドスコア順 (`hybrid_score`)」「ベクトル類似度順 (`vector_score`)」「通常検索スコア順 (`keyword_score`)」を追加。
+    - デフォルト（`default`）並び替え選択時は、ハイブリッド検索結果に対してハイブリッド順位（`hybrid_score` 降順）を最優先で表示。
+ 5. **差分インデックス同期**:
+-   - 全文インデックスの作成・更新完了時（`index_service`）に、連動して自動でベクトルインデックスの差分更新（`vector_state.sync_index`）を実行。
++   - 全文インデックスの作成・更新完了時（`index_service`）に、連動して自動でベクトルインデックスの差分更新（`vector_state.sync_index`）を実行（カスタム接続時やテスト実行環境時は安全ガードによりスキップ）。
+    - ファイルの更新日時（mtime）および SHA256 ハッシュによるスキップ判定で高速同期。
+-6. **ベクトル管理画面（PoC 同等以上の高機能版）**:
++6. **検索候補の有効ターゲット制限 & 実在ファイル実在性検証**:
++   - ベクトル検索およびハイブリッド検索時、現在有効な登録検索対象フォルダ（`targets` で `is_search_target_enabled = 1`）配下のファイルのみをヒット対象とする。登録フォルダ外のファイル（過去の登録解除フォルダやテスト・一時ファイルなど）は結果から自動除外される。
++   - ローカルファイルについてはファイルシステム上の実在性（`Path.is_file()`）も検証し、削除されたファイルのゴーストレコードを検索結果に返さない（スタブ・ダミーサービス時は除く）。
++   - テスト実行環境では `conftest.py` による `vector_state` の一時ディレクトリ自動隔離および `IndexService` のカスタムDB接続時ガードにより、テスト走査による実環境ベクトルDBへの混入・汚染を完全防止。
++7. **ベクトル管理画面（PoC 同等以上の高機能版）**:
+    - **モデル別バッジ**: 軽量/標準/高精度モデルごとのインデックス登録件数、DBサイズ（MB）、未インデックス状態をバッジ表示。
+    - **差分更新 ⚡ vs 全件再作成 🔄**: 変更ファイルのみ高速同期する差分更新ボタンと全件再作成ボタンを明示的に分離。
+    - **進捗バー & 完了サマリー**: リアルタイム進捗率表示、完了時の追加・更新・スキップ・削除件数、所要時間、DBサイズサマリー。
+@@ -447,8 +451,56 @@ Web UI、通常キーワード検索（FTS5）、正規表現検索、ベクト
+    - `launcher/windows/LocalSearchLauncher.Tests/Program.cs` (テスト追加)
+    - `docs/extension_filter_spec.md`, `docs/negative_filter_flow.excalidraw.md`
+ 
++---
++
++# AIインプットにおけるExcalidraw貼り付け画像（PNG等）のHTML表示・復元仕様書
++
++## 概要
++AIインプット機能（自己完結HTMLエクスポート）において、Excalidraw図面（`.excalidraw.md` / `.excalidraw`）内に貼り付けられているPNGなどの画像がHTML上で正しく解決・描画されるようにする仕様。
++Obsidian環境（`obsidian-dagnetz`）の画像管理方式（インラインBase64、`## Embedded Files` WikiLinkマッピング、および同名ハッシュファイル名 `{fileId}.png` 等）の3系統すべてを確実に解決し、自己完結HTML内の動的SVGへインラインBase64として埋め込む。
++
++## 仕様
++1. **`extract_excalidraw_data` による `## Embedded Files` の抽出**:
++   - Markdownテキスト内の `# Excalidraw Data` 下にある `## Embedded Files` セクションをパース。
++   - 正規表現 `^([a-zA-Z0-9_-]+)\s*:\s*!?\[\[([^\]|]+)(?:\|[^\]]*)?\]\]` により、`fileId` と WikiLink（例: `windows.png` や `01_data/common_image/obsidian_logo.png`）のマッピングを抽出。
++   - 抽出結果を返却データ辞書 `data["embedded_files"]` に格納。
++2. **多段階画像解決ヘルパー `resolve_excalidraw_image_data_url`**:
++   - **優先1 (インライン Data URL)**: `file_entry.get("dataURL")` が `data:image/` で始まっていればそれを採用。
++   - **優先2 (`## Embedded Files` のWikiLink探索)**: カレントフォルダ、Vaultルート、Vault親フォルダ、共通画像フォルダ（`01_data/common_image`, `attachments`, `images` 等）、Vault全体の再帰走査から探索してBase64化。
++   - **優先3 (ハッシュファイル名探索)**: カレントフォルダおよびVault全体から `{file_id}.png`, `{file_id}.jpg`, `{file_id}.svg`, `{file_id}.webp` 等を探索してBase64化。
++3. **`excalidraw_to_svg` の画像埋め込み**:
++   - 引数に `vault_path: Optional[Union[str, Path]] = None`, `current_file_path: Optional[Union[str, Path]] = None` を追加。
++   - 解決したBase64 Data URLを用いて、SVGに `<image href="{data_url}" xlink:href="{data_url}" x="{x}" y="{y}" width="{w}" height="{h}" opacity="{opacity}" preserveAspectRatio="none" />` を確実に出力。
++4. **`export_documents_to_html` における Excalidraw ノート直接指定対応**:
++   - ユーザーがAIインプットの対象ファイルとして Excalidraw ノート（`.excalidraw.md` 等）を直接指定した場合、スキップせず図面（SVGまたはキャッシュPNG）をドキュメント本文（`<article>`）に美しい画像としてレンダリング。
++5. **テスト & ドキュメント**:
++   - テスト: `backend/tests/test_ai_html_excalidraw_image.py`
++   - ドキュメント: `docs/ai_html_excalidraw_image_spec.md`, `docs/excalidraw_image_flow.excalidraw.md`
+ 
++---
+ 
++# ランチャー検索時の既存DB高速検索仕様書（インデックス作成待機抑止・更新チェック連動）
+ 
++## 概要
++Windows環境ではベクトルのインデックス作成（Embedding生成）に時間がかかるため、ランチャー利用時はインデックス作成（再走査やベクトルのインデックス作成）を待たずに既存データベース（DB）だけで高速に検索できるようにする。
++ランチャーの「更新」チェックボックスがONの場合のみ、従来通りインデックス作成・更新を同期的に待ってから検索する。
+ 
++## 仕様
++1. **ランチャー検索ルーティング（更新チェックOFF時・既定）**:
++   - Windows WPF ランチャーおよびその他OS（非Mac）ランチャーでは、更新チェックOFF（かつ gantt 未選択）の場合、検索方式（`hybrid` / `vector` / `keyword`）に関わらず既存DB専用API `POST /api/search/indexed` を呼び出す。
++   - ペイロードに `search_type` を渡す。
++   - バックエンドでは `search_existing_index` により、インデックス作成・差分走査を一切行わず、既存の SQLite DB および既存ベクトルインデックスから即座に結果を照合・融合して返す。
++2. **ランチャー検索ルーティング（更新チェックON時）**:
++   - 「更新」チェックボックスがONの場合、統合API `POST /api/search` を `search_all_enabled: false`, `skip_refresh: false` で呼び出す。
++   - バックエンドで登録済みフォルダのインデックス作成・差分更新（ベクトルのインデックス同期を含む）が完了するのを待ってから、最新化されたインデックスに対して検索を行う。
++3. **バックエンドの再インデックス抑止ガード**:
++   - `SearchService.search()` 内で、フォルダ未指定かつ全DB検索OFFの再インデックス条件に `and not params.skip_refresh` のガードを追加。`skip_refresh: true` が指定されている場合は絶対に再インデックス処理を実行しない。
++4. **変更対象ファイル**:
++   - `backend/app/services/search_service.py` (`search` の `skip_refresh` ガード)
++   - `backend/tests/test_search_service.py` (単体テスト追加)
++   - `launcher/src/launcher_app/api/client.py` (`search` メソッドの他OSルーティング)
++   - `launcher/tests/test_api_client.py` (単体テスト追加)
++   - `launcher/windows/LocalSearchLauncher/SearchModels.cs` (`IndexedLauncherSearchRequest`, `LauncherSearchRequestBuilder`)
++   - `launcher/windows/LocalSearchLauncher.Tests/Program.cs` (単体テスト更新)
++   - `AGENTS.md`, `launcher/docs/spec.md`, `launcher/windows/README.md`, `docs/launcher_indexed_search_spec.md`
+ 
+diff --git a/docs/ai_html_excalidraw_image_spec.md b/docs/ai_html_excalidraw_image_spec.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..5af74631b7db6a27a9d21e4000cad07da7dd37a8
+--- /dev/null
++++ b/docs/ai_html_excalidraw_image_spec.md
+@@ -0,0 +1,54 @@
++# AIインプットにおけるExcalidraw貼り付け画像（PNG等）のHTML表示・復元 仕様書
++
++## 概要
++AIインプット機能（自己完結HTMLエクスポート）において、Excalidraw図面（`.excalidraw.md` / `.excalidraw`）内に貼り付けられているPNGなどの画像がHTML上で正しく解決・描画されるようにする仕様。
++Obsidian Excalidrawプラグイン（`obsidian-dagnetz`）の仕様に準拠し、インラインBase64、Markdownの `## Embedded Files` セクション、およびハッシュファイル名（`{fileId}.png` 等）の3系統すべての画像形式をサポートする。
++
++---
++
++## 背景と課題
++従来のバックエンド実装（`html_exporter.py`）では、Excalidrawの動的ベクターSVG生成（`excalidraw_to_svg`）時に `Drawing` JSON内の `files[fileId].dataURL` のみをインライン参照していた。
++しかし、Obsidian環境のExcalidrawノートでは以下の画像管理パターンが存在する：
++1. **インライン Base64 形式**: `files[fileId].dataURL` に画像データが直接保持されている形式。
++2. **`## Embedded Files` WikiLink マッピング形式**: Markdownテキスト内の `## Embedded Files` セクションに `{fileId}: [[画像.png]]` としてWikiLinkが記述され、実際の画像ファイルは同フォルダやVault内（例: `01_data/common_image/` 等）に別ファイルとして管理される形式。
++3. **同名ハッシュファイル形式**: `{fileId}.png`（例: `0fd5abb9830e51ddaf1d5b4f9e3b493519bb6318.png`）としてノートと同じフォルダまたはVault内に配置される形式。
++
++従来は2と3の解決ロジックが存在せず、また `excalidraw_to_svg` にVaultパスやノートパスが渡されていなかったため、動的SVG生成時に `<image>` 要素が0件となり、貼り付け画像が抜け落ちていた。
++
++---
++
++## 実装仕様
++
++### 1. `extract_excalidraw_data` による `## Embedded Files` の抽出
++- Markdownテキスト内の `# Excalidraw Data` 下にある `## Embedded Files` セクションをパース。
++- 正規表現 `^([a-zA-Z0-9_-]+)\s*:\s*!?\[\[([^\]|]+)(?:\|[^\]]*)?\]\]` により、`fileId` と WikiLink のマッピングを抽出。
++- 抽出結果を返却データ辞書 `data["embedded_files"]` に格納。
++
++### 2. 多段階画像解決ヘルパー `resolve_excalidraw_image_data_url`
++画像要素（`elem.get("fileId")`）に対し、以下の優先順位でBase64 Data URLを解決：
++1. **インライン Data URL**: `file_entry.get("dataURL")` が `data:image/` で始まっていればそれを採用。
++2. **`## Embedded Files` のWikiLink探索**:
++   - カレントディレクトリ（ノートの親フォルダ）
++   - Vaultルートディレクトリ
++   - Vault親ディレクトリ
++   - 共通画像フォルダ（`01_data/common_image`, `attachments`, `images` 等）
++   - Vault全体の再帰探索
++3. **ハッシュファイル名探索**:
++   - `{file_id}.png`, `{file_id}.jpg`, `{file_id}.jpeg`, `{file_id}.svg`, `{file_id}.webp`, `{file_id}.bmp` をカレントフォルダおよびVault全体から探索。
++
++### 3. `excalidraw_to_svg` の画像埋め込み
++- シグネチャに `vault_path: Optional[Union[str, Path]] = None`, `current_file_path: Optional[Union[str, Path]] = None` を追加。
++- `resolve_excalidraw_image_data_url` で解決したBase64 Data URLを用いて、SVGに `<image href="{data_url}" xlink:href="{data_url}" x="{x}" y="{y}" width="{w}" height="{h}" opacity="{opacity}" preserveAspectRatio="none" />` を確実に出力。
++
++### 4. `export_documents_to_html` における Excalidraw ノート直接指定対応
++- ユーザーがAIインプットの対象ファイルとして Excalidraw ノート（`.excalidraw.md` 等）を直接指定した場合、スキップせず図面（SVGまたはキャッシュPNG）をドキュメント本文（`<article>`）に美しい画像としてレンダリング。
++
++---
++
++## 変更対象ファイル
++- `backend/app/vector/html_exporter.py`
++- `backend/tests/test_ai_html_excalidraw_image.py`
++- `claude.md`
++- `AGENTS.md`
++- `docs/ai_html_excalidraw_image_spec.md`
++- `docs/excalidraw_image_flow.excalidraw.md`
+diff --git a/docs/excalidraw_image_flow.excalidraw.md b/docs/excalidraw_image_flow.excalidraw.md
+index 942dc88dbd2269a5e365fa06d642607bbda82c13..867e194dc1eaab6d88636355b7e635de31dc8e8b 100644
+--- a/docs/excalidraw_image_flow.excalidraw.md
++++ b/docs/excalidraw_image_flow.excalidraw.md
+@@ -1,12 +1,16 @@
+ <!--
+ /**
+- * .excalidraw.md の画像ファイル（図面アセット）取り扱いフロー図
++ * .excalidraw.md の画像ファイル取り扱い & 貼り付け画像復元フロー図
+  * 
+- * 1. AI文書収集時の除外判定 (export_documents_to_html & AiInputPage)
+- *    - .excalidraw.md は文書記事からスキップ（Excalidraw JSON/メタデータの生展開を防止）
+- * 2. Markdownノート内リンクの画像置換 (replace_obsidian_image_embeds)
+- *    - ![[xxx.excalidraw.md]] および [[xxx.excalidraw.md]] を画像として検出し Base64 <img> タグへ置換
+- * 3. ファイル種別 & アイコン判定 (fileIcon.ts, file_icons.py, SearchModels.cs)
++ * 1. AI文書収集と直接指定の判定 (export_documents_to_html & AiInputPage)
++ *    - Markdownノート内リンクは画像として埋め込み、Excalidrawノート直接指定時も図面画像として記事本文に出力
++ * 2. 貼り付け画像（PNG等）の多段階自動解決 (resolve_excalidraw_image_data_url)
++ *    - インラインBase64、## Embedded Files のWikiLink探索、同フォルダ等の{fileId}.*探索
++ * 3. キャッシュ探索 & 動的SVG生成 (find_excalidraw_cache_image & excalidraw_to_svg)
++ *    - キャッシュ未生成時も貼り付け画像を含む高解像度SVGを自動動的生成
++ * 4. 自己完結型HTMLへの埋め込み (Base64 Data URL)
++ *    - 全画像をインライン化し、ブラウザ上で完全に表示
++ * 5. ファイル種別 & アイコン判定 (fileIcon.ts, file_icons.py, SearchModels.cs)
+  *    - markdown.svg ではなく excalidraw.svg (図面アイコン) を統一適用
+  **/
+ -->
+@@ -21,13 +25,13 @@ tags: [excalidraw]
+ # Excalidraw Data
+ 
+ ## Text Elements
+-.excalidraw.md の画像ファイル（図面アセット）取り扱いフロー ^title
+-① AI文書収集時の除外判定 (obsidian-dagnetz準拠) ^step1
+-.excalidraw.md は文書記事からスキップ (JSON等の生展開を防止) ^step1-desc
++.excalidraw.md の画像ファイル取り扱い & 貼り付け画像復元フロー ^title
++① AI文書収集と直接指定の判定 (obsidian-dagnetz準拠) ^step1
++直接指定時も図面画像として本文出力 (生JSON展開は防止) ^step1-desc
+ ② ノート内リンクの画像置換 (replace_obsidian_image_embeds) ^step2
+-![[xxx.excalidraw.md]] および [[xxx.excalidraw.md]] を画像置換 ^step2-desc
+-③ キャッシュ探索 & 動的SVG生成 ^step3
+-.excalidraw-cache の PNG/SVG または ノート内JSONからSVG動的生成 ^step3-desc
++![[xxx.excalidraw.md]] を図面画像として自動検出 ^step2-desc
++③ 貼り付け画像の解決 & 動的SVG生成 ^step3
++Embedded Files / {fileId}.png から画像を復元しSVGに展開 ^step3-desc
+ ④ Base64 <img> タグへインライン埋め込み ^step4
+ 自己完結型HTML内に美しいベクター図面画像として埋め込み ^step4-desc
+ ⑤ UI / ランチャーでのアイコン統一 ^step5
+diff --git a/docs/launcher_indexed_search_spec.md b/docs/launcher_indexed_search_spec.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..8a40efe4cbeb62477c3427916b57ddcdef6601a0
+--- /dev/null
++++ b/docs/launcher_indexed_search_spec.md
+@@ -0,0 +1,40 @@
++<!--
++ランチャー検索におけるインデックス作成待機抑止と更新チェック連動仕様書
++Windows環境等でベクトルのインデックス作成がボトルネックとなるのを防ぎ、更新チェックOFF時は既存DB専用API (/api/search/indexed) で即座に検索し、更新チェックON時のみインデックス作成・更新を待って検索する仕様。
++-->
++
++# ランチャー検索における既存DB高速検索・更新チェック連動仕様書
++
++## 1. 目的と背景
++Windows 環境（特に CPU 推論環境）では、ベクトルの埋め込み計算（Embedding 生成）を含むインデックス作成処理に時間がかかります。
++従来のランチャーでは、ハイブリッド検索が有効な場合に更新チェックが OFF であっても統合検索 API（`/api/search`）にリクエストが送信され、インデックス差分走査や更新待ちが発生してユーザー体験を損ねていました。
++本仕様では、ランチャーからの検索においてインデックス作成を待たずに既存データベース（DB）だけで高速に検索できるようにし、「更新」チェックボックスが ON の場合のみ最新のインデックス作成・更新を待って検索するように動作を制御します。
++
++## 2. 検索ルーティング仕様
++
++| 条件 | エンドポイント | ペイロード主要フラグ | 動作 |
++| :--- | :--- | :--- | :--- |
++| **通常時（更新チェック OFF、gantt 未選択）** | `POST /api/search/indexed` | `search_type: "hybrid"` (または `vector`/`keyword`), `folder_path: ""` | インデックス作成・差分走査を一切行わず、既存の SQLite DB および既存ベクトルインデックスのみで即座に高速検索 |
++| **「更新」チェック ON** | `POST /api/search` | `search_all_enabled: false`, `skip_refresh: false`, `search_type: "hybrid"` | 登録済み検索対象フォルダのインデックス作成・差分更新（ベクトルインデックス同期を含む）を完了させてから最新結果を検索 |
++| **gantt チェック ON（更新チェック OFF）** | `POST /api/search` | `search_all_enabled: true`, `skip_refresh: true`, `include_gantt_tasks: true` | インデックス作成を行わず、既存 DB と gantt タスクを統合検索 |
++
++## 3. コンポーネント別の変更内容
++
++### 3.1 Windows WPF ランチャー (`launcher/windows/LocalSearchLauncher`)
++- **`IndexedLauncherSearchRequest`**:
++  - `SearchType`（既定値 `"hybrid"`）フィールドを追加し、既存インデックス専用 API に検索方式を伝達可能に拡張。
++- **`LauncherSearchRequestBuilder.Build`**:
++  - `updateIndexOnSearch == false && !includeGanttTasks` のとき、選択中の `searchType`（`hybrid` / `vector` / `keyword`）に関わらず `api/search/indexed` を使用。
++  - `updateIndexOnSearch == true` のとき、`SearchAllEnabled: false`, `SkipRefresh: false` を設定した `LauncherSearchRequest` で `api/search` を呼び出し、バックエンドの再インデックスフローを起動。
++
++### 3.2 Python ランチャー (`launcher/src/launcher_app`)
++- **`LauncherApiClient.search`**:
++  - macOS 以外のプラットフォーム（Windows / Linux）において、gantt 未選択時は `search_type` に関わらず既存インデックス専用 API `/api/search/indexed` を呼び出し、`search_type` を送信。
++
++### 3.3 バックエンド (`backend/app/services/search_service.py`)
++- **`SearchService.search`**:
++  - フォルダ未指定かつ全 DB 検索 OFF の再インデックス判定に `and not params.skip_refresh` のガードを追加。
++  - `skip_refresh: true` が指定されているリクエストでは、絶対に同期再インデックス処理（`_refresh_search_targets_for_search_without_path`）に入らないよう安全性を保証。
++
++## 4. フロー図
++詳細な処理フローは `docs/launcher_search_flow.excalidraw.md` を参照。
+diff --git a/docs/launcher_search_flow.excalidraw.md b/docs/launcher_search_flow.excalidraw.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..e36a3ccfae694abbe57015b7760140059814b12b
+--- /dev/null
++++ b/docs/launcher_search_flow.excalidraw.md
+@@ -0,0 +1,109 @@
++<!--
++/**
++ * ランチャー検索ルーティング（既存DB高速検索 vs 更新チェック連動）フロー図
++ * 
++ * 1. ランチャー検索入力（Windows WPF / 他OS）
++ * 2. 「更新」チェック判定:
++ *    - OFF: POST /api/search/indexed ➔ インデックス作成を待たず、既存DBだけで即座に高速検索
++ *    - ON: POST /api/search (search_all_enabled: false, skip_refresh: false) ➔ 差分更新・ベクトル作成を待ってから検索
++ * 3. バックエンド処理:
++ *    - IndexedSearchRequest: search_existing_index() ➔ 再走査なし、既存FTS＋既存ベクトル類似度RRF融合
++ *    - SearchRequest (更新ON): ensure_fresh_target() ➔ 差分同期＋ベクトルsync_index完了後に検索
++ **/
++-->
++---
++
++excalidraw-plugin: parsed
++tags: [excalidraw]
++
++---
++==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠==
++
++# Excalidraw Data
++
++## Text Elements
++ランチャー検索ルーティング（既存DB高速検索 vs 更新チェック連動）フロー ^title
++① ランチャー入力 (WPF / Flet) ^step1
++ユーザーが検索キーワード・拡張子を入力
++（検索方式: ハイブリッド [既定] / ベクトル / 通常） ^step1-desc
++② 「更新」チェックボックス判定 ^step2
++OFF: 高速検索（インデックス作成待機なし）
++ON: 最新化検索（インデックス作成・更新を待機） ^step2-desc
++③-A 更新チェック OFF の場合 ^path-a
++POST /api/search/indexed
++・search_type: "hybrid" / "vector" / "keyword"
++・インデックス差分走査を完全スキップ
++・既存 SQLite DB + 既存ベクトルインデックスから即座に取得・融合 ^path-a-desc
++③-B 更新チェック ON の場合 ^path-b
++POST /api/search
++・search_all_enabled: false, skip_refresh: false
++・登録済みフォルダの差分インデックス作成・更新を実行
++・ベクトルインデックスの差分同期 (sync_index) も完了を待機
++・最新化されたインデックスに対して検索を実行 ^path-b-desc
++④ 検索結果をランチャーへ即時表示 ^result
++更新OFF: 待たずに一瞬でレスポンス
++更新ON: 最新ファイルを反映した結果を表示 ^result-desc
++
++## Drawing
++```json
++{
++	"type": "excalidraw",
++	"version": 2,
++	"source": "https://excalidraw.com",
++	"elements": [
++		{
++			"type": "rectangle",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "box-title",
++			"fillStyle": "solid",
++			"strokeWidth": 2,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 40,
++			"y": 40,
++			"strokeColor": "#3b82f6",
++			"backgroundColor": "#1e293b",
++			"width": 780,
++			"height": 50,
++			"seed": 1,
++			"groupIds": [],
++			"roundness": { "type": 3 }
++		},
++		{
++			"type": "text",
++			"version": 1,
++			"versionNonce": 1,
++			"isDeleted": false,
++			"id": "text-title",
++			"fillStyle": "solid",
++			"strokeWidth": 1,
++			"strokeStyle": "solid",
++			"roughness": 1,
++			"opacity": 100,
++			"angle": 0,
++			"x": 60,
++			"y": 52,
++			"strokeColor": "#f8fafc",
++			"backgroundColor": "transparent",
++			"width": 740,
++			"height": 25,
++			"seed": 2,
++			"groupIds": [],
++			"fontSize": 18,
++			"fontFamily": 1,
++			"text": "ランチャー検索ルーティング（既存DB高速検索 vs 更新チェック連動）フロー",
++			"rawText": "ランチャー検索ルーティング（既存DB高速検索 vs 更新チェック連動）フロー",
++			"textAlign": "center",
++			"verticalAlign": "middle"
++		}
++	],
++	"appState": {
++		"viewBackgroundColor": "#0f172a",
++		"gridSize": null
++	}
++}
++```
+diff --git a/launcher/docs/spec.md b/launcher/docs/spec.md
+index 3189942592bc07b56fd33cb502468bfa9483cf53..40204ac22e6b54ec192f1bddb4f68a3f47b6b147 100644
+--- a/launcher/docs/spec.md
++++ b/launcher/docs/spec.md
+@@ -63,7 +63,7 @@ launcher/
+ - Web フロントの「ランチャー」ページから、起動・停止・再起動・状態確認・ログ確認を行える。
+ - **検索のプラットフォーム別挙動**:
+     - **macOS**: `/api/search` を使い、登録済みフォルダを検索時に順次更新する (`skip_refresh=false`, `search_all_enabled=false`)。
+-    - **その他 OS**: `/api/search/indexed` を使い、更新チェックをスキップして既存インデックスのみから高速に検索する。
++    - **その他 OS**: `/api/search/indexed` を使い、更新チェックをスキップして既存インデックスのみから高速に検索する（選択中の `search_type` を連携）。
+ - 検索結果タイトル相当のクリックは `LAUNCHER_WEB_BASE_URL` を基準に、ファイルでは `/api/fullpath?path=...`、フォルダでは `/?path=...` を既定ブラウザで開く。
+ - `GUI`ボタンは外部8001ではなく、`LAUNCHER_API_BASE_URL`を基準に8079の検索Web画面を開く。
+ - ファイル結果を開いた場合は Web アプリと同じく `/api/search/click` でアクセス数を更新する。
+@@ -141,7 +141,7 @@ Windowsでは `launcher/windows/` のWPF版を優先する。ホットキーはS
+ 配布物はself-containedフォルダ版を標準、single-file版を携帯版とする。発行方法は
+ `launcher/windows/README.md` を参照する。
+ 
+-WPF版はmacOSネイティブ版の操作仕様に合わせ、拡張子フィルタ、gantt検索、名前・メモ・送信・キャンセル、共有parent取得、結果のパスコピー・保存場所・フォルダ・ganttリンク、GUIボタン、上下キー循環選択を提供する。表示直後は検索欄へフォーカスし、検索結果の先頭が選択済みなら矢印操作なしの `Return` / `Enter` で選択結果を開く。`Tab` / `Shift + Tab` は「検索欄 → 拡張子欄 → タスク名 → メモ → 送信 → 検索欄」を循環し、送信から検索欄へ移る際は検索画面を表示する。`.py`、`.bat`、`.exe`、`.lnk` は8001を経由せず、親フォルダを current directory として直接起動する。検索結果は横スクロールを使わず、長いパス・抜粋・操作ボタンを折り返す。Windowsの性能仕様に従い、通常時は `/api/search/indexed`、gantt選択時は `skip_refresh=true` の `/api/search` を使用し、いずれも既存DB内の `local` と `web` を横断してインデックス更新なしで検索する。
++WPF版はmacOSネイティブ版の操作仕様に合わせ、拡張子フィルタ、gantt検索、名前・メモ・送信・キャンセル、共有parent取得、結果のパスコピー・保存場所・フォルダ・ganttリンク、GUIボタン、上下キー循環選択を提供する。表示直後は検索欄へフォーカスし、検索結果の先頭が選択済みなら矢印操作なしの `Return` / `Enter` で選択結果を開く。`Tab` / `Shift + Tab` は「検索欄 → 拡張子欄 → タスク名 → メモ → 送信 → 検索欄」を循環し、送信から検索欄へ移る際は検索画面を表示する。`.py`、`.bat`、`.exe`、`.lnk` は8001を経由せず、親フォルダを current directory として直接起動する。検索結果は横スクロールを使わず、長いパス・抜粋・操作ボタンを折り返す。Windowsの性能仕様に従い、通常時（「更新」チェックOFF）は `/api/search/indexed` を使用してインデックス作成を待たず既存DBだけで高速に検索し、「更新」チェックON時は `/api/search`（`search_all_enabled=false`, `skip_refresh=false`）により登録済みフォルダのインデックス作成・更新（ベクトルインデックス同期含む）を待ってから検索する。gantt選択時は `skip_refresh=true` の `/api/search` を使用し、いずれも既存DB内の `local` と `web` を横断する。
+ 
+ 検索UIのHWNDは表示する仮想デスクトップに合わせて再生成するが、検索文字列はアプリプロセス側に退避して復元し、再表示時に全選択する。WPF版はフォーカスを失っても自動非表示にせず、別ウィンドウをアクティブにした状態でも `Topmost` で最前面表示を維持する。非表示にするのは `Escape`、設定済みの表示切り替えホットキー、または結果の `Return` / `Enter` 実行など明示的な終了操作に限る。WPF初期版の背景は半透明パネルであり、Windows DWM/Acrylicによる背景ブラーは未実装とする。
+ 
+diff --git a/launcher/src/launcher_app/api/client.py b/launcher/src/launcher_app/api/client.py
+index ca106012dc2da6144fa284e0631d0315ced17d8f..2edded64c8e3fab83801bd3259df185911eab118 100644
+--- a/launcher/src/launcher_app/api/client.py
++++ b/launcher/src/launcher_app/api/client.py
+@@ -66,7 +66,7 @@ class LauncherApiClient:
+         normalized_types = types.strip()
+         effective_search_type = search_type or "hybrid"
+         
+-        if (include_gantt_tasks or (search_type is not None and search_type != "keyword")) and not is_mac:
++        if include_gantt_tasks and not is_mac:
+             endpoint = "/api/search"
+             payload = {
+                 "q": query,
+@@ -81,9 +81,8 @@ class LauncherApiClient:
+                 "limit": limit,
+                 "offset": 0,
+                 "include_snippets": True,
++                "include_gantt_tasks": True,
+             }
+-            if include_gantt_tasks:
+-                payload["include_gantt_tasks"] = True
+             if search_type is not None:
+                 payload["search_type"] = search_type
+         elif is_mac:
+@@ -115,6 +114,8 @@ class LauncherApiClient:
+                 "limit": limit,
+                 "offset": 0,
+             }
++            if search_type is not None:
++                payload["search_type"] = search_type
+ 
+         if normalized_types:
+             payload["types"] = normalized_types
+diff --git a/launcher/tests/test_api_client.py b/launcher/tests/test_api_client.py
+index 84920d715646981a6128be074821982891750b92..22e5476ef70026fe3dba3225e0e09303be9474ea 100644
+--- a/launcher/tests/test_api_client.py
++++ b/launcher/tests/test_api_client.py
+@@ -142,6 +142,35 @@ def test_search_sends_extension_filter_to_existing_index_endpoint(monkeypatch) -
+     assert captured["body"] == {"q": "alpha", "folder_path": "", "limit": 8, "offset": 0, "types": ".py, bat"}
+ 
+ 
++def test_search_posts_indexed_endpoint_for_hybrid_search_on_windows(monkeypatch) -> None:
++    """
++    Windows（非 Mac）では、gantt 未選択時はハイブリッド検索でもインデックス更新なしの /api/search/indexed を使用する。
++    """
++    monkeypatch.setattr("platform.system", lambda: "Windows")
++    captured: dict[str, object] = {}
++
++    def fake_urlopen(request: Request, timeout: float) -> StubResponse:
++        captured["url"] = request.full_url
++        captured["method"] = request.get_method()
++        captured["body"] = json.loads((request.data or b"{}").decode("utf-8"))
++        return _stub_search_response()
++
++    client = LauncherApiClient(base_url="http://127.0.0.1:8000", urlopen=fake_urlopen)
++
++    response = client.search("alpha", search_type="hybrid")
++
++    assert captured["url"] == "http://127.0.0.1:8000/api/search/indexed"
++    assert captured["method"] == "POST"
++    assert captured["body"] == {
++        "q": "alpha",
++        "folder_path": "",
++        "limit": 8,
++        "offset": 0,
++        "search_type": "hybrid",
++    }
++    assert response.total == 1
++
++
+ def test_search_posts_gantt_include_for_all_platforms(monkeypatch) -> None:
+     """
+     gantt 選択時は Windows でも通常検索に gantt 追加フラグを指定する。
+diff --git a/launcher/windows/LocalSearchLauncher.Tests/Program.cs b/launcher/windows/LocalSearchLauncher.Tests/Program.cs
+index 0798d493ba9fd554183ea5638fa106c2b94952b2..b5434014fd886d4000f949c7b755b0a427068666 100644
+--- a/launcher/windows/LocalSearchLauncher.Tests/Program.cs
++++ b/launcher/windows/LocalSearchLauncher.Tests/Program.cs
+@@ -35,24 +35,24 @@ Assert(hybridItem.DisplayTitle == "test.md  🌟両方一致", "両方一致バ
+ Assert(hybridItem.DisplaySnippet == "💡 核心文テスト", "核心文を表示する");
+ 
+ var (defaultEndpoint, defaultPayload) = LauncherSearchRequestBuilder.Build("alpha", 8, false, ".md");
+-Assert(defaultEndpoint == "api/search", "既定のハイブリッド検索は統合APIを使う");
+-Assert(defaultPayload is LauncherSearchRequest { SourceType: "local_web", SearchType: "hybrid" }, "ハイブリッド検索はSearchTypeにhybridを指定する");
++Assert(defaultEndpoint == "api/search/indexed", "既定のハイブリッド検索（更新OFF）は既存DB専用APIを使う");
++Assert(defaultPayload is IndexedLauncherSearchRequest { SourceType: "local_web", SearchType: "hybrid", Types: ".md" }, "ハイブリッド検索はSearchTypeにhybridを指定して既存DBから検索する");
+ 
+ var (excludeQueryEndpoint, excludeQueryPayload) = LauncherSearchRequestBuilder.Build("-.png", 8, false, "-png");
+-Assert(excludeQueryEndpoint == "api/search", "除外語検索も統合APIを使う");
+-Assert(excludeQueryPayload is LauncherSearchRequest { Q: "-.png", Types: "-png" }, "除外語および除外拡張子フィルタをリクエストへ反映する");
++Assert(excludeQueryEndpoint == "api/search/indexed", "除外語検索も更新OFFなら既存DB専用APIを使う");
++Assert(excludeQueryPayload is IndexedLauncherSearchRequest { Q: "-.png", Types: "-png", SearchType: "hybrid" }, "除外語および除外拡張子フィルタをリクエストへ反映する");
+ 
+ var (indexedEndpoint, indexedPayload) = LauncherSearchRequestBuilder.Build("alpha", 8, false, ".md", searchType: "keyword");
+ Assert(indexedEndpoint == "api/search/indexed", "通常キーワード検索は既存DB専用APIを使う");
+-Assert(indexedPayload is IndexedLauncherSearchRequest { SourceType: "local_web" }, "通常検索はlocalとwebを横断する");
++Assert(indexedPayload is IndexedLauncherSearchRequest { SourceType: "local_web", SearchType: "keyword" }, "通常検索はlocalとwebを横断する");
+ 
+ var (ganttEndpoint, ganttPayload) = LauncherSearchRequestBuilder.Build("alpha", 8, true, "");
+ Assert(ganttEndpoint == "api/search", "gantt追加検索は統合APIを使う");
+-Assert(ganttPayload is LauncherSearchRequest { SourceType: "local_web", SkipRefresh: true }, "gantt追加時もlocal/web横断かつDB更新なしにする");
++Assert(ganttPayload is LauncherSearchRequest { SourceType: "local_web", SkipRefresh: true, SearchAllEnabled: true }, "gantt追加時もlocal/web横断かつDB更新なしにする");
+ 
+ var (updateEndpoint, updatePayload) = LauncherSearchRequestBuilder.Build("alpha", 8, false, ".md", updateIndexOnSearch: true);
+ Assert(updateEndpoint == "api/search", "更新ONは統合APIを使う");
+-Assert(updatePayload is LauncherSearchRequest { SourceType: "local_web", SkipRefresh: false, IncludeGanttTasks: false }, "更新ONはganttを勝手に有効化せずバックグラウンド差分更新を許可する");
++Assert(updatePayload is LauncherSearchRequest { SourceType: "local_web", SkipRefresh: false, SearchAllEnabled: false, IncludeGanttTasks: false }, "更新ONは登録済みフォルダのインデックス作成・更新を許可して検索する");
+ 
+ Assert(LauncherResultSelection.CanOpenWithReturn(hasSelectedResult: true, memoActive: false), "検索画面で先頭結果が選択されていればReturnだけで開く");
+ Assert(!LauncherResultSelection.CanOpenWithReturn(hasSelectedResult: false, memoActive: false), "検索結果がないときReturnでは開かない");
+diff --git a/launcher/windows/LocalSearchLauncher/SearchModels.cs b/launcher/windows/LocalSearchLauncher/SearchModels.cs
+index 98f7ffebf55fb75ff9847c4b20bd194f9ea097b5..e8a46c1f241e7665c66f67ce4bb5a5e3f5b764b6 100644
+--- a/launcher/windows/LocalSearchLauncher/SearchModels.cs
++++ b/launcher/windows/LocalSearchLauncher/SearchModels.cs
+@@ -81,9 +81,10 @@ internal sealed record IndexedLauncherSearchRequest(
+     int Limit,
+     int Offset,
+     string Types,
+-    string SourceType = "local_web");
++    string SourceType = "local_web",
++    string SearchType = "hybrid");
+ 
+-/// <summary>gantt追加時やハイブリッド・ベクトル検索時もlocal / webを横断するリクエスト。</summary>
++/// <summary>gantt追加時やインデックス更新検索時もlocal / webを横断するリクエスト。</summary>
+ internal sealed record LauncherSearchRequest(
+     string Q,
+     string FullPath,
+@@ -105,11 +106,11 @@ internal sealed record LauncherSearchRequest(
+ internal static class LauncherSearchRequestBuilder
+ {
+     public static (string Endpoint, object Payload) Build(string query, int limit, bool includeGanttTasks, string types, bool updateIndexOnSearch = false, string searchType = "hybrid") =>
+-        includeGanttTasks || updateIndexOnSearch || searchType != "keyword"
++        includeGanttTasks || updateIndexOnSearch
+             ? ("api/search", new LauncherSearchRequest(
+-                query, "", true, !updateIndexOnSearch, "local_web", 0, "all", "default", "desc",
++                query, "", !updateIndexOnSearch, !updateIndexOnSearch, "local_web", 0, "all", "default", "desc",
+                 limit, 0, true, includeGanttTasks, types, searchType))
+-            : ("api/search/indexed", new IndexedLauncherSearchRequest(query, "", limit, 0, types));
++            : ("api/search/indexed", new IndexedLauncherSearchRequest(query, "", limit, 0, types, "local_web", searchType));
+ }
+ 
+ /// <summary>検索画面でReturnによる結果起動が可能かを判定する。</summary>
+diff --git a/launcher/windows/README.md b/launcher/windows/README.md
+index 08071b4b942f5e55bc9512615f70be2a570c62f9..8f12dcb1b43fa4b0222d1bb575a568982c4beaa4 100644
+--- a/launcher/windows/README.md
++++ b/launcher/windows/README.md
+@@ -10,7 +10,7 @@ Windows標準APIと.NET標準機能だけで動く、Windows x64向けランチ
+ - ウィンドウ上部の「Local Search」領域をドラッグして表示位置を移動可能
+ - 多重起動防止
+ 
+-WPF版はmacOSネイティブ版の操作仕様に合わせ、検索欄右側の拡張子フィルタ、gantt検索、タスク名・メモ・送信・キャンセル、共有parent取得、パスコピー、保存場所、フォルダ、ganttリンク、GUIボタン、上下キー循環選択を提供します。表示直後に検索欄へフォーカスし、検索結果の先頭が選択されていれば矢印操作なしの `Return` / `Enter` で開きます。`Tab` / `Shift + Tab` は「検索欄 → 拡張子欄 → タスク名 → メモ → 送信 → 検索欄」を循環し、送信後のTabでは検索画面を表示します。`.py`、`.bat`、`.exe`、`.lnk` は8001のOpenハブを経由せず、親フォルダをcurrent directoryとして直接起動します。検索結果領域は横スクロールを使わず、長いパス・抜粋・操作ボタンを折り返します。Windowsの検索性能仕様に従い、ローカルファイルとWebページの両方を既存DBだけから検索し、インデックスは更新しません。
++WPF版はmacOSネイティブ版の操作仕様に合わせ、検索欄右側の拡張子フィルタ、gantt検索、タスク名・メモ・送信・キャンセル、共有parent取得、パスコピー、保存場所、フォルダ、ganttリンク、GUIボタン、上下キー循環選択を提供します。表示直後に検索欄へフォーカスし、検索結果の先頭が選択されていれば矢印操作なしの `Return` / `Enter` で開きます。`Tab` / `Shift + Tab` は「検索欄 → 拡張子欄 → タスク名 → メモ → 送信 → 検索欄」を循環し、送信後のTabでは検索画面を表示します。`.py`、`.bat`、`.exe`、`.lnk` は8001のOpenハブを経由せず、親フォルダをcurrent directoryとして直接起動します。検索結果領域は横スクロールを使わず、長いパス・抜粋・操作ボタンを折り返します。Windowsの検索性能仕様に従い、通常時（「更新」チェックOFF）は既存DB専用API（`/api/search/indexed`）を使用してベクトルのインデックス作成を待たず既存DBだけで即座に高速検索し、「更新」チェックON時は最新のインデックス作成・更新を待ってから検索します。gantt選択時は `skip_refresh=true` の `/api/search` を使用し、いずれもローカルファイルとWebページの両方を既存DBから横断検索します。
+ 
+ WPF初期版の背景は半透明ネイビーパネルとドロップシャドウです。Windows DWM/Acrylicによる背景ブラーは未実装です。
+ 
+diff --git a/launcher/windows/publish/folder/LocalSearchLauncher.dll b/launcher/windows/publish/folder/LocalSearchLauncher.dll
+index d6741d34f49ff05e45d640735e33ed76caf773ae..286c9d0679421c09626ece9132c508ec7ca196a6 100644
+GIT binary patch
+delta 13645
+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
+B1i1hJ
+
+delta 13643
+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
+
+diff --git a/launcher/windows/publish/folder/LocalSearchLauncher.exe b/launcher/windows/publish/folder/LocalSearchLauncher.exe
+index 15e9c98c1f01151aad5f723a5e0a863a5b56208e..f567c443b61d9b4eceac7cfb609e2611916d4549 100644
+GIT binary patch
+delta 97
+zcmZoz!r1^sEsR^3a(sQw7*ZHg87zR<00@&A5*dscjDY+^1~VWl5h!lXU;>me1Bw{}
+i<&79Dfh<dgG@y(nP{tU@G6a&QKy^mjclt89vj70NqY+;K
+
+delta 97
+zcmZoz!r1^sEsR^3a(sQw8Il=Hz|fK*mBEl9g&_@y&4D->NTxDaG8h1%5s+sAWE%q6
+c$v~blP?Z@_)(pru2eT7FYPaw7WpZZ$0Kw!D^Z)<=
+
+diff --git a/launcher/windows/publish/single-file/LocalSearchLauncher.exe b/launcher/windows/publish/single-file/LocalSearchLauncher.exe
+index d1aaad2d18603c1df17a1288d8d4dd1b33321146..d36de8c8feabfc0077850e7f96a08b9da9775ed6 100644
+--- a/launcher/windows/publish/single-file/LocalSearchLauncher.exe
++++ b/launcher/windows/publish/single-file/LocalSearchLauncher.exe
+@@ -1,3 +1,3 @@
+ version https://git-lfs.github.com/spec/v1
+-oid sha256:474da783c007be56d3f2ee804894283760efde9fb1666029d1b631f370fa1095
++oid sha256:16ea1942fc5fd5e3d688027273ad8e8b15d9fd1ae2c72b006ba42cb8c3954212
+ size 161672759

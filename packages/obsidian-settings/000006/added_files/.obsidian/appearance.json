@@ -1,0 +1,27 @@
+{
+  "theme": "obsidian",
+  "interfaceFontFamily": "M PLUS 1",
+  "textFontFamily": "M PLUS 1",
+  "monospaceFontFamily": "M PLUS 1 Code",
+  "showViewHeader": false,
+  "cssTheme": "Autotape",
+  "accentColor": "#fff266",
+  "baseFontSizeAction": true,
+  "baseFontSize": 22,
+  "enabledCssSnippets": [
+    "explorer-text-color",
+    "heading-glow",
+    "heading-underline",
+    "inline-code-select",
+    "list-bullet-color",
+    "thino-font-fix",
+    "editor-width",
+    "excalidraw-embed-width",
+    "custom-tag-styles",
+    "bold-style",
+    "pdf-export-fix",
+    "table-header-style",
+    "button-accent-style"
+  ],
+  "translucency": false
+}

@@ -1,0 +1,37 @@
+{
+    "name": "obsidian-sidebar-explorer-tag",
+    "version": "1.0.0",
+    "description": "Tag tree and tag keyword search functionality extracted from Sidebar Explorer.",
+    "main": "main.js",
+    "scripts": {
+        "dev": "node esbuild.config.mjs",
+        "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+        "test": "node --import tsx --test utils.test.ts view.test.js"
+    },
+    "keywords": [
+        "obsidian",
+        "plugin",
+        "explorer"
+    ],
+    "author": "Antigravity",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/mock-require": "^3.0.0",
+        "@types/node": "^25.3.3",
+        "@types/utif": "^3.0.3",
+        "builtin-modules": "^5.0.0",
+        "esbuild": "^0.28.1",
+        "mock-require": "^3.0.3",
+        "obsidian": "latest",
+        "tslib": "2.6.2",
+        "tsx": "^4.22.4",
+        "typescript": "5.3.3"
+    },
+    "dependencies": {
+        "@kenjiuno/decompressrtf": "^0.1.4",
+        "@kenjiuno/msgreader": "^1.28.0",
+        "emf-converter": "^1.0.0",
+        "monkey-around": "^3.0.0",
+        "utif": "^3.1.0"
+    }
+}

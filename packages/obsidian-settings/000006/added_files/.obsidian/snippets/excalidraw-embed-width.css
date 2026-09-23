@@ -1,0 +1,134 @@
+/**
+ * Excalidrawおよび画像埋め込み図のサイズ調整
+ * 
+ * 機能:
+ * 1. Markdownの幅指定（Option＋スクロール、ドラッグリサイズを含む）を優先
+ * 2. 親要素の幅固定を行わず、画像の拡大・縮小を妨げない
+ * 3. Vault表示領域からのはみ出しだけを防止
+ * 4. アスペクト比を維持
+ */
+
+/* フレーム参照を含む埋め込み（最優先） */
+.internal-embed[src*="#^frame"],
+.markdown-embed[src*="#^frame"] {
+    max-width: 100% !important;
+}
+
+.internal-embed[src*="#^frame"]>*,
+.markdown-embed[src*="#^frame"]>* {
+    max-width: 100% !important;
+}
+
+/* すべてのExcalidraw埋め込みコンテナ */
+.internal-embed[src*="excalidraw"],
+.internal-embed[src*="Excalidraw"],
+.markdown-embed[src*="excalidraw"],
+.markdown-embed[src*="Excalidraw"] {
+    max-width: 100% !important;
+}
+
+/* 埋め込み内部のコンテンツ */
+.internal-embed[src*="excalidraw"] .markdown-embed-content,
+.internal-embed[src*="Excalidraw"] .markdown-embed-content,
+.markdown-embed[src*="excalidraw"] .markdown-embed-content,
+.markdown-embed[src*="Excalidraw"] .markdown-embed-content,
+.internal-embed[src*="#^frame"] .markdown-embed-content {
+    max-width: 100% !important;
+}
+
+/* SVGラッパー */
+.excalidraw-svg-wrapper,
+.excalidraw-svg-wrapper svg {
+    height: auto !important;
+    max-width: 100% !important;
+}
+
+/* 画像要素 */
+img[src*="excalidraw"]:not([width]),
+img[src*="Excalidraw"]:not([width]),
+img[alt*="excalidraw"]:not([width]),
+img[alt*="Excalidraw"]:not([width]) {
+    height: auto !important;
+    max-width: 100% !important;
+}
+
+/* iframe */
+.excalidraw-wrapper iframe,
+iframe[src*="excalidraw"],
+iframe[src*="Excalidraw"] {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 400px;
+}
+
+/* drawio埋め込み図の左寄せ */
+.drawio-diagram-wrapper,
+.drawio-centering-diagrams {
+    justify-content: flex-start !important;
+}
+
+/* 図・画像の埋め込み名を、図の下に見えるラベルとして表示 */
+.media-embed[data-figure-name]:not([data-figure-kind="excalidraw"]),
+.internal-embed[data-figure-name]:not([data-figure-kind="excalidraw"]),
+.markdown-embed[data-figure-name]:not([data-figure-kind="excalidraw"]) {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    max-width: 100% !important;
+    vertical-align: top;
+}
+
+/* Excalidraw変換の前後とも縦配置にし、本体の幅指定には触れない。 */
+.media-embed[data-figure-name][data-figure-kind="excalidraw"],
+.internal-embed[data-figure-name][data-figure-kind="excalidraw"],
+.markdown-embed[data-figure-name][data-figure-kind="excalidraw"],
+.excalidraw-svg[data-figure-name][data-figure-kind="excalidraw"] {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    max-width: 100% !important;
+    vertical-align: top;
+}
+
+.custom-figure-caption {
+    display: block;
+    margin-top: 0.7em;
+    flex: 0 0 auto;
+    order: 9999;
+    width: min(var(--figure-width, 100%), 100%);
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    color: var(--text-normal) !important;
+    font-size: var(--font-ui-small);
+    line-height: 1.3;
+    opacity: 0.9;
+}
+
+/* Reading viewでも、編集画面と同じようにMarkdownの単一改行を表示する。 */
+.markdown-reading-view .markdown-preview-section p,
+.markdown-preview-view .markdown-preview-section p {
+    white-space: pre-line;
+}
+
+/* プレビューでも各図を1行として扱い、次の行との間隔を確保する。 */
+.markdown-reading-view [data-figure-name],
+.markdown-preview-view [data-figure-name] {
+    margin-bottom: var(--figure-after-gap, 2.5em) !important;
+}
+
+/* ダークテーマで、SVG内の黒い文字が背景に埋もれないようにする */
+.theme-dark .drawio-centering-diagrams svg text,
+.theme-dark .drawio-centering-diagrams svg tspan,
+.theme-dark .drawio-diagram-wrapper svg text,
+.theme-dark .drawio-diagram-wrapper svg tspan {
+    fill: var(--text-normal) !important;
+    color: var(--text-normal) !important;
+}
+
+/* マークダウン上で選択中の画像ハイライト（rキーでリネーム可能であることを明示） */
+.custom-selected-markdown-image {
+    outline: 2px solid var(--interactive-accent) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px;
+}
