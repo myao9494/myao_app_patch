@@ -1,0 +1,465 @@
+/**
+ * FastAPI バックエンドと通信するための API クライアント。
+ * 階層指定（index_depth）は未指定（無制限）を許容するため、パラメータをオプショナルとして扱う。
+ **/
+import type {
+  AppSettings,
+  FailedFileListResponse,
+  IndexedTargetListResponse,
+  IndexStatus,
+  SearchTargetListResponse,
+  SearchTargetCoverage,
+  SchedulerSettings,
+  SearchResponse,
+  LauncherStatus,
+} from "../types";
+
+const API_BASE = (import.meta as ImportMeta & { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL ?? "";
+const SEARCH_PAGE_SIZE = 50;
+
+type ApiErrorDetail = {
+  msg?: string;
+};
+
+function getErrorMessage(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw) as { detail?: string | ApiErrorDetail[] };
+    if (typeof parsed.detail === "string" && parsed.detail.trim()) {
+      return parsed.detail;
+    }
+    if (Array.isArray(parsed.detail) && parsed.detail.length > 0) {
+      return parsed.detail.map((item) => item.msg ?? "入力内容を確認してください。").join(" ");
+    }
+  } catch {
+    return raw || "Request failed.";
+  }
+  return raw || "Request failed.";
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+    ...init,
+  });
+  if (!response.ok) {
+    throw new Error(getErrorMessage(await response.text()));
+  }
+  return (await response.json()) as T;
+}
+
+export async function fetchIndexStatus(): Promise<IndexStatus> {
+  return request<IndexStatus>("/api/index/status");
+}
+
+export async function fetchAppSettings(): Promise<AppSettings> {
+  return request<AppSettings>("/api/index/settings");
+}
+
+export async function fetchSchedulerSettings(): Promise<SchedulerSettings> {
+  return request<SchedulerSettings>("/api/index/scheduler");
+}
+
+export async function startScheduler(payload: { paths: string[]; start_at: string }): Promise<SchedulerSettings> {
+  return request<SchedulerSettings>("/api/index/scheduler/start", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchLauncherStatus(): Promise<LauncherStatus> {
+  return request<LauncherStatus>("/api/launcher/status");
+}
+
+export async function startLauncher(): Promise<LauncherStatus> {
+  return request<LauncherStatus>("/api/launcher/start", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+export async function stopLauncher(): Promise<LauncherStatus> {
+  return request<LauncherStatus>("/api/launcher/stop", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+export async function restartLauncher(): Promise<LauncherStatus> {
+  return request<LauncherStatus>("/api/launcher/restart", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+export async function updateAppSettings(payload: {
+  exclude_keywords?: string;
+  web_exclude_keywords?: string;
+  web_fetch_mode?: "http" | "edge" | "chrome";
+  hidden_indexed_targets?: string;
+  synonym_groups?: string;
+  obsidian_sidebar_explorer_data_path?: string;
+  gantt_parent?: number;
+  launcher_hotkey?: "command_option" | "double_shift";
+  index_selected_extensions?: string;
+  custom_content_extensions?: string;
+  custom_filename_extensions?: string;
+  confirm_index_deletion?: boolean;
+  clean_excluded_files?: boolean;
+}): Promise<AppSettings> {
+  return request<AppSettings>("/api/index/settings", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchFailedFiles(): Promise<FailedFileListResponse> {
+  return request<FailedFileListResponse>("/api/index/failed-files");
+}
+
+export async function fetchIndexedTargets(sourceType: "local" | "web" = "local"): Promise<IndexedTargetListResponse> {
+  const query = new URLSearchParams({ source_type: sourceType });
+  return request<IndexedTargetListResponse>(`/api/index/targets?${query.toString()}`);
+}
+
+export async function deleteIndexedTargets(folderPaths: string[]): Promise<{ deleted_count: number }> {
+  return request<{ deleted_count: number }>("/api/index/targets", {
+    method: "DELETE",
+    body: JSON.stringify({ target_paths: folderPaths }),
+  });
+}
+
+export async function fetchSearchTargets(): Promise<SearchTargetListResponse> {
+  return request<SearchTargetListResponse>("/api/index/search-targets");
+}
+
+export async function fetchSearchTargetCoverage(folderPath: string): Promise<SearchTargetCoverage> {
+  const query = new URLSearchParams({ folder_path: folderPath });
+  return request<SearchTargetCoverage>(`/api/index/search-targets/coverage?${query.toString()}`);
+}
+
+export async function setSearchTargetEnabled(payload: {
+  folder_path: string;
+  is_enabled: boolean;
+}): Promise<SearchTargetListResponse> {
+  return request<SearchTargetListResponse>("/api/index/search-targets", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function addSearchTarget(folderPath: string, indexDepth?: number): Promise<SearchTargetListResponse> {
+  return request<SearchTargetListResponse>("/api/index/search-targets", {
+    method: "POST",
+    body: JSON.stringify({ folder_path: folderPath, index_depth: indexDepth ?? undefined }),
+  });
+}
+
+export async function deleteSearchTargets(folderPaths: string[]): Promise<{ deleted_count: number }> {
+  return request<{ deleted_count: number }>("/api/index/search-targets", {
+    method: "DELETE",
+    body: JSON.stringify({ folder_paths: folderPaths }),
+  });
+}
+
+export async function reindexSearchTargets(folderPaths: string[]): Promise<{ reindexed_count: number }> {
+  return request<{ reindexed_count: number }>("/api/index/search-targets/reindex", {
+    method: "POST",
+    body: JSON.stringify({ folder_paths: folderPaths }),
+  });
+}
+
+export async function resetDatabase(): Promise<{ message: string; status: IndexStatus }> {
+  return request<{ message: string; status: IndexStatus }>("/api/index/reset", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+export async function cancelIndexing(): Promise<{ message: string; status: IndexStatus }> {
+  return request<{ message: string; status: IndexStatus }>("/api/index/cancel", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+export async function pickFolder(): Promise<{ full_path: string }> {
+  return request<{ full_path: string }>("/api/folders/pick", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+export async function fetchSearchPage(params: {
+  q: string;
+  full_path: string;
+  search_all_enabled?: boolean;
+  skip_refresh?: boolean;
+  source_type?: "local" | "web" | "gantt";
+  index_depth?: number;
+  refresh_window_minutes: number;
+  regex_enabled?: boolean;
+  search_target?: "all" | "body" | "filename" | "folder" | "filename_and_folder";
+  index_types?: string;
+  types?: string;
+  date_field?: "created" | "modified";
+  sort_by?: "default" | "hybrid_score" | "vector_score" | "keyword_score" | "created" | "modified" | "click_count";
+  sort_order?: "asc" | "desc";
+  created_from?: string;
+  created_to?: string;
+  limit?: number;
+  offset?: number;
+  include_snippets?: boolean;
+  include_gantt_tasks?: boolean;
+  search_type?: "hybrid" | "vector" | "keyword";
+}): Promise<SearchResponse> {
+  return request<SearchResponse>("/api/search", {
+    method: "POST",
+    body: JSON.stringify({
+      ...params,
+      limit: params.limit ?? SEARCH_PAGE_SIZE,
+      offset: params.offset ?? 0,
+      include_snippets: params.include_snippets ?? true,
+      search_type: params.search_type ?? "hybrid",
+    }),
+  });
+}
+
+export async function search(params: {
+  q: string;
+  full_path: string;
+  search_all_enabled?: boolean;
+  skip_refresh?: boolean;
+  source_type?: "local" | "web" | "gantt";
+  index_depth?: number;
+  refresh_window_minutes: number;
+  regex_enabled?: boolean;
+  search_target?: "all" | "body" | "filename" | "folder" | "filename_and_folder";
+  index_types?: string;
+  types?: string;
+  date_field?: "created" | "modified";
+  sort_by?: "default" | "hybrid_score" | "vector_score" | "keyword_score" | "created" | "modified" | "click_count";
+  sort_order?: "asc" | "desc";
+  created_from?: string;
+  created_to?: string;
+  include_gantt_tasks?: boolean;
+  search_type?: "hybrid" | "vector" | "keyword";
+}, options?: {
+  onProgress?: (response: SearchResponse) => void;
+}): Promise<SearchResponse> {
+  const response = await fetchSearchPage(params);
+  options?.onProgress?.(response);
+  return response;
+}
+
+export async function fetchVectorModelStatus(): Promise<import("../types").VectorModelStatus> {
+  return request<import("../types").VectorModelStatus>("/api/vector/model/status");
+}
+
+export async function loadVectorModel(modelPath?: string, useMock = false, mockDim = 256): Promise<any> {
+  return request<any>("/api/vector/model/load", {
+    method: "POST",
+    body: JSON.stringify({ model_path: modelPath, use_mock: useMock, mock_dim: mockDim }),
+  });
+}
+
+export async function fetchVectorPendingDeletions(
+  targetFolders?: string[],
+  modelPath?: string,
+): Promise<import("../types").VectorPendingDeletionsResponse> {
+  return request<import("../types").VectorPendingDeletionsResponse>("/api/vector/index/pending-deletions", {
+    method: "POST",
+    body: JSON.stringify({ target_folders: targetFolders, model_path: modelPath }),
+  });
+}
+
+export async function startVectorIndex(
+  forceReindex = false,
+  targetFolders?: string[],
+  modelPath?: string,
+  cleanDeletedFiles = false,
+): Promise<any> {
+  return request<any>("/api/vector/index/start", {
+    method: "POST",
+    body: JSON.stringify({
+      force_reindex: forceReindex,
+      clean_deleted_files: cleanDeletedFiles,
+      target_folders: targetFolders,
+      model_path: modelPath,
+    }),
+  });
+}
+
+export async function fetchVectorIndexProgress(): Promise<import("../types").VectorIndexProgress> {
+  return request<import("../types").VectorIndexProgress>("/api/vector/index/progress");
+}
+
+export async function fetchVectorIndexStats(): Promise<import("../types").VectorIndexStats> {
+  return request<import("../types").VectorIndexStats>("/api/vector/index/stats");
+}
+
+export async function updateVectorSingleFile(filePath: string): Promise<any> {
+  return request<any>("/api/vector/index/update-file", {
+    method: "POST",
+    body: JSON.stringify({ file_path: filePath }),
+  });
+}
+
+export async function fetchVectorDictionaryStatus(): Promise<any> {
+  return request<any>("/api/vector/dictionary/status");
+}
+
+export async function saveVectorDictionary(entries: Array<{ terms?: string; term?: string; description?: string }>, fileName = "glossary.xlsx"): Promise<any> {
+  return request<any>("/api/vector/dictionary/save", {
+    method: "POST",
+    body: JSON.stringify({ entries, file_name: fileName }),
+  });
+}
+
+export async function generateAiHtml(payload: {
+  file_paths?: string[];
+  vault_path?: string;
+  relative_paths?: string[];
+  prompt?: string;
+  title?: string;
+  include_raw_markdown?: boolean;
+  include_images?: boolean;
+  include_linked_emails?: boolean;
+  optimize_tokens?: boolean;
+}): Promise<import("../types").AiHtmlExportResponse> {
+  return request<import("../types").AiHtmlExportResponse>("/api/export/ai-html", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function downloadAiHtml(payload: {
+  file_paths?: string[];
+  vault_path?: string;
+  relative_paths?: string[];
+  prompt?: string;
+  title?: string;
+  include_raw_markdown?: boolean;
+  include_images?: boolean;
+  include_linked_emails?: boolean;
+  optimize_tokens?: boolean;
+}): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/export/ai-html/download`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(getErrorMessage(await response.text()));
+  }
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ai_context_document.html";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
+export async function saveAiHtmlToFile(payload: {
+  html_content: string;
+  file_name?: string;
+  target_dir?: string;
+}): Promise<{ success: boolean; saved_path: string; file_name: string; size_bytes: number }> {
+  return request<{ success: boolean; saved_path: string; file_name: string; size_bytes: number }>(
+    "/api/export/ai-html/save",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function downloadAiPdf(payload: {
+  html_content?: string;
+  file_paths?: string[];
+  vault_path?: string;
+  relative_paths?: string[];
+  prompt?: string;
+  title?: string;
+  file_name?: string;
+  include_raw_markdown?: boolean;
+  include_images?: boolean;
+  include_linked_emails?: boolean;
+  optimize_tokens?: boolean;
+}): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/export/ai-pdf/download`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(getErrorMessage(await response.text()));
+  }
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const fileName = payload.file_name || (payload.title ? `${payload.title}.pdf` : "ai_context_document.pdf");
+  a.download = fileName.endsWith(".pdf") ? fileName : `${fileName}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
+export async function saveAiPdfToFile(payload: {
+  html_content?: string;
+  file_paths?: string[];
+  vault_path?: string;
+  relative_paths?: string[];
+  prompt?: string;
+  title?: string;
+  file_name?: string;
+  target_dir?: string;
+  include_raw_markdown?: boolean;
+  include_images?: boolean;
+  include_linked_emails?: boolean;
+  optimize_tokens?: boolean;
+}): Promise<{ success: boolean; saved_path: string; file_name: string; size_bytes: number }> {
+  return request<{ success: boolean; saved_path: string; file_name: string; size_bytes: number }>(
+    "/api/export/ai-pdf/save",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function recordSearchClick(fileId: number, query = ""): Promise<{ file_id: number; click_count: number }> {
+  return request<{ file_id: number; click_count: number }>("/api/search/click", {
+    method: "POST",
+    keepalive: true,
+    body: JSON.stringify({ file_id: fileId, query }),
+  });
+}
+
+export async function deleteFile(fileId: number): Promise<{ status: string; file_id: number }> {
+  return request<{ status: string; file_id: number }>(`/api/files/${fileId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function openFileLocation(path: string): Promise<{ status: string }> {
+  return request<{ status: string }>("/api/files/open-location", {
+    method: "POST",
+    body: JSON.stringify({ path }),
+  });
+}
+
+export async function openGanttTaskInput(taskId: number): Promise<{ status: string; task_id: number }> {
+  return request<{ status: string; task_id: number }>(`/api/gantt/tasks/${taskId}/open-input`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
