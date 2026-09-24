@@ -1,3 +1,4 @@
 # Managed by Myao Patch Bridge
 *.patch.part-* binary
 *.json text eol=lf
+packages/** binary
