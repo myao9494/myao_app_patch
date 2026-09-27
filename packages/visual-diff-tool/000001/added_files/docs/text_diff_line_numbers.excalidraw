@@ -1,0 +1,118 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "box_title",
+      "type": "rectangle",
+      "x": 40,
+      "y": 30,
+      "width": 840,
+      "height": 60,
+      "strokeColor": "#15803d",
+      "backgroundColor": "#dcfce7",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": { "type": 3 }
+    },
+    {
+      "id": "text_title",
+      "type": "text",
+      "x": 60,
+      "y": 45,
+      "width": 800,
+      "height": 30,
+      "text": "テキスト差分 行番号の左右同期 ＆ 追加行(A)・削除行(D) 表示仕様",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle"
+    },
+    {
+      "id": "box_before",
+      "type": "rectangle",
+      "x": 40,
+      "y": 110,
+      "width": 400,
+      "height": 320,
+      "strokeColor": "#b91c1c",
+      "backgroundColor": "#fef2f2",
+      "fillStyle": "solid",
+      "strokeWidth": 1.5,
+      "roughness": 0,
+      "roundness": { "type": 3 }
+    },
+    {
+      "id": "text_before_title",
+      "type": "text",
+      "x": 60,
+      "y": 125,
+      "width": 360,
+      "height": 24,
+      "text": "【従来の課題: 行番号の左右ズレ】",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_before_desc",
+      "type": "text",
+      "x": 60,
+      "y": 160,
+      "width": 360,
+      "height": 250,
+      "text": "各ファイルの物理行番号を表示していたため:\n\n・途中で行が追加されると、新側の番号が進む\n  Row 4: 左 4 (replace) | 右 4 (replace)\n  Row 5: 左 -- (ギャップ) | 右 5 (insert)\n  Row 6: 左 -- (ギャップ) | 右 6 (insert)\n  Row 7: 左 5 (equal)   | 右 7 (equal) ← ズレ！\n  Row 8: 左 6 (equal)   | 右 8 (equal) ← ズレ！\n\n× 全く同じ内容の行なのに左右で番号が食い違う\n× 左右を見比べる際に認知負荷が大きい",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_after",
+      "type": "rectangle",
+      "x": 480,
+      "y": 110,
+      "width": 400,
+      "height": 320,
+      "strokeColor": "#15803d",
+      "backgroundColor": "#f0fdf4",
+      "fillStyle": "solid",
+      "strokeWidth": 1.5,
+      "roughness": 0,
+      "roundness": { "type": 3 }
+    },
+    {
+      "id": "text_after_title",
+      "type": "text",
+      "x": 500,
+      "y": 125,
+      "width": 360,
+      "height": 24,
+      "text": "【新仕様: 左右同期 ＆ A / D 表示】",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_after_desc",
+      "type": "text",
+      "x": 500,
+      "y": 160,
+      "width": 360,
+      "height": 250,
+      "text": "共通の行カウンター ＆ A/Dシンボルを採用:\n\n・追加行は 'A'、削除行は 'D'（番号消費なし）\n  Row 4: 左 4 (replace) | 右 4 (replace)\n  Row 5: 左 -- (ギャップ) | 右 A (insert)\n  Row 6: 左 -- (ギャップ) | 右 A (insert)\n  Row 7: 左 5 (equal)   | 右 5 (equal) ◎ 一致！\n  Row 8: 左 6 (equal)   | 右 6 (equal) ◎ 一致！\n\n◎ 共通行・変更行の行番号が100%左右完全同期！\n◎ 追加行(A:緑)・削除行(D:赤)が一目で判別可能",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  }
+}

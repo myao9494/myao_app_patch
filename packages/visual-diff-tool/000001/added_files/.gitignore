@@ -1,0 +1,12 @@
+.DS_Store
+.venv/
+.venv_windows/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.env
+.env.*
+frontend/node_modules/
+debug_outputs/
+attachments/

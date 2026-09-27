@@ -1,0 +1,193 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "box_title",
+      "type": "rectangle",
+      "x": 40,
+      "y": 30,
+      "width": 780,
+      "height": 60,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_title",
+      "type": "text",
+      "x": 60,
+      "y": 45,
+      "width": 740,
+      "height": 30,
+      "text": "Pythonコード & Markdown向け スマートDiffの仕組み",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle"
+    },
+    {
+      "id": "box_legacy",
+      "type": "rectangle",
+      "x": 40,
+      "y": 110,
+      "width": 370,
+      "height": 260,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#fff5f5",
+      "fillStyle": "solid",
+      "strokeWidth": 1.5,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_legacy_title",
+      "type": "text",
+      "x": 60,
+      "y": 125,
+      "width": 330,
+      "height": 25,
+      "text": "【従来の文字単位比較 (difflib標準)】",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_legacy_py",
+      "type": "text",
+      "x": 60,
+      "y": 165,
+      "width": 330,
+      "height": 70,
+      "text": "■ Pythonコード:\n  - def calculate_[tot]al_amount():\n  + def calculate_[fin]al_amount():\n  ※ \"_\" や \"al_amount\" が部分一致して\n    単語の途中でブツブツ細切れに！",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_legacy_md",
+      "type": "text",
+      "x": 60,
+      "y": 250,
+      "width": 330,
+      "height": 80,
+      "text": "■ 日本語Markdown:\n  - [今]日は晴天でした\n  + [明]日は大雨でした\n  ※ \"日\" だけが一致扱いになり、\n    \"今日/明日\" という単語が分断される",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_smart",
+      "type": "rectangle",
+      "x": 450,
+      "y": 110,
+      "width": 370,
+      "height": 260,
+      "strokeColor": "#2b8a3e",
+      "backgroundColor": "#ebfbee",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_smart_title",
+      "type": "text",
+      "x": 470,
+      "y": 125,
+      "width": 330,
+      "height": 25,
+      "text": "【実装したスマートDiff (トークン単位)】",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_smart_py",
+      "type": "text",
+      "x": 470,
+      "y": 165,
+      "width": 330,
+      "height": 70,
+      "text": "■ Pythonコード:\n  - def [calculate_total_amount]():\n  + def [calculate_final_amount]():\n  ★ 変数名・識別子を丸ごとハイライト！\n    人間がコードを読む感覚と完全一致。",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_smart_md",
+      "type": "text",
+      "x": 470,
+      "y": 250,
+      "width": 330,
+      "height": 80,
+      "text": "■ 日本語Markdown:\n  - [今日]は[晴天]でした\n  + [明日]は[大雨]でした\n  ★ 単語（漢字塊・ひらがな塊）ごとに\n    きれいに色分けされて一目で分かる！",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_anchor",
+      "type": "rectangle",
+      "x": 40,
+      "y": 390,
+      "width": 780,
+      "height": 110,
+      "strokeColor": "#495057",
+      "backgroundColor": "#f8f9fa",
+      "fillStyle": "solid",
+      "strokeWidth": 1.5,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_anchor_title",
+      "type": "text",
+      "x": 60,
+      "y": 405,
+      "width": 740,
+      "height": 25,
+      "text": "【行レベルの改善: 空行引きずられ防止 & アンカー行保護】",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "text_anchor_body",
+      "type": "text",
+      "x": 60,
+      "y": 435,
+      "width": 740,
+      "height": 55,
+      "text": "・空行や区切り記号（:、---、{}）をjunk扱いにして、ありふれた行の一致に引きずられないように制御\n・Markdownの見出し（#）やPythonの関数定義（def）がアンカーとして保護され、\n  途中に文章やコードが挿入されても前後のブロックが正しく整列するようになりました。",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  },
+  "files": {}
+}

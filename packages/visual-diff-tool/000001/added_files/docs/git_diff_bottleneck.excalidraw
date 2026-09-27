@@ -1,0 +1,294 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "box_user",
+      "type": "rectangle",
+      "x": 40,
+      "y": 40,
+      "width": 240,
+      "height": 90,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_user",
+      "type": "text",
+      "x": 55,
+      "y": 55,
+      "width": 210,
+      "height": 60,
+      "text": "ユーザーの操作\nObsidianの1ノートの\n差分を確認したい",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle"
+    },
+    {
+      "id": "arrow_1",
+      "type": "arrow",
+      "x": 280,
+      "y": 85,
+      "width": 80,
+      "height": 0,
+      "strokeColor": "#868e96",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          80,
+          0
+        ]
+      ]
+    },
+    {
+      "id": "box_current",
+      "type": "rectangle",
+      "x": 360,
+      "y": 20,
+      "width": 420,
+      "height": 340,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#fff5f5",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_current_title",
+      "type": "text",
+      "x": 380,
+      "y": 35,
+      "width": 380,
+      "height": 25,
+      "text": "【現在の内部処理 (遅延の原因)】",
+      "fontSize": 18,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_step1",
+      "type": "rectangle",
+      "x": 380,
+      "y": 70,
+      "width": 380,
+      "height": 60,
+      "strokeColor": "#fa5252",
+      "backgroundColor": "#ffffff",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "text_step1",
+      "type": "text",
+      "x": 390,
+      "y": 78,
+      "width": 360,
+      "height": 45,
+      "text": "① Vault全体の全Git差分を取得 (git status)\n  → 変更された全ファイル (数十〜数百件) を列挙",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_step2",
+      "type": "rectangle",
+      "x": 380,
+      "y": 140,
+      "width": 380,
+      "height": 90,
+      "strokeColor": "#c92a2a",
+      "backgroundColor": "#ffe3e3",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "text_step2",
+      "type": "text",
+      "x": 390,
+      "y": 148,
+      "width": 360,
+      "height": 75,
+      "text": "②【最大ボトルネック】全ファイルの git show 実行\n  → 全変更テキストに対して git cat-file & git show\n  → 100件なら200回以上 git サブプロセス直列起動\n  → macOSで数秒〜十数秒フリーズ！",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_step3",
+      "type": "rectangle",
+      "x": 380,
+      "y": 240,
+      "width": 380,
+      "height": 55,
+      "strokeColor": "#fa5252",
+      "backgroundColor": "#ffffff",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "text_step3",
+      "type": "text",
+      "x": 390,
+      "y": 248,
+      "width": 360,
+      "height": 40,
+      "text": "③ Vault全体を再帰探索 (rglob) してリンク解決\n  → その後に不要な99%のファイルを捨てて絞り込み",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_step4",
+      "type": "rectangle",
+      "x": 380,
+      "y": 305,
+      "width": 380,
+      "height": 45,
+      "strokeColor": "#fa5252",
+      "backgroundColor": "#ffffff",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "text_step4",
+      "type": "text",
+      "x": 390,
+      "y": 312,
+      "width": 360,
+      "height": 30,
+      "text": "④ UI上でも大量の差分リストから目的の1件を探す必要あり",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_improved",
+      "type": "rectangle",
+      "x": 360,
+      "y": 390,
+      "width": 420,
+      "height": 220,
+      "strokeColor": "#2b8a3e",
+      "backgroundColor": "#ebfbee",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 0,
+      "roundness": {
+        "type": 3
+      }
+    },
+    {
+      "id": "text_improved_title",
+      "type": "text",
+      "x": 380,
+      "y": 405,
+      "width": 380,
+      "height": 25,
+      "text": "【改善策 (高速化とUX改善)】",
+      "fontSize": 18,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_imp1",
+      "type": "rectangle",
+      "x": 380,
+      "y": 440,
+      "width": 380,
+      "height": 70,
+      "strokeColor": "#40c057",
+      "backgroundColor": "#ffffff",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "text_imp1",
+      "type": "text",
+      "x": 390,
+      "y": 448,
+      "width": 360,
+      "height": 55,
+      "text": "① ピンポイント取得・事前git showの廃止\n  → 対象ファイルのみ直接 git 差分を取得 (1〜2回起動)\n  → 処理時間が 数秒〜十数秒 → 数十ミリ秒 に劇的改善！",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "box_imp2",
+      "type": "rectangle",
+      "x": 380,
+      "y": 520,
+      "width": 380,
+      "height": 70,
+      "strokeColor": "#40c057",
+      "backgroundColor": "#ffffff",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "text_imp2",
+      "type": "text",
+      "x": 390,
+      "y": 528,
+      "width": 360,
+      "height": 55,
+      "text": "② UIに「ファイル絞り込み検索」と「単一ファイル直開き」\n  → フォルダ指定時もインクリメンタル検索ですぐ発見\n  → Obsidian連携時は余計なファイルを出さず即表示",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  },
+  "files": {}
+}
