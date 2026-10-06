@@ -1,0 +1,10 @@
+{
+  "id": "ai-model-workbench",
+  "name": "AI Model Workbench",
+  "version": "0.9.12",
+  "minAppVersion": "1.5.0",
+  "description": "Turn 3D models into linked knowledge assets.",
+  "author": "flash",
+  "authorUrl": "https://github.com/flash555588",
+  "isDesktopOnly": false
+}

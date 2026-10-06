@@ -1,0 +1,3306 @@
+/* ===== AI Model Workbench - Obsidian-native Design ===== */
+
+/* --- Utility Classes --- */
+
+body {
+  --ai3d-radius: var(--radius-s);
+  --ai3d-spacing: var(--size-4-3);
+}
+
+.is-hidden {
+  display: none;
+}
+
+.ai3d-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ai3d-canvas-full {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ai3d-settings-diagnostics {
+  margin-top: 0.5rem;
+}
+
+.ai3d-settings-status-block {
+  margin-bottom: 0.9rem;
+}
+
+.ai3d-annot-btn {
+  position: relative;
+}
+
+.ai3d-inline-btn.ai3d-btn-active {
+  color: var(--text-on-accent);
+  background: var(--interactive-accent);
+}
+
+.ai3d-inline-btn.ai3d-btn-active:hover {
+  filter: brightness(1.1);
+}
+
+.ai3d-res-btn {
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 32px;
+}
+
+/* --- Preview Host --- */
+
+.ai3d-preview-host {
+  min-height: var(--min-height, clamp(200px, 30vh, 400px));
+  max-width: var(--max-width, none);
+  border-radius: var(--ai3d-radius) var(--ai3d-radius) 0 0;
+  border: 1px solid var(--background-modifier-border);
+  overflow: hidden;
+  background: var(--background-secondary);
+  position: relative;
+  transition: box-shadow 0.15s ease;
+}
+
+.ai3d-preview-host canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+.ai3d-preview-host canvas:active {
+  cursor: grabbing;
+}
+
+/* Keyboard focus ring for canvases (they are tabbable and support R/W/G/B/M keys). */
+.ai3d-preview-host canvas:focus-visible,
+.ai3d-grid-host canvas:focus-visible,
+.ai3d-embed-canvas:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+}
+
+/* Floating model caption: identifies the previewed asset inside the note. */
+.ai3d-inline-caption {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 16px);
+  padding: 3px 8px;
+  color: var(--text-normal);
+  background: color-mix(in srgb, var(--background-primary) 72%, transparent);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.4;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* Hide the caption while an interaction mode (measure/slice/focus/disassembly)
+   is active so it does not obscure the region being worked on. */
+.ai3d-preview-host.ai3d-interaction-active .ai3d-inline-caption,
+.ai3d-grid-host.ai3d-interaction-active .ai3d-inline-caption {
+  opacity: 0;
+}
+
+.ai3d-inline-caption-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai3d-inline-caption-badge {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* One-time interaction hint shown after a model loads. */
+.ai3d-interaction-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  z-index: 6;
+  padding: 4px 12px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--background-primary) 78%, transparent);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  font-size: var(--font-ui-smaller);
+  line-height: 1.5;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  transition: opacity 0.4s ease;
+}
+
+.ai3d-interaction-hint.is-hidden {
+  opacity: 0;
+}
+
+.ai3d-zoom-control {
+  --ai3d-zoom-percent: 0%;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 168px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--background-primary) 46%, transparent);
+  opacity: 0.72;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  pointer-events: auto;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.ai3d-zoom-control:hover,
+.ai3d-zoom-control:focus-within,
+.ai3d-zoom-control.is-dragging {
+  opacity: 1;
+  background: color-mix(in srgb, var(--background-primary) 68%, transparent);
+}
+
+.ai3d-zoom-control.is-hidden {
+  display: none;
+}
+
+.ai3d-zoom-track {
+  position: relative;
+  width: 4px;
+  height: 132px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--background-modifier-border) 78%, transparent);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ai3d-zoom-fill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--ai3d-zoom-percent);
+  border-radius: inherit;
+  background: var(--interactive-accent);
+}
+
+.ai3d-zoom-track::after {
+  content: "";
+  position: absolute;
+  top: calc(100% - var(--ai3d-zoom-percent));
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--background-primary);
+  border-radius: 50%;
+  background: var(--interactive-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+}
+
+.ai3d-zoom-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: ns-resize;
+  opacity: 0;
+  pointer-events: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+@media (max-width: 600px) {
+  .ai3d-zoom-control {
+    right: 6px;
+    width: 24px;
+    height: 126px;
+  }
+
+  .ai3d-zoom-track {
+    height: 96px;
+  }
+}
+
+.ai3d-preview-host canvas.ai3d-disassembly-active,
+.ai3d-grid-host canvas.ai3d-disassembly-active,
+.ai3d-embed-preview canvas.ai3d-disassembly-active {
+  cursor: grab;
+  touch-action: none;
+}
+
+.ai3d-preview-host canvas.ai3d-disassembly-dragging,
+.ai3d-grid-host canvas.ai3d-disassembly-dragging,
+.ai3d-embed-preview canvas.ai3d-disassembly-dragging {
+  cursor: grabbing;
+}
+
+.ai3d-preview-host canvas.ai3d-measurement-active,
+.ai3d-grid-host canvas.ai3d-measurement-active,
+.ai3d-embed-preview canvas.ai3d-measurement-active {
+  cursor: crosshair;
+}
+
+.ai3d-preview-host canvas.ai3d-measurement-focus-aggregation,
+.ai3d-grid-host canvas.ai3d-measurement-focus-aggregation,
+.ai3d-embed-preview canvas.ai3d-measurement-focus-aggregation {
+  animation: ai3d-measurement-focus-aggregation 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ai3d-measurement-focus-aggregation {
+  0% {
+    box-shadow:
+      inset 0 0 0 0 rgba(96, 165, 250, 0),
+      0 0 0 0 rgba(37, 99, 235, 0);
+    filter: saturate(1) brightness(1);
+  }
+  34% {
+    box-shadow:
+      inset 0 0 0 2px rgba(125, 211, 252, 0.9),
+      0 0 0 3px rgba(59, 130, 246, 0.44),
+      0 0 28px rgba(37, 99, 235, 0.48);
+    filter: saturate(1.15) brightness(1.04);
+  }
+  68% {
+    box-shadow:
+      inset 0 0 0 1px rgba(147, 197, 253, 0.5),
+      0 0 0 10px rgba(59, 130, 246, 0.16),
+      0 0 40px rgba(29, 78, 216, 0.28);
+    filter: saturate(1.08) brightness(1.02);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 0 rgba(96, 165, 250, 0),
+      0 0 0 16px rgba(37, 99, 235, 0);
+    filter: saturate(1) brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai3d-preview-host canvas.ai3d-measurement-focus-aggregation,
+  .ai3d-grid-host canvas.ai3d-measurement-focus-aggregation,
+  .ai3d-embed-preview canvas.ai3d-measurement-focus-aggregation {
+    animation: none;
+    box-shadow:
+      inset 0 0 0 2px rgba(125, 211, 252, 0.75),
+      0 0 24px rgba(37, 99, 235, 0.32);
+  }
+}
+
+.ai3d-preview-host.is-mobile-scroll-mode canvas,
+.ai3d-grid-host.is-mobile-scroll-mode canvas,
+.ai3d-embed-preview.is-mobile-scroll-mode .ai3d-embed-canvas {
+  pointer-events: none;
+}
+
+.ai3d-preview-host.is-mobile-scroll-mode .ai3d-annotation-pin,
+.ai3d-grid-host.is-mobile-scroll-mode .ai3d-annotation-pin,
+.ai3d-embed-preview.is-mobile-scroll-mode .ai3d-annotation-pin {
+  pointer-events: none;
+}
+
+.ai3d-preview-host.is-mobile-interactive,
+.ai3d-grid-host.is-mobile-interactive,
+.ai3d-embed-preview.is-mobile-interactive {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+}
+
+.ai3d-preview-host.is-mobile-interactive canvas,
+.ai3d-grid-host.is-mobile-interactive canvas,
+.ai3d-embed-preview.is-mobile-interactive .ai3d-embed-canvas {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* --- Empty / Loading States --- */
+
+.ai3d-inline-empty {
+  padding: var(--ai3d-spacing);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  line-height: 1.5;
+}
+
+.ai3d-direct-load-gate {
+  display: flex;
+  min-height: min(420px, 70vh);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--background-primary);
+}
+
+.ai3d-direct-load-gate-title {
+  color: var(--text-normal);
+  font-size: var(--font-ui-medium);
+  font-weight: 600;
+}
+
+.ai3d-direct-load-gate-message {
+  max-width: 420px;
+  color: var(--text-muted);
+}
+
+.ai3d-direct-load-gate-meta {
+  display: flex;
+  max-width: min(520px, 90%);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-direct-load-gate-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai3d-direct-load-gate-meta span + span::before {
+  content: "/";
+  margin-right: 6px;
+  color: var(--background-modifier-border);
+}
+
+.ai3d-direct-load-gate-button {
+  min-height: 30px;
+  margin-top: 4px;
+  padding: 4px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--interactive-normal);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ai3d-direct-load-gate-button:hover {
+  background: var(--interactive-hover);
+}
+
+.ai3d-load-feedback-shell {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 28px);
+}
+
+.ai3d-load-feedback-shell.is-mobile {
+  padding: 14px;
+}
+
+.ai3d-load-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-1);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 420px;
+  width: min(100%, 420px);
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.ai3d-load-feedback-shell.is-mobile .ai3d-load-feedback {
+  max-width: 300px;
+  gap: 6px;
+}
+
+.ai3d-load-feedback.is-warning {
+  color: var(--text-warning);
+}
+
+.ai3d-load-feedback.is-error {
+  color: var(--text-error);
+}
+
+.ai3d-load-feedback-title {
+  font-size: var(--font-ui-medium);
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.ai3d-load-feedback-shell.is-mobile .ai3d-load-feedback-title {
+  font-size: var(--font-ui-small);
+}
+
+.ai3d-load-feedback-message {
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.ai3d-load-feedback-hint {
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.ai3d-mobile-mode-hint {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  line-height: 1.45;
+}
+
+.ai3d-mobile-mode-hint--inline {
+  padding: 6px 4px 0;
+}
+
+/* Note previews share a compact frame in reading and Live Preview surfaces. */
+.ai3d-note-preview {
+  container: ai3d-note / inline-size;
+  width: 100%;
+  min-width: 0;
+  margin: 12px 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-primary);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ai3d-note-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  font-weight: 600;
+}
+
+.ai3d-note-preview-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai3d-note-preview > .ai3d-preview-host {
+  height: var(--min-height, clamp(200px, 30vh, 400px));
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+
+.ai3d-embed-preview.ai3d-note-preview > .ai3d-preview-host {
+  height: auto;
+  min-height: 0;
+}
+
+.ai3d-embed-preview.ai3d-note-preview > .ai3d-preview-host > .ai3d-embed-canvas {
+  height: var(--ai3d-embed-height, 300px);
+}
+
+.ai3d-note-preview .ai3d-note-toolbar {
+  container-type: normal;
+  justify-content: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 8px;
+  border: none;
+  border-top: 1px solid var(--background-modifier-border);
+  border-radius: 0;
+  background: var(--background-primary);
+}
+
+.ai3d-note-toolbar .ai3d-inline-btn {
+  box-shadow: none;
+  min-height: 32px;
+}
+
+.ai3d-note-preview .ai3d-note-toolbar .ai3d-helper-group {
+  gap: 6px;
+}
+
+.ai3d-note-toolbar .ai3d-note-group-label {
+  display: none;
+  order: -1;
+  flex: 0 0 46px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-note-toolbar .ai3d-note-button-text {
+  display: none;
+}
+
+.ai3d-note-toolbar:not(.show-secondary) .ai3d-helper-group-output {
+  display: none;
+}
+
+.ai3d-note-preview .ai3d-note-toolbar:not(.show-secondary) .ai3d-inline-btn.is-secondary.ai3d-btn-active {
+  display: flex;
+}
+
+.ai3d-note-toolbar.show-secondary .ai3d-helper-group {
+  flex: 1 1 100%;
+  gap: 6px;
+  padding: 4px 0;
+  border: none;
+}
+
+.ai3d-note-toolbar.show-secondary .ai3d-note-group-label,
+.ai3d-note-toolbar.show-secondary .ai3d-note-button-text {
+  display: inline;
+}
+
+.ai3d-note-toolbar.show-secondary .ai3d-note-named-btn {
+  width: auto;
+  height: auto;
+  gap: 5px;
+  padding: 4px 8px;
+  white-space: normal;
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-note-toolbar .ai3d-measurement-details,
+.ai3d-note-toolbar .ai3d-slice-details {
+  box-shadow: none;
+  border-radius: var(--radius-s);
+}
+
+@container ai3d-note (max-width: 480px) {
+  .ai3d-note-toolbar .ai3d-helper-group + .ai3d-helper-group {
+    padding-left: 0;
+    border: none;
+  }
+  .ai3d-note-toolbar.show-secondary .ai3d-note-group-label {
+    flex-basis: 100%;
+    margin-bottom: 2px;
+  }
+}
+
+/* --- CM6 Widget: re-enable pointer events blocked by CodeMirror --- */
+
+/* Note insertion follows the host theme and keeps native picker navigation. */
+.ai3d-note-insert-modal { width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto; }
+.ai3d-note-insert-rules { margin: 0 12px 12px; padding: 16px; border: 1px solid var(--background-modifier-border); border-radius: 12px; background: var(--background-primary); }
+.ai3d-note-insert-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.ai3d-note-insert-rules h3 { margin: 0; font-size: var(--font-ui-medium); }
+.ai3d-note-insert-location { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: var(--font-ui-smaller); color: var(--text-muted); }
+.ai3d-note-insert-location output { padding: 3px 8px; border-radius: 6px; background: var(--background-secondary); color: var(--text-normal); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ai3d-note-insert-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ai3d-note-insert-options label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: var(--font-ui-small); color: var(--text-muted); }
+.ai3d-note-insert-options select { width: 100%; max-width: 100%; height: 34px; color: var(--text-normal); }
+.ai3d-note-insert-rules p { margin: 12px 0 0; font-size: var(--font-ui-small); line-height: 1.6; overflow-wrap: anywhere; }
+.ai3d-note-insert-hint { color: var(--text-normal); }
+.ai3d-note-insert-rules .ai3d-note-insert-guidance { margin-top: 6px; color: var(--text-muted); }
+.ai3d-note-insert-modal .prompt-results { max-height: min(320px, 35vh); }
+.ai3d-model-suggestion { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; }
+.ai3d-model-suggestion-content { flex: 1; min-width: 0; }
+.ai3d-model-suggestion-name { color: var(--text-normal); font-weight: 500; overflow-wrap: anywhere; }
+.ai3d-model-suggestion-path { margin-top: 3px; color: var(--text-muted); font-size: var(--font-ui-smaller); overflow-wrap: anywhere; }
+.ai3d-model-suggestion-format { flex-shrink: 0; padding: 3px 6px; border: 1px solid var(--background-modifier-border); border-radius: 5px; color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.ai3d-model-suggestion.is-selected { background: color-mix(in srgb, var(--interactive-accent) 12%, var(--background-primary)); }
+.ai3d-note-insert-modal select:focus-visible,
+.ai3d-note-parts-options :is(select, input, button):focus-visible,
+.ai3d-registered-parts-modal :is(input, button):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+@media (max-width: 480px) {
+  .ai3d-note-insert-options { grid-template-columns: 1fr; gap: 10px; }
+  .ai3d-note-insert-rules { padding: 12px; }
+  .ai3d-note-insert-heading { margin-bottom: 12px; }
+  .ai3d-note-insert-modal .prompt-results { max-height: 25vh; }
+}
+/* Note part presentation keeps the editor-owned frame and original canvas size. */
+.ai3d-note-parts-bar { border-top: 1px solid var(--background-modifier-border); padding: 12px; background: var(--background-primary); }
+.ai3d-note-parts-status { color: var(--text-muted); font-size: var(--font-ui-smaller); line-height: 1.6; margin-bottom: 12px; overflow-wrap: anywhere; }
+.ai3d-note-parts-status.is-warning { color: var(--text-warning); }
+.ai3d-note-parts-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 12px; }
+.ai3d-note-parts-options label { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--font-ui-smaller); color: var(--text-muted); }
+.ai3d-note-parts-options .ai3d-note-parts-selection { flex-direction: column; align-items: stretch; }
+.ai3d-note-parts-options select { width: 100%; max-width: 100%; color: var(--text-normal); }
+.ai3d-note-parts-options .ai3d-note-parts-separation { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.ai3d-note-parts-separation span { grid-column: 1 / -1; }
+.ai3d-note-parts-separation input { width: 100%; min-width: 0; }
+.ai3d-note-parts-separation output { min-width: 4ch; text-align: right; color: var(--text-normal); font-variant-numeric: tabular-nums; }
+.ai3d-note-parts-options button { justify-self: end; max-width: 100%; font-size: var(--font-ui-smaller); }
+.ai3d-note-parts-options [data-ai3d-action="note-parts-register"] { grid-column: 1 / -1; justify-self: start; }
+.ai3d-note-parts-toggle[aria-pressed="true"],
+.ai3d-image-actions [data-ai3d-action="note-parts-toggle"][aria-pressed="true"] { color: var(--text-on-accent); background: var(--interactive-accent); }
+.ai3d-image-compact > .ai3d-note-parts-bar,
+.ai3d-note-parts-active .ai3d-annotation-overlay,
+.ai3d-registered-parts-modal .ai3d-annotation-overlay { display: none; }
+@container ai3d-note (max-width: 360px) {
+  .ai3d-note-parts-options { grid-template-columns: minmax(0, 1fr); }
+  .ai3d-note-parts-options button { justify-self: start; }
+}
+
+/* Registered-part inspection reuses the current single-model canvas. */
+.ai3d-registered-parts-entry { padding: 14px 0; border-bottom: 1px solid var(--background-modifier-border); }
+.ai3d-registered-parts-entry h4 { margin: 0 0 6px; font-size: var(--font-ui-small); }
+.ai3d-registered-parts-entry p { color: var(--text-muted); font-size: var(--font-ui-smaller); margin: 0 0 12px; }
+.ai3d-registered-parts-entry button { width: 100%; }
+.ai3d-registered-parts-modal { width: min(1280px, 94vw); max-width: 94vw; height: min(860px, 94vh); max-height: 94vh; display: flex; flex-direction: column; }
+.ai3d-registered-parts-modal .modal-content { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.ai3d-registered-parts-hint { flex-shrink: 0; margin: 0 0 14px; color: var(--text-muted); font-size: var(--font-ui-small); }
+.ai3d-registered-parts-toolbar { flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ai3d-registered-parts-spacing { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: var(--font-ui-small); }
+.ai3d-registered-parts-spacing input { width: 140px; }
+.ai3d-registered-parts-spacing output { min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; }
+.ai3d-registered-parts-layout { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 14px; min-height: 0; }
+.ai3d-registered-parts-stage { min-width: 0; min-height: 0; overflow: hidden; border: 1px solid var(--background-modifier-border); border-radius: 12px; background: var(--background-secondary); }
+.ai3d-registered-parts-stage .ai3d-preview-host { width: 100%; height: 100%; min-height: 0; border: 0; border-radius: 0; }
+.ai3d-registered-parts-stage .ai3d-sidebar-toggle,
+.ai3d-registered-parts-stage .ai3d-annotation-overlay { display: none; }
+.ai3d-registered-parts-sidebar { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.ai3d-registered-parts-search { width: 100%; }
+.ai3d-registered-parts-stats { color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.ai3d-registered-parts-other { display: flex; align-items: center; gap: 6px; font-size: var(--font-ui-smaller); }
+.ai3d-registered-parts-list { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px; }
+.ai3d-registered-part { padding: 12px; border: 1px solid var(--background-modifier-border); border-radius: 10px; background: var(--background-secondary); }
+.ai3d-registered-part.is-selected { border-color: var(--interactive-accent); background: color-mix(in srgb, var(--interactive-accent) 9%, var(--background-secondary)); box-shadow: inset 3px 0 var(--interactive-accent); }
+.ai3d-registered-part h4 { margin: 0 0 5px; font-size: var(--font-ui-small); overflow-wrap: anywhere; }
+.ai3d-registered-part-status { display: inline-block; padding: 3px 7px; border-radius: 5px; background: var(--background-primary); font-size: var(--font-ui-smaller); color: var(--text-muted); }
+.ai3d-registered-part[data-match-status="partial"] .ai3d-registered-part-status,
+.ai3d-registered-part[data-match-status="ambiguous"] .ai3d-registered-part-status { color: var(--text-warning); }
+.ai3d-registered-part-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.ai3d-registered-part-actions label { display: flex; align-items: center; font-size: var(--font-ui-smaller); }
+.ai3d-registered-part-actions button { font-size: var(--font-ui-smaller); padding: 4px 8px; height: auto; }
+.ai3d-registered-part-actions button[aria-pressed="true"] { color: var(--text-on-accent); background: var(--interactive-accent); }
+.ai3d-registered-parts-footer { flex-shrink: 0; display: flex; justify-content: flex-end; margin-top: 14px; }
+.ai3d-registered-parts-empty { padding: 24px 8px; color: var(--text-muted); text-align: center; }
+@media (max-width: 760px) {
+  .ai3d-registered-parts-layout { grid-template-columns: 1fr; grid-template-rows: minmax(120px, 1fr) minmax(120px, 0.8fr); }
+  .ai3d-registered-parts-spacing { margin-left: 0; }
+}
+
+/* Image-style wikilinks stay inside their Markdown parent and reserve only the canvas. */
+.ai3d-image-embed {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+  line-height: normal;
+  white-space: normal;
+  margin: 4px 2px;
+  box-sizing: border-box;
+}
+
+.ai3d-image-embed > .ai3d-note-preview {
+  position: relative;
+  margin: 0;
+}
+
+.ai3d-image-embed .ai3d-note-preview-header {
+  display: none;
+}
+
+.ai3d-image-compact .ai3d-note-toolbar,
+.ai3d-image-compact .ai3d-zoom-control {
+  display: none;
+}
+
+.ai3d-image-actions {
+  display: none;
+}
+
+.ai3d-image-compact .ai3d-image-actions {
+  display: flex;
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  z-index: 12;
+  max-width: calc(100% - 12px);
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary);
+  box-shadow: 0 2px 8px #0002;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.ai3d-image-actions button {
+  min-width: 0;
+  min-height: 30px;
+  padding: 3px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-ui-smaller);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ai3d-image-actions [data-ai3d-action="expand-preview"] {
+  color: var(--interactive-accent);
+  font-weight: 600;
+}
+
+.ai3d-image-compact:hover .ai3d-image-actions,
+.ai3d-image-compact:focus-within .ai3d-image-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ai3d-image-viewer-modal {
+  width: min(880px, calc(100vw - 32px));
+  max-height: 90vh;
+}
+
+.ai3d-image-viewer-modal .modal-content {
+  overflow-y: auto;
+}
+
+.ai3d-image-viewer-modal .ai3d-note-preview {
+  margin: 0;
+}
+
+.ai3d-image-viewer-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+.ai3d-image-expanded.ai3d-embed-preview.ai3d-note-preview > .ai3d-preview-host > .ai3d-embed-canvas {
+  height: clamp(220px, 48vh, 520px);
+}
+
+@media (hover: none) {
+  .ai3d-image-compact .ai3d-image-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .ai3d-image-actions button {
+    min-height: 40px;
+  }
+}
+
+.ai3d-cm-widget,
+.ai3d-inline-wrapper {
+  pointer-events: auto;
+}
+
+.ai3d-inline-toolbar,
+.ai3d-inline-toolbar button,
+.ai3d-inline-toolbar input,
+.ai3d-helper-toolbar,
+.ai3d-helper-toolbar button {
+  pointer-events: auto;
+}
+
+/* --- Inline Controls Toolbar --- */
+
+.ai3d-inline-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px 8px 0 0;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.ai3d-inline-label {
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.ai3d-inline-value {
+  color: var(--text-normal);
+  font-weight: 600;
+  min-width: 30px;
+  text-align: right;
+  font-size: 11px;
+}
+
+.ai3d-inline-slider {
+  flex: 1;
+  min-width: 60px;
+  height: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--background-modifier-border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ai3d-inline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--interactive-accent);
+  cursor: pointer;
+}
+
+.ai3d-inline-axis-btn,
+.ai3d-inline-reset-btn {
+  padding: 2px 8px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai3d-inline-axis-btn:hover,
+.ai3d-inline-reset-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-normal);
+}
+
+.ai3d-inline-axis-btn.is-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: transparent;
+}
+
+/* --- Inline Helper Toolbar (outside preview) --- */
+
+.ai3d-helper-toolbar {
+  container-type: inline-size;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 2px;
+  margin-top: -1px;
+  border: 1px solid var(--background-modifier-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-s) var(--radius-s);
+  background: var(--background-secondary);
+}
+
+.ai3d-helper-toolbar.is-mobile {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 4px;
+}
+
+.ai3d-helper-group {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 2px;
+}
+
+.ai3d-helper-group + .ai3d-helper-group {
+  margin-left: 0;
+  padding-left: 4px;
+  border-left: 1px solid var(--background-modifier-border);
+}
+
+.ai3d-helper-group-inspect {
+  min-width: 0;
+}
+
+.ai3d-measurement-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 190px;
+  min-height: 28px;
+  padding: 0 5px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  border: none;
+  border-radius: var(--radius-s);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ai3d-measurement-strip:hover,
+.ai3d-measurement-strip.is-expanded {
+  background: var(--background-modifier-hover);
+}
+
+.ai3d-measurement-strip.is-active,
+.ai3d-measurement-strip.is-expanded {
+  color: var(--text-normal);
+}
+
+.ai3d-measurement-strip.is-pending {
+  color: var(--text-accent);
+}
+
+.ai3d-measurement-strip.is-targeting {
+  color: var(--text-warning);
+}
+
+.ai3d-measurement-strip.is-reviewing {
+  color: var(--text-normal);
+}
+
+.ai3d-measurement-strip-value {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai3d-measurement-strip-meta {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai3d-measurement-strip-meta::before {
+  content: "/";
+  margin-right: 6px;
+  color: var(--background-modifier-border);
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-helper-group {
+  gap: 4px;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-measurement-strip {
+  flex: 1 1 auto;
+  max-width: none;
+  padding-left: 6px;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-helper-group + .ai3d-helper-group {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+}
+
+.ai3d-helper-toolbar .ai3d-inline-btn.is-secondary {
+  display: none;
+}
+
+.ai3d-helper-toolbar.show-secondary .ai3d-inline-btn.is-secondary {
+  display: flex;
+}
+
+.ai3d-slice-details {
+  flex: 1 0 100%;
+  min-width: 0;
+  padding: 6px 2px 1px;
+  margin-top: 2px;
+  background: transparent;
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.ai3d-slice-details.is-hidden {
+  display: none;
+}
+
+.ai3d-interaction-status {
+  flex: 0 0 auto;
+  min-height: 22px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--interactive-accent) 42%, var(--background-modifier-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--interactive-accent) 12%, var(--background-secondary));
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  font-weight: 650;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ai3d-interaction-status.is-hidden {
+  display: none;
+}
+
+.ai3d-helper-toolbar .ai3d-inline-btn.ai3d-linked-inactive {
+  opacity: 0.48;
+}
+
+.ai3d-helper-toolbar .ai3d-inline-btn.ai3d-linked-inactive:hover {
+  opacity: 1;
+}
+
+.ai3d-preview-host.ai3d-interaction-active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 52%, transparent);
+}
+
+.ai3d-preview-host.ai3d-interaction-measurement {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #f59e0b 68%, transparent);
+}
+
+.ai3d-preview-host.ai3d-interaction-slice {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #38bdf8 72%, transparent);
+}
+
+.ai3d-preview-host.ai3d-interaction-disassembly {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #22c55e 62%, transparent);
+}
+
+.ai3d-slice-header,
+.ai3d-slice-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ai3d-slice-title,
+.ai3d-slice-label {
+  flex: 0 0 72px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 650;
+}
+
+.ai3d-slice-summary,
+.ai3d-slice-value {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai3d-slice-header {
+  justify-content: space-between;
+}
+
+.ai3d-slice-summary {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.ai3d-slice-reset-btn {
+  min-height: 24px;
+  border: 1px solid var(--background-modifier-border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 700;
+}
+
+.ai3d-slice-reset-btn {
+  width: 26px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai3d-slice-reset-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ai3d-slice-reset-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.ai3d-slice-reset-btn svg * {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai3d-slice-status-row {
+  align-items: baseline;
+}
+
+.ai3d-slice-status-row .ai3d-slice-label {
+  flex-basis: 58px;
+}
+
+.ai3d-slice-number-control,
+.ai3d-slice-axis-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ai3d-slice-number-control {
+  flex: 0 1 180px;
+}
+
+.ai3d-slice-number-input {
+  width: 86px;
+  min-width: 0;
+  height: 26px;
+  padding: 2px 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 3px;
+  background: var(--background-primary-alt);
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai3d-slice-number-input:focus {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+}
+
+.ai3d-slice-number-unit {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-slice-rotation-row {
+  align-items: flex-end;
+}
+
+.ai3d-slice-axis-control {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.ai3d-slice-axis-label {
+  text-align: center;
+  font-size: var(--font-ui-smaller);
+  font-weight: 700;
+}
+
+.ai3d-slice-axis-control .ai3d-slice-number-unit {
+  display: none;
+}
+
+.ai3d-slice-axis-x .ai3d-slice-axis-label {
+  color: #ef4444;
+}
+
+.ai3d-slice-axis-y .ai3d-slice-axis-label {
+  color: #22c55e;
+}
+
+.ai3d-slice-axis-z .ai3d-slice-axis-label {
+  color: #3b82f6;
+}
+
+.ai3d-slice-mode-row {
+  align-items: center;
+}
+
+.ai3d-slice-mode-row.is-hidden {
+  display: none;
+}
+
+.ai3d-slice-mode-buttons {
+  flex: 1 1 200px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.ai3d-slice-mode-btn {
+  min-height: 28px;
+  padding: 3px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--button-radius);
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 650;
+}
+
+.ai3d-slice-mode-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ai3d-slice-mode-btn.ai3d-btn-active {
+  border-color: color-mix(in srgb, var(--interactive-accent) 68%, var(--background-modifier-border));
+  background: color-mix(in srgb, var(--interactive-accent) 18%, var(--background-secondary));
+  color: var(--text-normal);
+}
+
+.ai3d-helper-toolbar:not(.show-secondary) .ai3d-helper-group-inspect:not(.has-primary-visible) {
+  display: none;
+}
+
+.ai3d-helper-toolbar .ai3d-mobile-more-toggle {
+  display: flex;
+  margin-left: auto;
+}
+
+.ai3d-inline-btn {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+  padding: 0;
+}
+
+.ai3d-slice-btn {
+  width: auto;
+  min-width: 66px;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--interactive-accent) 34%, var(--background-modifier-border));
+  color: var(--text-normal);
+  background: color-mix(in srgb, var(--interactive-accent) 10%, transparent);
+  font-size: var(--font-ui-smaller);
+  font-weight: 650;
+}
+
+.ai3d-slice-btn:hover {
+  background: color-mix(in srgb, var(--interactive-accent) 18%, var(--background-modifier-hover));
+}
+
+.ai3d-slice-active {
+  cursor: default;
+  touch-action: none;
+}
+
+.ai3d-slice-active.ai3d-slice-rotate {
+  cursor: default;
+}
+
+.ai3d-slice-dragging {
+  cursor: grabbing;
+  touch-action: none;
+}
+
+.ai3d-slice-btn-text {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-inline-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-slice-btn {
+  width: auto;
+  min-width: 72px;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-mobile-mode-btn {
+  width: auto;
+  min-width: 56px;
+  min-height: 34px;
+  padding: 4px 10px;
+  gap: 6px;
+  justify-content: center;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: var(--background-primary);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-mobile-mode-btn-label {
+  line-height: 1;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-mobile-more-toggle {
+  display: flex;
+  margin-left: auto;
+}
+
+@container (max-width: 420px) {
+  .ai3d-helper-toolbar-adaptive {
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 6px 4px;
+  }
+
+  .ai3d-helper-toolbar-adaptive .ai3d-helper-group {
+    gap: 4px;
+  }
+
+  .ai3d-helper-toolbar-adaptive .ai3d-measurement-strip {
+    flex: 1 1 auto;
+    max-width: 150px;
+  }
+
+  .ai3d-helper-toolbar-adaptive .ai3d-helper-group + .ai3d-helper-group {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .ai3d-helper-toolbar-adaptive .ai3d-inline-btn.is-secondary {
+    display: none;
+  }
+
+  .ai3d-helper-toolbar-adaptive.show-secondary .ai3d-inline-btn.is-secondary {
+    display: flex;
+  }
+
+  .ai3d-helper-toolbar-adaptive:not(.show-secondary) .ai3d-helper-group-inspect:not(.has-primary-visible) {
+    display: none;
+  }
+
+  .ai3d-helper-toolbar-adaptive .ai3d-mobile-more-toggle {
+    display: flex;
+    margin-left: auto;
+  }
+}
+
+.ai3d-inline-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+}
+
+.ai3d-helper-toolbar .ai3d-inline-btn.ai3d-labeled-btn {
+  width: auto;
+  min-width: 60px;
+  gap: 5px;
+  padding: 0 7px;
+  white-space: nowrap;
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-helper-toolbar .ai3d-mobile-more-toggle,
+.ai3d-helper-toolbar .ai3d-inline-btn.ai3d-labeled-secondary,
+.ai3d-helper-toolbar .ai3d-exit-mode-btn {
+  width: auto;
+  min-width: 64px;
+  height: auto;
+  min-height: 28px;
+  gap: 5px;
+  padding: 4px 8px;
+  font-size: var(--font-ui-smaller);
+  white-space: normal;
+}
+
+.ai3d-helper-toolbar .ai3d-interaction-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-s);
+}
+
+.ai3d-interaction-status > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai3d-helper-toolbar .ai3d-exit-mode-btn {
+  flex: 0 0 auto;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+}
+
+.ai3d-helper-toolbar .ai3d-interaction-status.is-hidden {
+  display: none;
+}
+
+.ai3d-helper-toolbar .ai3d-interaction-status {
+  flex: 1 1 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ai3d-helper-toolbar.is-mobile .ai3d-inline-btn,
+.ai3d-helper-toolbar.is-mobile .ai3d-mobile-mode-btn {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+/* SVG icons inside plugin buttons 鈥?shared sizing and stroke styling. */
+.ai3d-inline-btn svg,
+.ai3d-annot-action-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.ai3d-inline-btn svg *,
+.ai3d-annot-action-btn svg * {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- Grid Host (3dgrid) --- */
+
+.ai3d-grid-host {
+  height: var(--grid-height, clamp(280px, 42vh, 460px));
+  min-height: 250px;
+  border-radius: var(--ai3d-radius) var(--ai3d-radius) 0 0;
+  border: 1px solid var(--background-modifier-border);
+  overflow: hidden;
+  background: var(--background-secondary);
+  position: relative;
+  max-height: clamp(250px, 40vh, 450px);
+}
+
+.ai3d-grid-host canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+.ai3d-grid-host canvas:active {
+  cursor: grabbing;
+}
+
+/* --- JSON Config Error --- */
+
+.ai3d-json-error {
+  padding: var(--ai3d-spacing);
+  border-radius: var(--radius-s);
+  background: var(--background-modifier-error);
+  border: 1px solid var(--color-red);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+}
+
+.ai3d-json-error pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-monospace);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+/* --- Tooltip --- */
+
+.ai3d-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  animation: ai3d-fade-in-centered 0.15s ease;
+}
+
+@keyframes ai3d-fade-in-centered {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* --- Direct File View --- */
+.workspace-leaf-content[data-type="ai3d-direct-view"] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ai3d-direct-view-leaf {
+  min-height: 0;
+}
+
+.workspace .workspace-leaf.ai3d-direct-view-leaf > .workspace-leaf-content:not(.ai3d-direct-view-leaf-content) {
+  display: none;
+}
+
+.ai3d-direct-view-leaf > .workspace-leaf-content.ai3d-direct-view-leaf-content {
+  flex: 1 1 0;
+}
+
+.ai3d-direct-view-leaf-content,
+.workspace-leaf-content.ai3d-direct-view-leaf-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ai3d-direct-view-leaf-content > .view-content.ai3d-direct-view,
+.workspace-leaf-content[data-type="ai3d-direct-view"] > .view-content.ai3d-direct-view {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.ai3d-direct-view {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.ai3d-workspace {
+  container-type: inline-size;
+  container-name: ai3d-workspace;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+.ai3d-workspace-track-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4px var(--ai3d-sidebar-width, 200px);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.ai3d-workspace-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ai3d-sidebar-toggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  padding: 5px 9px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-workspace.is-sidebar-collapsed .ai3d-workspace-track-top {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.ai3d-workspace.is-sidebar-collapsed .ai3d-workspace-sidebar,
+.ai3d-workspace.is-sidebar-collapsed .ai3d-resize-handle-h {
+  display: none;
+}
+
+.ai3d-resize-handle-h:focus-visible,
+.ai3d-sidebar-toggle:focus-visible,
+.ai3d-helper-toolbar button:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+}
+
+.ai3d-workspace.is-resizing-sidebar {
+  user-select: none;
+  cursor: col-resize;
+}
+.ai3d-workspace-main .ai3d-preview-host {
+  flex: 1;
+  min-height: 0;
+}
+.ai3d-workspace-main .ai3d-helper-toolbar {
+  flex-shrink: 0;
+}
+.ai3d-workspace-sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-secondary);
+  border-left: 1px solid var(--background-modifier-border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+.ai3d-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  min-height: 0;
+  overflow-y: auto;
+}
+.ai3d-sidebar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.ai3d-sidebar-content > .ai3d-sidebar-body,
+.ai3d-sidebar-content > .ai3d-direct-workbench-panel {
+  flex: 0 0 auto;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-control {
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-control-head,
+.ai3d-sidebar-content .ai3d-direct-workbench-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-control-head {
+  justify-content: space-between;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-action {
+  padding: 5px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-action:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-empty {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  padding: 8px 0;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-main,
+.ai3d-sidebar-content .ai3d-direct-workbench-match-side {
+  min-width: 0;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-side {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-title,
+.ai3d-sidebar-content .ai3d-direct-workbench-match-source,
+.ai3d-sidebar-content .ai3d-direct-workbench-match-model,
+.ai3d-sidebar-content .ai3d-direct-workbench-match-target,
+.ai3d-sidebar-content .ai3d-direct-workbench-match-reasons {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-title {
+  color: var(--text-normal);
+  font-weight: 600;
+  font-size: 12px;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-source {
+  color: var(--text-muted);
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-model {
+  color: var(--text-faint);
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-target {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-reasons {
+  color: var(--text-faint);
+  font-size: 10px;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-score {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ai3d-sidebar-content .ai3d-direct-workbench-match-open {
+  min-width: 44px;
+}
+.ai3d-resize-handle {
+  background: var(--background-modifier-border);
+  user-select: none;
+  position: relative;
+  z-index: 1;
+  transition: background 0.15s;
+}
+.ai3d-resize-handle:hover {
+  background: var(--interactive-accent);
+}
+.ai3d-resize-handle-h {
+  cursor: col-resize;
+}
+.ai3d-resize-handle-v {
+  display: none;
+}
+.ai3d-direct-view .ai3d-preview-host {
+  flex: 1;
+  min-height: 0;
+}
+
+.ai3d-direct-workbench-panel {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: min(760px, calc(100% - 236px));
+  max-height: min(34%, 220px);
+  overflow: hidden;
+  gap: 8px;
+  align-items: start;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--background-secondary) 92%, transparent);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.24);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-direct-workbench-panel.is-hidden {
+  display: none;
+}
+
+.ai3d-sidebar-content > .ai3d-direct-workbench-panel {
+  position: static;
+  left: auto;
+  bottom: auto;
+  z-index: auto;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  box-shadow: none;
+  background: var(--background-primary);
+}
+
+.ai3d-sidebar-content > .ai3d-direct-workbench-panel .ai3d-direct-workbench-overview {
+  grid-template-columns: 1fr;
+}
+
+.ai3d-sidebar-content > .ai3d-direct-workbench-panel .ai3d-direct-workbench-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ai3d-sidebar-content > .ai3d-direct-workbench-panel .ai3d-direct-workbench-metric {
+  flex: 0 0 auto;
+  padding: 3px 0;
+  border: none;
+  background: transparent;
+}
+
+.ai3d-sidebar-content .ai3d-direct-workbench-metric .ai3d-direct-workbench-value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ai3d-direct-workbench-overview,
+.ai3d-direct-workbench-status,
+.ai3d-direct-workbench-metrics,
+.ai3d-direct-workbench-controls {
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.ai3d-direct-workbench-overview,
+.ai3d-direct-workbench-status,
+.ai3d-direct-workbench-controls {
+  flex-direction: column;
+}
+
+.ai3d-direct-workbench-overview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.ai3d-direct-workbench-metrics {
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.ai3d-direct-workbench-line,
+.ai3d-direct-workbench-metric,
+.ai3d-direct-workbench-control {
+  min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+}
+
+.ai3d-direct-workbench-line,
+.ai3d-direct-workbench-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai3d-direct-workbench-metric {
+  flex: 1 1 84px;
+}
+
+.ai3d-direct-workbench-route {
+  flex: 1;
+}
+
+.ai3d-direct-workbench-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.ai3d-direct-workbench-value {
+  min-width: 0;
+  color: var(--text-normal);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai3d-direct-workbench-diagnostics summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-direct-workbench-diagnostics .ai3d-direct-workbench-status {
+  margin-top: 8px;
+}
+
+.ai3d-sidebar-content .ai3d-direct-workbench-actions .is-primary {
+  order: -1;
+  flex: 1 0 100%;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.ai3d-direct-workbench-knowledge .ai3d-direct-workbench-knowledge-status,
+.ai3d-direct-workbench-diagnostics .ai3d-direct-workbench-value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ai3d-direct-workbench-error {
+  color: var(--text-error);
+  font-size: var(--font-ui-smaller);
+  overflow-wrap: anywhere;
+}
+
+.ai3d-direct-workbench-evidence-hint {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.4;
+}
+
+.ai3d-direct-workbench-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai3d-direct-workbench-control-head,
+.ai3d-direct-workbench-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai3d-direct-workbench-control-head {
+  justify-content: space-between;
+}
+
+.ai3d-direct-workbench-action {
+  min-height: 26px;
+  padding: 2px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.ai3d-direct-workbench-action:hover {
+  color: var(--text-normal);
+  border-color: var(--interactive-accent);
+}
+
+.ai3d-direct-workbench-action:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.ai3d-direct-workbench-knowledge {
+  gap: 4px;
+}
+
+.ai3d-direct-workbench-registered {
+  gap: 6px;
+}
+
+.ai3d-direct-workbench-registered-body {
+  min-width: 0;
+}
+
+.ai3d-direct-workbench-empty {
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.ai3d-direct-workbench-match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai3d-direct-workbench-match {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+}
+
+.ai3d-direct-workbench-match-main,
+.ai3d-direct-workbench-match-side {
+  min-width: 0;
+}
+
+.ai3d-direct-workbench-match-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai3d-direct-workbench-match-side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ai3d-direct-workbench-match-review {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ai3d-direct-workbench-match-review-status {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+}
+
+.ai3d-direct-workbench-match-review-status.is-confirmed {
+  color: var(--text-success);
+}
+
+.ai3d-direct-workbench-match-review-status.is-rejected {
+  color: var(--text-error);
+}
+
+.ai3d-direct-workbench-match-review-action {
+  white-space: nowrap;
+}
+
+.ai3d-direct-workbench-match-show-all {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.ai3d-direct-workbench-match-title,
+.ai3d-direct-workbench-match-source,
+.ai3d-direct-workbench-match-model,
+.ai3d-direct-workbench-match-target,
+.ai3d-direct-workbench-match-reasons {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai3d-direct-workbench-match-title {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.ai3d-direct-workbench-match-source {
+  color: var(--text-muted);
+}
+
+.ai3d-direct-workbench-match-model {
+  color: var(--text-faint);
+}
+
+.ai3d-direct-workbench-match-target {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-direct-workbench-match-reasons {
+  color: var(--text-faint);
+}
+
+.ai3d-direct-workbench-match-score {
+  min-width: 34px;
+  color: var(--text-accent);
+  font-weight: 700;
+  text-align: right;
+}
+
+.ai3d-direct-workbench-match-open {
+  min-width: 44px;
+}
+
+@media (max-width: 760px) {
+  .ai3d-workspace-track-top {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) 4px auto;
+  }
+  .ai3d-resize-handle-h {
+    cursor: row-resize;
+  }
+  .ai3d-workspace-sidebar {
+    flex-direction: row;
+    border-left: none;
+    border-top: 1px solid var(--background-modifier-border);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .ai3d-sidebar-content {
+    flex-direction: row;
+    gap: 8px;
+    padding: 4px;
+    min-width: min-content;
+  }
+  .ai3d-direct-workbench-panel {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 28%;
+    grid-template-columns: 1fr;
+  }
+  .ai3d-direct-workbench-overview {
+    grid-template-columns: 1fr;
+  }
+  .ai3d-direct-workbench-controls {
+    gap: 8px;
+  }
+  .ai3d-direct-workbench-match {
+    grid-template-columns: 1fr;
+  }
+  .ai3d-direct-workbench-match-side {
+    justify-content: space-between;
+  }
+}
+
+/* Respond to the leaf width, including narrow splits in a wide desktop window. */
+@container ai3d-workspace (max-width: 640px) {
+  .ai3d-workspace-track-top {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 35%);
+  }
+  .ai3d-workspace-track-top > .ai3d-resize-handle-h {
+    display: none;
+  }
+  .ai3d-workspace-sidebar {
+    flex-direction: column;
+    border-left: none;
+    border-top: 1px solid var(--background-modifier-border);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .ai3d-workspace-sidebar .ai3d-sidebar-content {
+    flex-direction: column;
+    min-width: 0;
+    padding: 8px;
+  }
+}
+
+/* --- Responsive: Narrow Sidebar --- */
+
+@media (max-width: 400px) {
+  .ai3d-preview-host {
+    min-height: 240px;
+  }
+
+  .ai3d-inline-toolbar {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .ai3d-inline-axis-btn,
+  .ai3d-inline-reset-btn {
+    min-height: 30px;
+    padding: 4px 10px;
+  }
+
+  .ai3d-helper-toolbar {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 4px;
+  }
+
+  .ai3d-inline-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ai3d-inline-btn svg,
+  .ai3d-annot-action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ai3d-embed-canvas {
+    height: var(--ai3d-embed-height, 220px);
+  }
+}
+
+/* --- Live Preview Embed --- */
+
+.ai3d-embed-preview {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+}
+
+.ai3d-embed-preview.is-mobile {
+  border-radius: var(--radius-m);
+}
+
+.ai3d-embed-preview-lazy {
+  min-height: var(--ai3d-embed-height, 300px);
+}
+
+.ai3d-embed-canvas {
+  display: block;
+  width: 100%;
+  height: var(--ai3d-embed-height, 300px);
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+}
+
+.ai3d-embed-canvas:active {
+  cursor: grabbing;
+}
+
+.ai3d-mobile-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4-2);
+  padding: 6px 10px 8px;
+  border-top: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+}
+
+.ai3d-mobile-mode-bar.is-detached {
+  margin-top: -1px;
+  border: 1px solid var(--background-modifier-border);
+  border-top: none;
+  border-radius: 0 0 var(--ai3d-radius) var(--ai3d-radius);
+}
+
+.ai3d-mobile-mode-btn {
+  flex-shrink: 0;
+  min-width: 56px;
+  min-height: 34px;
+  padding: 4px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+}
+
+.ai3d-embed-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.ai3d-embed-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-error);
+  font-size: var(--font-ui-small);
+  text-align: center;
+  padding: 8px;
+}
+
+/* --- Loading Overlay --- */
+
+.ai3d-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--background-primary) 85%, transparent);
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.ai3d-loading-overlay > :not(.ai3d-loading-skeleton) {
+  position: relative;
+  z-index: 1;
+}
+
+.ai3d-loading-overlay.is-hiding {
+  opacity: 0;
+}
+
+.ai3d-loading-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--background-secondary) 92%, transparent), color-mix(in srgb, var(--background-primary) 82%, transparent));
+  overflow: hidden;
+}
+
+.ai3d-loading-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 45%, transparent 100%);
+  transform: translateX(-100%);
+  animation: ai3d-skeleton-sweep 1.5s ease-in-out infinite;
+}
+
+.ai3d-loading-skeleton-canvas {
+  flex: 1;
+  border-radius: var(--radius-m);
+  background: color-mix(in srgb, var(--background-modifier-border) 80%, transparent);
+}
+
+.ai3d-loading-skeleton-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai3d-loading-skeleton-line {
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--background-modifier-border) 75%, transparent);
+}
+
+.ai3d-loading-skeleton-line.is-short {
+  width: 60%;
+}
+
+@keyframes ai3d-skeleton-sweep {
+  to { transform: translateX(100%); }
+}
+
+.ai3d-loading-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--background-modifier-border);
+  border-top-color: var(--interactive-accent);
+  border-radius: 50%;
+  animation: ai3d-spin 0.8s linear infinite;
+}
+
+@keyframes ai3d-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai3d-loading-text {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  text-align: center;
+}
+
+.ai3d-loading-bar-track {
+  width: 160px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--background-modifier-border);
+  overflow: hidden;
+}
+
+.ai3d-loading-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--interactive-accent);
+  width: var(--bar-width, 0%);
+  transition: width 0.4s ease;
+}
+
+.ai3d-loading-bar-fill.is-indeterminate {
+  width: 40%;
+  animation: ai3d-indeterminate 1.4s ease-in-out infinite;
+}
+
+@keyframes ai3d-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ===== Model Performance Feedback ===== */
+
+.ai3d-performance-feedback {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: min(320px, calc(100% - 20px));
+  padding: 6px 9px;
+  color: #f8fafc;
+  background: rgba(10, 15, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.ai3d-performance-feedback.is-subtle {
+  opacity: 0.58;
+}
+
+.ai3d-performance-feedback-tier {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #111827;
+  background: #fbbf24;
+}
+
+.ai3d-performance-feedback.is-extreme .ai3d-performance-feedback-tier {
+  color: #ffffff;
+  background: #ef4444;
+}
+
+.ai3d-performance-feedback-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+/* ===== Annotation Pins ===== */
+
+.ai3d-annotation-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Semi-transparent overlay when annotation mode is active */
+.ai3d-annot-mode-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: rgba(74, 158, 255, 0.06);
+  border: 2px solid rgba(74, 158, 255, 0.3);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: ai3d-annot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ai3d-annot-pulse {
+  0%, 100% { border-color: rgba(74, 158, 255, 0.3); }
+  50% { border-color: rgba(74, 158, 255, 0.6); }
+}
+
+.ai3d-annotation-pin {
+  --pin-anchor-x: 13px;
+  --pin-anchor-translate: translate(calc(-1 * var(--pin-anchor-x)), calc(-50% + var(--pin-offset-y, 0px)));
+  position: absolute;
+  left: var(--pin-left, 0);
+  top: var(--pin-top, 0);
+  transform: var(--pin-anchor-translate);
+  transform-origin: var(--pin-anchor-x) 50%;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: auto;
+  cursor: default;
+  user-select: none;
+  padding: 3px 8px 3px 6px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+  transition: opacity 0.25s ease, filter 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
+}
+
+.ai3d-annotation-pin--dot {
+  --pin-anchor-x: 8px;
+  width: 18px;
+  height: 18px;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.ai3d-annotation-pin--dot .ai3d-pin-dot {
+  width: 12px;
+  height: 12px;
+}
+
+.ai3d-annotation-pin--snippet {
+  --pin-anchor-x: 13px;
+  align-items: flex-start;
+  gap: 7px;
+  width: min(260px, 46vw);
+  padding: 6px 9px 7px 7px;
+  border-radius: var(--radius-s);
+}
+
+.ai3d-pin-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ai3d-pin-snippet {
+  max-height: 82px;
+  overflow: hidden;
+  font-size: 10.5px;
+  line-height: 1.35;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.74);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ai3d-pin-snippet--markdown {
+  white-space: normal;
+}
+
+.ai3d-pin-snippet--markdown > :first-child,
+.ai3d-pin-snippet--markdown > :last-child {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.ai3d-pin-snippet--markdown pre {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+.ai3d-annotation-pin:hover {
+  transform: var(--pin-anchor-translate) scale(1.05);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Occluded pin (behind model geometry) */
+.ai3d-annotation-pin.ai3d-pin-occluded {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fully hidden pin (behind camera or outside the projected viewport) */
+.ai3d-annotation-pin.ai3d-pin-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ai3d-pin-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--pin-color, #4a9eff);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.ai3d-pin-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai3d-pin-delete {
+  display: none;
+  background: rgba(255, 60, 60, 0.85);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.ai3d-annotation-pin:hover .ai3d-pin-delete {
+  display: block;
+}
+
+/* Annotation editor popup */
+.ai3d-annotation-editor {
+  position: absolute;
+  left: var(--editor-left, 0);
+  top: var(--editor-top, 0);
+  z-index: 20;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  padding: 8px;
+  min-width: 180px;
+  max-width: 240px;
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai3d-annotation-editor-input {
+  width: 100%;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ai3d-annotation-editor-input:focus {
+  border-color: var(--interactive-accent);
+}
+
+.ai3d-annotation-editor-colors {
+  display: flex;
+  gap: 4px;
+}
+
+.ai3d-pin-color-swatch {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  border-radius: 50%;
+  background: var(--swatch-color, #4a9eff);
+  background-image: none;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.ai3d-pin-color-swatch.is-selected {
+  background: var(--swatch-color, #4a9eff);
+  border-color: var(--text-normal, #ffffff);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text-normal, #ffffff) 22%, transparent);
+  transform: scale(1.08);
+}
+
+.ai3d-pin-color-swatch:hover {
+  border-color: var(--text-muted, #999999);
+}
+
+.ai3d-annotation-editor-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.ai3d-annotation-editor-btn {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+}
+
+.ai3d-annotation-editor-confirm {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.ai3d-annotation-editor-delete {
+  background: var(--background-secondary);
+  color: var(--text-error);
+  border-color: var(--text-error);
+  margin-right: auto;
+}
+
+.ai3d-annotation-editor-delete:hover {
+  background: var(--text-error);
+  color: var(--text-on-accent);
+}
+
+/* Editor input wrapper */
+.ai3d-editor-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Binding tag: shown below input when a heading is selected */
+.ai3d-editor-binding-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  padding: 1px 6px;
+  font-size: 11px;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ai3d-editor-binding-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai3d-editor-binding-clear {
+  font-size: 10px;
+  line-height: 1;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.ai3d-editor-binding-clear:hover {
+  color: var(--text-error);
+}
+
+/* Content preview: shows heading section content */
+.ai3d-editor-content-preview {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  padding: 6px 8px;
+  max-height: 100px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ai3d-editor-content-preview--markdown {
+  white-space: normal;
+}
+
+.ai3d-editor-content-preview--markdown > :first-child,
+.ai3d-editor-content-preview--markdown > :last-child,
+.ai3d-pin-popover-body--markdown > :first-child,
+.ai3d-pin-popover-body--markdown > :last-child {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.ai3d-editor-content-preview--markdown pre,
+.ai3d-pin-popover-body--markdown pre {
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.ai3d-editor-content-preview--markdown code,
+.ai3d-pin-popover-body--markdown code {
+  word-break: normal;
+}
+
+.ai3d-editor-content-preview--empty {
+  font-style: italic;
+  color: var(--text-faint);
+}
+
+/* Heading autocomplete dropdown */
+.ai3d-heading-dropdown {
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.ai3d-heading-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  gap: 6px;
+}
+
+.ai3d-heading-dropdown-item:hover,
+.ai3d-heading-dropdown-item.active {
+  background: var(--background-modifier-hover);
+}
+
+.ai3d-heading-dropdown-heading {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-normal);
+}
+
+.ai3d-heading-dropdown-note {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Annotations panel section */
+.ai3d-annot-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai3d-annot-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai3d-annot-hint {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+.ai3d-annot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai3d-annot-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: var(--radius-s);
+  transition: background 0.15s ease;
+}
+
+.ai3d-annot-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.ai3d-annot-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ai3d-annot-label {
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ai3d-annot-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ai3d-annot-item:hover .ai3d-annot-actions {
+  opacity: 1;
+}
+
+.ai3d-annot-action-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-s);
+  padding: 0;
+}
+
+.ai3d-annot-action-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ai3d-annot-action-btn.is-delete:hover {
+  color: var(--text-error);
+}
+
+/* Pin count badge on annotation toolbar button */
+.ai3d-pin-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+/* --- Pin Hover Popover --- */
+
+.ai3d-pin-popover {
+  position: fixed;
+  left: var(--popover-left, 0);
+  top: var(--popover-top, 0);
+  z-index: 100;
+  max-width: 320px;
+  max-height: 240px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-s);
+  overflow: hidden;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.ai3d-pin-popover-title {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-accent);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.ai3d-pin-popover-body {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 8;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+}
+
+.ai3d-pin-popover-body--markdown {
+  display: block;
+  overflow-y: auto;
+  text-overflow: unset;
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* --- Pin Pulse Animation (note heading hover) --- */
+
+@keyframes ai3d-pin-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 158, 255, 0.6); transform: var(--pin-anchor-translate) scale(1); }
+  50%  { box-shadow: 0 0 0 8px rgba(74, 158, 255, 0); transform: var(--pin-anchor-translate) scale(1.2); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 158, 255, 0); transform: var(--pin-anchor-translate) scale(1); }
+}
+
+.ai3d-pin-pulse {
+  animation: ai3d-pin-pulse 1.2s ease-out;
+}
+
+/* --- Heading Pin Badge --- */
+
+.ai3d-heading-pin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  font-size: 0.75em;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  vertical-align: middle;
+}
+
+.ai3d-heading-pin-badge-swatch {
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+}
+
+.ai3d-heading-pin-badge-count {
+  font-size: 0.95em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.ai3d-heading-pin-badge:hover {
+  opacity: 0.9;
+}
+
+.ai3d-heading-pin-badge-swatch:hover,
+.ai3d-heading-pin-badge-swatch:focus-visible {
+  opacity: 1;
+  transform: scale(1.3);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 0 3px rgba(255, 255, 255, 0.14);
+  outline: none;
+}
+
+/* Keep utility hiding stronger than later hover/layout display rules. */
+body .is-hidden.is-hidden.is-hidden {
+  display: none;
+}
+
+/* More must never reveal unavailable capabilities or vault-only actions. */
+body .ai3d-helper-toolbar .ai3d-inline-btn.is-hidden,
+body .ai3d-helper-toolbar.show-secondary .ai3d-inline-btn.is-hidden,
+body .ai3d-note-preview .ai3d-note-toolbar:not(.show-secondary) .ai3d-inline-btn.is-secondary.ai3d-btn-active.is-hidden {
+  display: none;
+}
+
+/* Measurement details inside the helper toolbar */
+.ai3d-measurement-details {
+  flex: 1 0 100%;
+  min-width: 0;
+  padding: 6px 2px 1px;
+  margin-top: 2px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--background-modifier-border);
+  border-radius: 0;
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  box-shadow: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.ai3d-measurement-details.is-hidden {
+  display: none;
+}
+
+.ai3d-measurement-details-title {
+  display: none;
+}
+
+.ai3d-measurement-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  min-width: 0;
+}
+
+.ai3d-measurement-section + .ai3d-measurement-section {
+  padding-top: 6px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.ai3d-measurement-section-title {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.ai3d-measurement-detail-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0;
+}
+
+.ai3d-measurement-detail-actions {
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+.ai3d-measurement-record-summary {
+  flex: 1 1 auto;
+  min-width: 120px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai3d-measurement-detail-action {
+  width: 28px;
+  height: 26px;
+  color: var(--text-muted);
+}
+
+.ai3d-measurement-detail-action:disabled {
+  color: var(--text-faint);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ai3d-measurement-detail-label {
+  flex: 0 0 72px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.ai3d-measurement-detail-readonly {
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai3d-measurement-reference-row {
+  align-items: center;
+}
+
+.ai3d-measurement-reference-value {
+  min-width: 88px;
+}
+
+.ai3d-measurement-reference-input {
+  width: 86px;
+}
+
+.ai3d-measurement-reference-apply {
+  width: auto;
+  min-width: 42px;
+  height: 26px;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+}
+
+.ai3d-measurement-reference-apply:hover:not(:disabled) {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ai3d-measurement-reference-apply:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ai3d-measurement-detail-input {
+  width: 68px;
+  min-height: 26px;
+  padding: 2px 6px;
+  font-size: var(--font-ui-smaller);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai3d-measurement-detail-select {
+  min-height: 26px;
+  padding: 2px 6px;
+  font-size: var(--font-ui-smaller);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  color: var(--text-normal);
+}
+
+.ai3d-measurement-detail-lock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ai3d-measurement-detail-scale-actions {
+  margin-top: 2px;
+  gap: 4px;
+}
+
+.ai3d-measurement-detail-scale-actions .ai3d-inline-btn {
+  width: auto;
+  min-width: 56px;
+  height: 26px;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+}
+
+.ai3d-measurement-detail-scale-actions .ai3d-inline-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ai3d-inline-btn[data-ai3d-action="toggle-measurement"].ai3d-btn-active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 40%, transparent);
+}
+
+.ai3d-inline-btn[data-ai3d-action="toggle-slice"].ai3d-btn-active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 40%, transparent);
+}
