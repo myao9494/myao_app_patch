@@ -1,7 +1,0 @@
-# 3D差分（STEP比較）機能用の任意依存。未導入でも既存の画像・テキスト差分は動作する。
-# 導入: .venv/bin/python -m pip install -r requirements-3d.txt
-# ライセンス: cadquery-ocp-novtk=Apache-2.0（同梱OpenCASCADEはLGPL-2.1+例外）, trimesh=MIT, rtree=MIT, scipy=BSD-3
-cadquery-ocp-novtk>=7.8,<9
-trimesh>=4.4
-rtree>=1.3
-scipy>=1.11

@@ -1,0 +1,10 @@
+{
+  "id": "cad-viewer",
+  "name": "CAD Viewer",
+  "version": "2.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "Interactive 3D CAD viewer for STEP (.step/.stp), FreeCAD (.FCStd), OBJ and STL models with pseudo-solid section hatching, persistent view locking and annotations.",
+  "author": "Ondřej Uhnavý & Antigravity",
+  "authorUrl": "https://github.com/ondreu",
+  "isDesktopOnly": false
+}
