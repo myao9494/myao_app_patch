@@ -1,0 +1,887 @@
+{
+  "schema_version": 1,
+  "repo_id": "visual-diff-tool",
+  "display_name": "visual-diff-tool",
+  "kind": "app",
+  "sequence": 4,
+  "created_at": "2026-10-08T22:07:35.292021+00:00",
+  "source_branch": "main",
+  "source_from_commit": "8b97362da3dd7c4d90e3dc500bffafde588651d1",
+  "source_to_commit": "c8b3c3f6892c6d3990705cc2c400af2b7b8415af",
+  "patch_size": 2435462,
+  "patch_sha256": "711e16be085c9bb86b34fd2fecb2f2bf52716c786c6ffb8c00858edbcc78b101",
+  "chunks": [
+    {
+      "name": "changes.patch.part-000001",
+      "size": 2435462,
+      "sha256": "711e16be085c9bb86b34fd2fecb2f2bf52716c786c6ffb8c00858edbcc78b101"
+    }
+  ],
+  "changed_paths": [
+    "backend/app/main.py",
+    "backend/app/mesh_diff.py",
+    "backend/app/mesh_jobs.py",
+    "backend/app/step_mesh.py",
+    "docs/3d_cad_diff_specification.md",
+    "docs/claude.md",
+    "docs/git_3d_diff_pipeline.excalidraw",
+    "docs/three_diff_parallel_acceleration.excalidraw",
+    "frontend/dist/assets/ThreeDiffViewer-A4PEAbxX.css",
+    "frontend/dist/assets/ThreeDiffViewer-B9dBMEyO.css",
+    "frontend/dist/assets/ThreeDiffViewer-DJGJyAXx.js",
+    "frontend/dist/assets/ThreeDiffViewer-DqkjA5vG.js",
+    "frontend/dist/assets/index-CmIZqvNm.js",
+    "frontend/dist/assets/index-DtFSIsIA.js",
+    "frontend/dist/index.html",
+    "frontend/src/main.jsx",
+    "frontend/src/three-diff/ThreeDiffViewer.jsx",
+    "frontend/src/three-diff/three-diff.css",
+    "tests/test_git_3d_diff.py",
+    "tests/test_git_3d_single.py",
+    "tests/test_markdown_cad_links.py",
+    "tests/test_mesh_parallel.py"
+  ],
+  "added_files": [
+    {
+      "path": "backend/app/main.py",
+      "size": 81442,
+      "sha256": "5e13c9c56b811aa80106cac7b518628875de46656a8becc227a9a1117ed516c6"
+    },
+    {
+      "path": "backend/app/mesh_diff.py",
+      "size": 22319,
+      "sha256": "957e7be286b920345f661f2916872ca99bda1a4d3d4bc2ca3dd6436ee72fc425"
+    },
+    {
+      "path": "backend/app/mesh_jobs.py",
+      "size": 17933,
+      "sha256": "dd0bde4605dfabc07ec973d40b2cd3077f3c59614d45f8729fb3fbdfe3c023f2"
+    },
+    {
+      "path": "backend/app/step_mesh.py",
+      "size": 15890,
+      "sha256": "cce5cb5a19c0f84afc77571b90477832ec88ec3dd1eb103b9cab46381e6f7d75"
+    },
+    {
+      "path": "docs/3d_cad_diff_specification.md",
+      "size": 24942,
+      "sha256": "e00713bb5ddf26a285c5497dcbb7a13113a75eb417f62ec18278e74716e1af79"
+    },
+    {
+      "path": "docs/claude.md",
+      "size": 27940,
+      "sha256": "9f16f0f8811a5e4b89c63d00ab7d1689017bcc67730262763eadcd69cd132ea7"
+    },
+    {
+      "path": "docs/git_3d_diff_pipeline.excalidraw",
+      "size": 4054,
+      "sha256": "5d47aed5975b007736b0976ba8741b418354a19271fc309d64d40d596cc19394"
+    },
+    {
+      "path": "docs/three_diff_parallel_acceleration.excalidraw",
+      "size": 6247,
+      "sha256": "1464350278eda264887aa4626001b747b5b9b44a854ea7af770fee512ab7813a"
+    },
+    {
+      "path": "frontend/dist/assets/ThreeDiffViewer-B9dBMEyO.css",
+      "size": 5201,
+      "sha256": "f3c82eb6bae29783282bc8485f0f01cd22d2dbced481d1657a54b44e5a3a78e5"
+    },
+    {
+      "path": "frontend/dist/assets/ThreeDiffViewer-DqkjA5vG.js",
+      "size": 815837,
+      "sha256": "344f063163fa2ccbae3308bc2a5f5ab717f6ad2866f0f8c7d0e1c516e4678308"
+    },
+    {
+      "path": "frontend/dist/assets/index-DtFSIsIA.js",
+      "size": 336974,
+      "sha256": "455c9c42c3dfaa6038ce6459e79f5d6247cb1af55c85b6156015f5bfcc40e701"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "size": 466,
+      "sha256": "4ff8aadcd6774928234c99d23f3303eb31e431dbd46b3906a5f8f353a37258c9"
+    },
+    {
+      "path": "frontend/src/main.jsx",
+      "size": 232416,
+      "sha256": "d75614c2e9411ac9a21ebb631f296162f08f8b846fb67ba15cafd4fdd2293ab3"
+    },
+    {
+      "path": "frontend/src/three-diff/ThreeDiffViewer.jsx",
+      "size": 58512,
+      "sha256": "e635434f6a93c163f6613a5116768366d2def0cdba7dce182de0dd83dcf85a06"
+    },
+    {
+      "path": "frontend/src/three-diff/three-diff.css",
+      "size": 6670,
+      "sha256": "d72c2c1f343c93c075761d10fe2118d4c58d8b2e5fa05a6de5dffeadcb7a2c68"
+    },
+    {
+      "path": "tests/test_git_3d_diff.py",
+      "size": 5886,
+      "sha256": "5bf7fdadbcb32f1cf041fc0a50d8f157a4485ef878ca900870053c1326fcfb6f"
+    },
+    {
+      "path": "tests/test_git_3d_single.py",
+      "size": 4715,
+      "sha256": "fe5e3d5eee09146bbc08f6116ccec1f59de6e2b40fd893957695b2ed4c010a43"
+    },
+    {
+      "path": "tests/test_markdown_cad_links.py",
+      "size": 2033,
+      "sha256": "76a6099e6d120b33da4c0ff965cdcdf6cf0665a30f6533f39995df3a8cc9c71b"
+    },
+    {
+      "path": "tests/test_mesh_parallel.py",
+      "size": 4376,
+      "sha256": "1c8233b521aff4f56dc04fae2e8926f56f5379e1fd7237eb43eb98b97ca48e70"
+    }
+  ],
+  "deleted_files": [
+    "frontend/dist/assets/ThreeDiffViewer-A4PEAbxX.css",
+    "frontend/dist/assets/ThreeDiffViewer-DJGJyAXx.js",
+    "frontend/dist/assets/index-CmIZqvNm.js"
+  ],
+  "target_files": [
+    {
+      "path": ".gitignore",
+      "blob": "929be67349f160cfcf03bd5a4e74723614828188",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "AGENTS.md",
+      "blob": "2d13f795b5a37f64714122e513687b5f888c173f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "README.md",
+      "blob": "85df8544bf0e9cf3a0caffc7f4644e1538ebf7b6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/.visual-diff-settings.json",
+      "blob": "e42fb977174d999851418c5adcfd3da27a00dc3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/README.md",
+      "blob": "384c62b56c3d5d1dcb4543fab1d678616386aef6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "blob": "689977fff15b426b820d3e81bb529dde3b09f93a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/alignment.py",
+      "blob": "db3b646dc45abe4da1912252f77ed3b8869b880a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/attachments.py",
+      "blob": "a3b42b54d40708d7bf80be0d68d0995872069129",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/diffing.py",
+      "blob": "96b14adfb1da7143c431e35c8fe2bc88bb4627ca",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/image_io.py",
+      "blob": "928621886dcc173cc725e6ea3f72db9f71b82563",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/main.py",
+      "blob": "9f9efcf6a2cf537908b9e8597d7a6b6a51947458",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/mesh_diff.py",
+      "blob": "da0129862e7a4c91485fdfaaedc6e2c1a870b22f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/mesh_jobs.py",
+      "blob": "7a9bc2458fd728d92cc041a85c854e8ccb060885",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/models.py",
+      "blob": "2466daf6a18f5e1c43096be95ed79c64b58d9055",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/raster_cache.py",
+      "blob": "636c450aa705f1f974d74402c8d34b652a302098",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/regions.py",
+      "blob": "3560155f58bae9bfd944f394ee36286cb8479924",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/result_cache.py",
+      "blob": "a1213c8c90f12c27b083081cda135e16e8e99951",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/step_mesh.py",
+      "blob": "90d728d7ec16287b3894030c3d163819c9fef326",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/run.py",
+      "blob": "44e4f2ca1223e6944954aa394d324dca981eecd5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "claude.md",
+      "blob": "86afc0e1b48326b01b6132cf3b3819f453ea830f",
+      "mode": "120000",
+      "type": "blob"
+    },
+    {
+      "path": "docs/3d_cad_diff_specification.md",
+      "blob": "3aeeda6446c95a51004dca7b1cdc12e447e239fc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/claude.md",
+      "blob": "cdb03aa82a5514ceed9d50c18b0fb57a9fb6b9ea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/git_3d_diff_pipeline.excalidraw",
+      "blob": "6f03a784e97912c021ceb3d5c2277e0a9ba77561",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/git_diff_bottleneck.excalidraw",
+      "blob": "45bf2ad36782b92f17244c1cbf07b79cab294c60",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/obsidian_link_resolution.excalidraw",
+      "blob": "0f1318ec1cd4d4e1379bdfe3be4a924b6c377d99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/obsidian_link_resolution.md",
+      "blob": "a9a18dd47a330edb1d11cb435ada75f38e967edc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/server_settings_management.excalidraw",
+      "blob": "ed2ced90adaa153771b3243e295076dac5398aa2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/server_settings_management.md",
+      "blob": "ccb729451af88fa2544599008757990a99405fd8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/smart_text_diff.excalidraw",
+      "blob": "12109ec2bd51fed04eaa997013a18ecd8c41668a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/specification.md",
+      "blob": "8502302d053bc2c87551811fb22d9db3882089d7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/text_diff_line_numbers.excalidraw",
+      "blob": "32c07a24914a201e83940d67d88ac3a28f488525",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/text_diff_overlay_and_colors.excalidraw",
+      "blob": "646499e9451c75e01d917106067afa3502354062",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_measure_annotation.excalidraw",
+      "blob": "1e0994ce311f7ce285a6df37e8a3f035fc4f2bc4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_parallel_acceleration.excalidraw",
+      "blob": "97222e357df9c7af270b847eb916a60d0581eec7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_pipeline.excalidraw",
+      "blob": "ad2e883bd3dd695bd7085b997fb033b9ff452a44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_section_and_smart_dimension.excalidraw",
+      "blob": "2e0723657dba8432d00ebacc8fcf94fef451431e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/.nvmrc",
+      "blob": "db49bb14d78e76cc5ebbf481960bced880636a24",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/ThreeDiffViewer-B9dBMEyO.css",
+      "blob": "e12b147d6e6a21c4503dc791c888dea33524ab69",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/ThreeDiffViewer-DqkjA5vG.js",
+      "blob": "a4e01ea73807546126eeab2b58071975d06eacdd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-D074Cmoy.css",
+      "blob": "07c0c866fda12f57bf6ef9b220134ac02fc2ef0d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-DtFSIsIA.js",
+      "blob": "81e7fddbb1b531019fe6ccd7ea6f68294f17db27",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/favicon.svg",
+      "blob": "7c60e47b70e107bad61af3715b0b433de297a46d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "blob": "c0a6cb4a9e8fbc777d45de2c878d1afd2903a028",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/index.html",
+      "blob": "e4ed65bc5cd03d3d65896abdc431e865bffad1c8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "blob": "e264030350a6b1d3415c1d725063d7f2247b7951",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package.json",
+      "blob": "94859597c583944c62f08ee6b470f7577f9c23a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/favicon.svg",
+      "blob": "7c60e47b70e107bad61af3715b0b433de297a46d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/main.jsx",
+      "blob": "f7056f4d25bb17d74b535f73156f26afa16b1b37",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/styles.css",
+      "blob": "ee0643f476e2b680508bf9a0d589eea03ebd52d2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/MeasureAnnotationLayer.jsx",
+      "blob": "e4d37fa7bb9e08e07ef73f1d6e0efa8eb89ac102",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/ThreeDiffViewer.jsx",
+      "blob": "4e288f83a6318fa39bbdeb2895b182b150a4d6a2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/materials.js",
+      "blob": "8907b14715bf86ed4f9d54cd7192f74ebd089a9b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/measureUtils.js",
+      "blob": "33c7f28cfafd006f63712118e679773e2f677f43",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/sectionPlane.js",
+      "blob": "eea72179d53ae9ea6d00dc06b990f2e38739a9fc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/three-diff.css",
+      "blob": "e4639cadb00396de663d767f21484362599ab513",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/vdm1.js",
+      "blob": "193e6c38148be2ddd6404020e2f77d14a5c30a12",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/measure_utils.test.js",
+      "blob": "9c4172f7d2b3f349d95d2690aeaefbe566b4150a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/section_plane.test.js",
+      "blob": "ec77ff774cbbefc631afb394f403e0a794ed24e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "requirements-3d.txt",
+      "blob": "c05bfff2980d06a75e304a03e72cfe5287fe65b2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "requirements.txt",
+      "blob": "c192afeb2e8aebbac3c284c9f9eddea25118c1dc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bathtub_curve_a.png",
+      "blob": "638a0f3517ef3542570732a28e7fa2c99650fdd6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bathtub_curve_b.png",
+      "blob": "377f63e9cb7fba568edfb3d1749cfc5db2db25b5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bolt_a.png",
+      "blob": "09d5cdc09adc82e3b1c289c627979da6d99dd4c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bolt_b.png",
+      "blob": "de76a4ce710dc10be4cffcd7d401dd4e5384af30",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bom_a.png",
+      "blob": "6b10114d03157d34ea3587a9c5ebe8896c470cd5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bom_b.png",
+      "blob": "2626e2d28420b54c5eb54a44b349f5b979f43c8f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bracket_a.png",
+      "blob": "273d39a0be03115421c34697cf1994ddca177158",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bracket_b.png",
+      "blob": "3de409202e9290ff42348659fc1aedfb6f2fdca6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/ecn_a.png",
+      "blob": "ef378931f91af2cdaeaf5e82aa072a04eece3376",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/ecn_b.png",
+      "blob": "6c0d06d2a0851e86d9ae89bcb0f20074d3b81442",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/factory_layout_a.png",
+      "blob": "d205fe034c0696eddcbec08aa0d81b973adbb44d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/factory_layout_b.png",
+      "blob": "2104468131914131971f370b86f37ca6bfe329b4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/fft_spectrum_a.png",
+      "blob": "51d0d95019280715423fa37be16bc9a928fe1f9d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/fft_spectrum_b.png",
+      "blob": "1614926f0fd3cf6afcbd949efc8c8322272ddd38",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/flange_a.png",
+      "blob": "4d047689bc53b287e03e08c8395e9e68181c6b98",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/flange_b.png",
+      "blob": "cb223a16229176624eda772c3a85df4ffffeeb0f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/gear_a.png",
+      "blob": "bbf5875cd09b1c499bf59c64a174db8e643abde7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/gear_b.png",
+      "blob": "6aa4696eaa06a9ffc41b29d05d753731aab57535",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/inspection_certificate_a.png",
+      "blob": "46989e9ca804961cdefac3b659e8ff6e6b08cab2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/inspection_certificate_b.png",
+      "blob": "370d634cc8fdab9766339824e537877b167f678f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/pcb_a.png",
+      "blob": "7b8861ffa972dbebbb24b03ed4543ba7d2513c55",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/pcb_b.png",
+      "blob": "3ce09cf9665c66431cf5b94f3bbd1155177d077f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/shaft_a.png",
+      "blob": "2f2914208bbfe263d4134c9f222dc71f5d93b20f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/shaft_b.png",
+      "blob": "bd7e5b4d5970dca5ee35caf67a584595a78e4c0c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/added_boss_a.step",
+      "blob": "01c02de6dfd46ae231ca40135e11d3a7e193d81b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/added_boss_b.step",
+      "blob": "65c74947cf88f4b295853ddbdf820e668c1077a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/dimension_a.step",
+      "blob": "a3edd1c87020ba2691e7acda02794ae3486dba8e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/dimension_b.step",
+      "blob": "5c7a49c130eb5f3edea8ed873904faf30100adce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/hole_position_a.step",
+      "blob": "7352fff4c669bd8e0978cd6c4478ac668cabcb2a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/hole_position_b.step",
+      "blob": "d8959ee9f8a861907228ad39552a31b05861b170",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_a.step",
+      "blob": "b7c54a4a45fc5c1936911ae6132f3ead5cd7dbc4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_b.step",
+      "blob": "59b4543bec5b7b269d6e0c29dac53401e6ff2651",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_diff_a.step",
+      "blob": "d26e2c93f10cbc610b3c5c92799e0a5dad10f178",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_diff_b.step",
+      "blob": "e679f98bb98aac73e210e81339c7cb835b740d82",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/unit_inch_a.step",
+      "blob": "c7c166dd6f1ec49f3918ebfeb7f0e9fa02ab2dc9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/unit_inch_b.step",
+      "blob": "c684d7299b0f932f9eddf24a005ff97a83c864e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/stress_strain_a.png",
+      "blob": "621a4bb0ef68e6b62c87adc98f132805b50a3302",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/stress_strain_b.png",
+      "blob": "f1f654ec8d2c56bd23b4cb675cced1d34f307b3e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/thermal_heatmap_a.png",
+      "blob": "9fae3275ed6da877d7a910f3bd0db9d223336e38",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/thermal_heatmap_b.png",
+      "blob": "1928e7f55bd5e7e9263cb57667f335a29f94dd3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/workflow_flowchart_a.png",
+      "blob": "50f11ca497495fbc6a19eb94c400ba2676bf150a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/workflow_flowchart_b.png",
+      "blob": "7759d14cc6499afa38d85131c3097789ff4f2cb6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "scripts/generate_samples.py",
+      "blob": "7a4a13958e142189a0960953e4665a1107fe8d04",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "scripts/generate_step_samples.py",
+      "blob": "d5f340bf6eee9920bac094c63868b2b5c7ee159c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "scripts/verify_samples.py",
+      "blob": "c5f84df73d08357bea9a7e7e4fa92ee47876ce4b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "start_mac.sh",
+      "blob": "d39f88adadc5a5710bbaa01637995b6c74d806b1",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "start_windows.bat",
+      "blob": "1bf6d4cdf4afc6402b65d4e9f84437b042e0cfa4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_backend_pipeline.py",
+      "blob": "0a8f7eeae3df431a1acb975effc6fbf390ed0c94",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_git_3d_diff.py",
+      "blob": "aba5e4334cf18f124de7a24ae3f738e00e291512",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_git_3d_single.py",
+      "blob": "84cfda5a9b52311bcd80c962866c9e9eef29e5df",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_markdown_cad_links.py",
+      "blob": "8abfed25230ba6f55acc5fc6e9c27ce0baa39b2b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_alignment.py",
+      "blob": "27b131dc313115009568bae5f8a8cdde0b33a290",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_api.py",
+      "blob": "5aedac628b9dcd82197344dec2326bf397f26d95",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_distance.py",
+      "blob": "bbab1cd0ce6410d3e0bdbbbd243d633f4c150d7c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_parallel.py",
+      "blob": "1060a56dce90cb2ea41fc1ff7ba3a43ae4abc873",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_obsidian_linked_images_diff.py",
+      "blob": "67c8791d50382ee2112123e0ab65174d8a39c594",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_performance_and_parallel.py",
+      "blob": "f4f824619dc0dc9a9095bc62f895402d04dfca0c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_sample_generator.py",
+      "blob": "7cdf404ddc01c7dc303155d800f88348e4ae0f61",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_server_settings.py",
+      "blob": "46126aac9dba8b20d081d2f791ff6c496ad76c7f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_smart_text_diff.py",
+      "blob": "2848dffae9efa05115436601170c4ad9d9967b9f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_step_mesh.py",
+      "blob": "eb290100d22d4e3c3a428e5b3eb0ff515a5c153b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_text_diff_line_numbers.py",
+      "blob": "beeadec6a275103a4e8a04bf8c59f7a0601f74db",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_text_diff_view_style.py",
+      "blob": "2b034bd8f02e656bc7490f3176e6ad9cbbe140f4",
+      "mode": "100644",
+      "type": "blob"
+    }
+  ],
+  "signature": "a63ad3b37dab24e2c0b3e0a38de5362ffaed080238e4329e9e99bed4d367b969"
+}

@@ -4,19 +4,14 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 10,
-      "manifest_path": "packages/obsidian-settings/000010/manifest.json"
+      "sequence": 11,
+      "manifest_path": "packages/obsidian-settings/000011/manifest.json"
     },
     {
       "repo_id": "visual-diff-tool",
-      "sequence": 3,
-      "manifest_path": "packages/visual-diff-tool/000003/manifest.json"
-    },
-    {
-      "repo_id": "spoon_feeder2",
-      "sequence": 2,
-      "manifest_path": "packages/spoon_feeder2/000002/manifest.json"
+      "sequence": 4,
+      "manifest_path": "packages/visual-diff-tool/000004/manifest.json"
     }
   ],
-  "signature": "492fd6d233fa23a1f3beb1a2dc3f3311072309d74c1711774c909436cb6c198a"
+  "signature": "6564c4bf4c160502379aec71a4554aa29e84816afdbc7f574e1d834aaf66b309"
 }
