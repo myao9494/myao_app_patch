@@ -1,0 +1,17 @@
+# FastAPI ファイルマネージャー バックエンド依存関係（pyproject.toml と同じ内容）
+# 注: インデックス検索機能は外部サービス（file_index_service）に移行
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+httpx>=0.25.0
+send2trash>=1.8.0
+pywinpty>=3.0.0; platform_system == "Windows"
+# Windows のクリップボード連携（Explorer への貼り付け）
+pywin32>=306; platform_system == "Windows"
+
+# テスト
+pytest>=7.4.0
+pytest-asyncio>=0.21.0

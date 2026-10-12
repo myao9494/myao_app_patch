@@ -1,0 +1,1766 @@
+{
+  "schema_version": 1,
+  "repo_id": "gantt_react_myao",
+  "display_name": "gantt_react_myao",
+  "kind": "app",
+  "sequence": 2,
+  "created_at": "2026-10-12T23:10:13.026605+00:00",
+  "source_branch": "main",
+  "source_from_commit": "81fad29ca65bbc57e51af0c802c68f374939c90e",
+  "source_to_commit": "e7947fde5944fca60143abc2213d715b864cdde5",
+  "patch_size": 24153227,
+  "patch_sha256": "c64bee24a6f208dd5defcee055292d2ccb8295c623efdbd12512f09b8087ed1f",
+  "chunks": [
+    {
+      "name": "changes.patch.part-000001",
+      "size": 20971520,
+      "sha256": "3badfe80b1c43917478712085e4ba846d211e24e860a0469530d62da46f984fe"
+    },
+    {
+      "name": "changes.patch.part-000002",
+      "size": 3181707,
+      "sha256": "cb661c0c78a22d21cea331d5f3d96325ecd55eb8835173f4cf4bcd3357031721"
+    }
+  ],
+  "changed_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "backend/README.md",
+    "backend/config.py",
+    "backend/database.py",
+    "backend/main.py",
+    "backend/pyproject.toml",
+    "backend/restore_from_csv.py",
+    "backend/routers/calendar.py",
+    "backend/routers/csv_io.py",
+    "backend/routers/grid.py",
+    "backend/routers/links.py",
+    "backend/routers/open_input.py",
+    "backend/routers/synonyms.py",
+    "backend/routers/tasks.py",
+    "backend/schemas.py",
+    "backend/services/__init__.py",
+    "backend/services/browser_window.py",
+    "backend/services/calendar_files.py",
+    "backend/services/csv_io.py",
+    "backend/services/obsidian_export.py",
+    "backend/services/task_text.py",
+    "backend/services/update_sequence.py",
+    "backend/test_open_input_154.py",
+    "backend/test_regex.py",
+    "backend/test_regex2.py",
+    "backend/tests/conftest.py",
+    "backend/tests/test_calendar_api.py",
+    "backend/tests/test_csv_io.py",
+    "backend/tests/test_grid.py",
+    "backend/tests/test_holidays_api.py",
+    "backend/tests/test_import_csv.py",
+    "backend/tests/test_links.py",
+    "backend/tests/test_load_data.py",
+    "backend/tests/test_obsidian.py",
+    "backend/tests/test_obsidian_export_sync.py",
+    "backend/tests/test_open_input.py",
+    "backend/tests/test_pwa_cache_headers.py",
+    "backend/tests/test_scripts.py",
+    "backend/tests/test_static_files.py",
+    "backend/tests/test_synonyms_api.py",
+    "backend/tests/test_tasks.py",
+    "claude.md",
+    "docs/SPECIFICATION.md",
+    "docs/auto_reload.md",
+    "docs/calendar_holiday_contextmenu.md",
+    "docs/calendar_schedule_contextmenu_and_id_search.md",
+    "docs/claude.md",
+    "docs/plan_suppress_lightbox.md",
+    "docs/univer_grid.md",
+    "docs/walkthrough_suppress_lightbox.md",
+    "fix_gantt.patch",
+    "frontend/README.md",
+    "frontend/check_pin.html",
+    "frontend/dist/assets/index-DszVymYf.js",
+    "frontend/dist/index.html",
+    "frontend/dist/sw.js",
+    "frontend/pnpm-lock.yaml",
+    "frontend/src/App.tsx",
+    "frontend/src/check_coord.js",
+    "frontend/src/components/ApiGuide/ApiGuide.tsx",
+    "frontend/src/components/DiffViewer/DiffViewer.tsx",
+    "frontend/src/components/GanttChart/ContextMenu.tsx",
+    "frontend/src/components/GanttChart/DateSettingModal.tsx",
+    "frontend/src/components/GanttChart/GanttChart.test.tsx",
+    "frontend/src/components/GanttChart/GanttChart.tsx",
+    "frontend/src/components/GanttChart/GanttChart.tsx.orig",
+    "frontend/src/components/GanttChart/GanttChart.tsx.rej",
+    "frontend/src/components/GanttChart/__tests__/GanttChart.test.tsx",
+    "frontend/src/components/GanttChart/__tests__/ganttEvents.test.ts",
+    "frontend/src/components/GanttChart/__tests__/ganttSync.test.ts",
+    "frontend/src/components/GanttChart/__tests__/ganttTemplates.test.ts",
+    "frontend/src/components/GanttChart/__tests__/ganttTestHarness.ts",
+    "frontend/src/components/GanttChart/__tests__/useGanttKeyboard.test.ts",
+    "frontend/src/components/GanttChart/contextMenuItems.test.ts",
+    "frontend/src/components/GanttChart/contextMenuItems.ts",
+    "frontend/src/components/GanttChart/ganttEvents.ts",
+    "frontend/src/components/GanttChart/ganttSetup.ts",
+    "frontend/src/components/GanttChart/ganttSync.ts",
+    "frontend/src/components/GanttChart/ganttTaskUtils.ts",
+    "frontend/src/components/GanttChart/ganttTemplates.ts",
+    "frontend/src/components/GanttChart/timelinePointer.ts",
+    "frontend/src/components/GanttChart/useGanttKeyboard.ts",
+    "frontend/src/components/GanttChart/useSchedulePins.ts",
+    "frontend/src/components/GanttChart/useTimelineScroll.ts",
+    "frontend/src/components/Header/HamburgerMenu.tsx",
+    "frontend/src/components/Header/Header.tsx",
+    "frontend/src/components/UniverSheet/UniverSheet.tsx",
+    "frontend/src/components/UniverSheet/gridColumns.ts",
+    "frontend/src/components/UniverSheet/gridTaskName.test.ts",
+    "frontend/src/components/UniverSheet/gridTaskName.ts",
+    "frontend/src/contexts/ThemeContext.tsx",
+    "frontend/src/contexts/useTheme.ts",
+    "frontend/src/hooks/__tests__/useGanttData.test.ts",
+    "frontend/src/hooks/useAppSettings.ts",
+    "frontend/src/hooks/useGanttData.ts",
+    "frontend/src/hooks/useGridStaging.ts",
+    "frontend/src/hooks/useLatestRef.ts",
+    "frontend/src/hooks/useOpenInputRequests.ts",
+    "frontend/src/hooks/useSyncedState.ts",
+    "frontend/src/services/__tests__/api.test.ts",
+    "frontend/src/services/__tests__/syncToDatabase.test.ts",
+    "frontend/src/services/api.ts",
+    "frontend/src/services/syncToDatabase.ts",
+    "frontend/src/types/gantt.ts",
+    "frontend/src/utils/__tests__/autoMoveTasks.test.ts",
+    "frontend/src/utils/__tests__/filterUtils.test.ts",
+    "frontend/src/utils/__tests__/ganttTimelineShortcut.test.ts",
+    "frontend/src/utils/__tests__/iconUtils.test.ts",
+    "frontend/src/utils/__tests__/taskText.test.ts",
+    "frontend/src/utils/autoMoveTasks.ts",
+    "frontend/src/utils/filterUtils.ts",
+    "frontend/src/utils/ganttTimelineShortcut.ts",
+    "frontend/src/utils/scheduleParser.test.ts",
+    "frontend/src/utils/taskText.ts",
+    "frontend/src/vite-env.d.ts",
+    "frontend/vite.config.ts",
+    "mockup.html"
+  ],
+  "added_files": [
+    {
+      "path": "AGENTS.md",
+      "size": 595,
+      "sha256": "5c5f8c7688d03bdd0041c11b87b3c26ac243fa12da2f28fc6168bcfde0144759"
+    },
+    {
+      "path": "CLAUDE.md",
+      "size": 9207,
+      "sha256": "c963fa1f472180947522846be461401154c0b34b35509f1ab2bbcfa8ba14d479"
+    },
+    {
+      "path": "README.md",
+      "size": 3177,
+      "sha256": "cd7d2cc3a1bd809ecd17b03ad034d6ce2e0638640a166514426d831b44400bb8"
+    },
+    {
+      "path": "backend/README.md",
+      "size": 1572,
+      "sha256": "db217960517d5ecda4139e297e7ed78536cef23cf25441fe1f6896a146de2e5f"
+    },
+    {
+      "path": "backend/config.py",
+      "size": 1434,
+      "sha256": "857d57dd4fc85a46fe5b8cf61366b9757be335d7ce25c890bc38bd97bce73cfc"
+    },
+    {
+      "path": "backend/database.py",
+      "size": 1544,
+      "sha256": "5e1fed4386f45d160be61ee31c7cb8f92ff5cebf67281a31e5ea7b7813e6b485"
+    },
+    {
+      "path": "backend/main.py",
+      "size": 4852,
+      "sha256": "f4b5ba7ee02f2d2e7711ed43c3e998bd32b34c039e0d22c215799b63b1a765f2"
+    },
+    {
+      "path": "backend/pyproject.toml",
+      "size": 615,
+      "sha256": "c5eac8972c4de99bdc8ecd963a1bcd3e45b9ec90118c08f05bbc5ba4c4158eb9"
+    },
+    {
+      "path": "backend/restore_from_csv.py",
+      "size": 2428,
+      "sha256": "4823d0bcf17dadf051f28fb91600ae4bb7a1d8cc4ec99966ded97a429814bbfa"
+    },
+    {
+      "path": "backend/routers/calendar.py",
+      "size": 3946,
+      "sha256": "07de1b1476c09a80c9dd9ff7aee2f03f49ecc37c3d3519803625da72e32270e2"
+    },
+    {
+      "path": "backend/routers/csv_io.py",
+      "size": 4279,
+      "sha256": "a0a7e3ce521eaf0fa92dbb2a7f4ee4e6c2b3ae9203f59630a69a93c0a8a19517"
+    },
+    {
+      "path": "backend/routers/grid.py",
+      "size": 9601,
+      "sha256": "156144e1f7a5de5e8650c155646936eefcb012b58ea56271fb7e1a43a27a310c"
+    },
+    {
+      "path": "backend/routers/links.py",
+      "size": 1793,
+      "sha256": "d7c72fb56e6bc0284a98210179a823d07e28563a85a089b0f1a3b5bf1a2f027b"
+    },
+    {
+      "path": "backend/routers/open_input.py",
+      "size": 3932,
+      "sha256": "ea80c432c677dab82d09a4dccc8a86d3e0edae63a21b8b263a4150071807996b"
+    },
+    {
+      "path": "backend/routers/synonyms.py",
+      "size": 1332,
+      "sha256": "16fd22d2423efb91e1a1676d1f9be3ca9254582b6440b356d0154318873c919b"
+    },
+    {
+      "path": "backend/routers/tasks.py",
+      "size": 15353,
+      "sha256": "9d26489f31d5fa5353415d05c9803868895de13892508d91ac703be693efdc3d"
+    },
+    {
+      "path": "backend/schemas.py",
+      "size": 5386,
+      "sha256": "762ec477e7a34c76fd0842988cad83e74b3f242cc042a3eb2b376ad72dde50c1"
+    },
+    {
+      "path": "backend/services/__init__.py",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/services/browser_window.py",
+      "size": 6549,
+      "sha256": "9f8644be8dc6acb4fe0556359f6dd3b9b4c0655c61757823d7dd57abaa885541"
+    },
+    {
+      "path": "backend/services/calendar_files.py",
+      "size": 5051,
+      "sha256": "ceb5774c5898fd553ac4746640bfc2eb215f794591dcdbf8138de1947f3fb973"
+    },
+    {
+      "path": "backend/services/csv_io.py",
+      "size": 7300,
+      "sha256": "9a930bc1dcb455ac42537432b79eac9d285f9719925a3d9e88941dd212cbafb3"
+    },
+    {
+      "path": "backend/services/obsidian_export.py",
+      "size": 10731,
+      "sha256": "d919f60dce434ff57fbc37f08593ad984a7d726cc4faf12975c469f34a411a56"
+    },
+    {
+      "path": "backend/services/task_text.py",
+      "size": 1597,
+      "sha256": "4e597965e7ef1a7b84d254ad7d5f8b21ef21926782aba317ac913de94fbad0b2"
+    },
+    {
+      "path": "backend/services/update_sequence.py",
+      "size": 973,
+      "sha256": "8bad98f170bbcbeae7a333ae0e4bc10290078bb17c69d7bb92aa280a6ced08cb"
+    },
+    {
+      "path": "backend/tests/conftest.py",
+      "size": 3365,
+      "sha256": "e815c0734ba4debf3a5aa4953b619ed38816eea4e44237b57ccc02aa049b5c1c"
+    },
+    {
+      "path": "backend/tests/test_calendar_api.py",
+      "size": 5033,
+      "sha256": "b123a67bd9e6442a88ec9c50f7887b3afb14639dcced88b10797f7fd0f65d387"
+    },
+    {
+      "path": "backend/tests/test_csv_io.py",
+      "size": 7682,
+      "sha256": "42b7f37f1c7674ee2f91167d4574247752ccd106df6daee1fe0ef6cea6248370"
+    },
+    {
+      "path": "backend/tests/test_grid.py",
+      "size": 6058,
+      "sha256": "42335182b87831c059c04cc3bd65824456d833469dd8a2b768d002a24aa37964"
+    },
+    {
+      "path": "backend/tests/test_links.py",
+      "size": 1247,
+      "sha256": "c263fdc1fc62dfcfae520aaf8689382ab73be54454f455444e846dc45d164a7c"
+    },
+    {
+      "path": "backend/tests/test_obsidian.py",
+      "size": 5202,
+      "sha256": "93c49a480fa4ca5f435bd528dc6498d8cf6372d0109403ecb499aaaa7c8efb72"
+    },
+    {
+      "path": "backend/tests/test_obsidian_export_sync.py",
+      "size": 5896,
+      "sha256": "9222bddc133a90e559dcb13ac53440f72791fd440aa7285b0c7d6b42158e23b5"
+    },
+    {
+      "path": "backend/tests/test_open_input.py",
+      "size": 8047,
+      "sha256": "40b374afd8c7dfcefd7ba0ed2bd0272bead59df4b78ed2ee55ed1a3e2a2d0840"
+    },
+    {
+      "path": "backend/tests/test_scripts.py",
+      "size": 3533,
+      "sha256": "07881cd70104e6ca26ced144d55cba80578459625271665d02abf3c7e678c640"
+    },
+    {
+      "path": "backend/tests/test_static_files.py",
+      "size": 5039,
+      "sha256": "187d993c35a63d9463074cb3a8b73fe323334c64c23c0393730ab11b683a49da"
+    },
+    {
+      "path": "backend/tests/test_synonyms_api.py",
+      "size": 2171,
+      "sha256": "9a04dcd68ecdcb6a899ed09d0d587d1fa1fe5a28d23fa9934210827e43e6aebd"
+    },
+    {
+      "path": "backend/tests/test_tasks.py",
+      "size": 11582,
+      "sha256": "56b674b9cb7f27b92b2abed642cd30d96835c5d91021a6ddbf1a7e9c10b54c50"
+    },
+    {
+      "path": "docs/SPECIFICATION.md",
+      "size": 33184,
+      "sha256": "55e7942b1c9837c3e1907ace4a08ec7e83bdea1ee507a146aa3d28cb68b63e85"
+    },
+    {
+      "path": "frontend/README.md",
+      "size": 1025,
+      "sha256": "c594252bba5e633736091f9195b8f66c724387adc2d9b85ed59a0b9a1d5437ec"
+    },
+    {
+      "path": "frontend/dist/assets/index-DszVymYf.js",
+      "size": 11507871,
+      "sha256": "1d8fca2296dd4627a1bf51f5144c3738e679da8ac64f07be5b17a55363c332c0"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "size": 856,
+      "sha256": "0a06b4b1920fa99e6104d5984f2a4c26d558a19eaeacdeeb49d1b91daa0295b3"
+    },
+    {
+      "path": "frontend/dist/sw.js",
+      "size": 1497,
+      "sha256": "030342396f972c7acde043fadff45bdd6c6ecc389b3f8025a31a1c43823ded94"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "size": 12772,
+      "sha256": "624b316fc5885b97320bc30757e79003f9aa1cbc8de0bf8ff3078978661b6a6f"
+    },
+    {
+      "path": "frontend/src/components/ApiGuide/ApiGuide.tsx",
+      "size": 8693,
+      "sha256": "bfa10749e892c9999b0205af2476d30d9a43fe367294c23a97457fc18cce0759"
+    },
+    {
+      "path": "frontend/src/components/DiffViewer/DiffViewer.tsx",
+      "size": 22119,
+      "sha256": "9f73b28216aea63a4932038237a95f2cb0f5bd5f587100ac19e5ce5e2ab6d489"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ContextMenu.tsx",
+      "size": 3397,
+      "sha256": "764c246d70861751d60d7d8de661e5570f2a3fdcf9c7a1e6b67ceb678ba31dfe"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/DateSettingModal.tsx",
+      "size": 5257,
+      "sha256": "357df4410aa47b157572fb7b244187411f8210ac6cf944c082c7820b4a9af917"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/GanttChart.tsx",
+      "size": 34128,
+      "sha256": "fe29080ad5977c58cf93cb3bd8195d696d00b7dd0ed1cdd8d00044ec51ae2995"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/GanttChart.test.tsx",
+      "size": 6606,
+      "sha256": "93360e38ee4baf774b860517a8fb22b4e8b4045e08b6565ed913bb3dccc85b91"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttEvents.test.ts",
+      "size": 13737,
+      "sha256": "f532cea18e13b7b8e507ebb4fd684f695a32a71e796e51a0b5a1eacc4bbc902d"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttSync.test.ts",
+      "size": 12433,
+      "sha256": "46ffab75183ef92aeea93992f71b86f4a36fa60e371ce10cd8cdd7fdc82f3522"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttTemplates.test.ts",
+      "size": 7217,
+      "sha256": "fb854562e411ddbb109cc24207236ae9067e24f91bd516e6467d67a79c49e8a2"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttTestHarness.ts",
+      "size": 1829,
+      "sha256": "408846089488aef1b48d202621a54231fac0c4f45d3039ca81cddd8efb0a3c04"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/useGanttKeyboard.test.ts",
+      "size": 10420,
+      "sha256": "4b8842d39ce5fd3b22a0cbcfcf8fd6fdad54bf35ffc1241fd8ee6257fd48c849"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/contextMenuItems.test.ts",
+      "size": 5165,
+      "sha256": "b52cb519a45133bfd4d9c3dd674759eb187d789b7f39ffe6e8e010845d238f54"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/contextMenuItems.ts",
+      "size": 7017,
+      "sha256": "75e17d66f6d9b0b2c00b16c1cdef94d611b5a8641d89f9ce2d57bcf05dc9a9ab"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttEvents.ts",
+      "size": 12887,
+      "sha256": "483e084e901deb5dae9246be837af8d5f227f32c0650a013bf1451385200434f"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttSetup.ts",
+      "size": 5357,
+      "sha256": "a1f94a6d69827b929ed508d13c196bcfb6da7a9410c67437a1f660a0360be698"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttSync.ts",
+      "size": 12650,
+      "sha256": "bc6cf28c6e9b272911783c4f2070e8c9b684adfbf06b242e98e2d533feb1c9d5"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttTaskUtils.ts",
+      "size": 8412,
+      "sha256": "24d3ce73c8d3192cb3b525aad8d632f55d1b5e57d6a72d0d0e6570a30c610b07"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttTemplates.ts",
+      "size": 7633,
+      "sha256": "2e4cc3184ddd1d221298d5541f5c734bea66e7087a07e396765427466a580159"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/timelinePointer.ts",
+      "size": 2568,
+      "sha256": "7cd975e979409fce9c059c52d629fadaa8bb92fa6e04375b44f978b46688e50f"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/useGanttKeyboard.ts",
+      "size": 14180,
+      "sha256": "e7ca424a48b04521dacf0d3bd7885d4b6b6772da39aa4affd1237b4282191ed0"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/useSchedulePins.ts",
+      "size": 6447,
+      "sha256": "d73910677b80e9997656146ad2bcd720dc3c56b331e21a306648a125f028675b"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/useTimelineScroll.ts",
+      "size": 5193,
+      "sha256": "f3a1c752a3b24f33fd56a096a1853eb1275cad657855e8ec9ca66b91a79adebb"
+    },
+    {
+      "path": "frontend/src/components/Header/HamburgerMenu.tsx",
+      "size": 19577,
+      "sha256": "a87e7968e454b08606c0d7f7f450f122ed41514f783c7ef13e82a2fe06561935"
+    },
+    {
+      "path": "frontend/src/components/Header/Header.tsx",
+      "size": 22025,
+      "sha256": "f694894d38ae4f5a533cdb6a54124f8dd06820d365828e5e79a3e3cc7fa467c1"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/UniverSheet.tsx",
+      "size": 14764,
+      "sha256": "70752244f124d73d00e499b33e6ce42aa437ff0e481b63871947b597453e5160"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/gridColumns.ts",
+      "size": 2159,
+      "sha256": "d80645c0241df32e6e36d81306a34e763d45402f59efba0c83d2a4967334a2e2"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/gridTaskName.test.ts",
+      "size": 3471,
+      "sha256": "eeb8e3beb8c1f21faef9f93e211a8eeba033e756ede14841c62713975d4afb30"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/gridTaskName.ts",
+      "size": 2086,
+      "sha256": "23dc3fd9b426f19c2d1adc9a67cdbe48ba31f623d1f767a310617a1d3e0413bd"
+    },
+    {
+      "path": "frontend/src/contexts/ThemeContext.tsx",
+      "size": 1654,
+      "sha256": "76148d82ed31c224ffd5f827f23e1b6b914269a3adbd38de1cf5d58405f1954f"
+    },
+    {
+      "path": "frontend/src/contexts/useTheme.ts",
+      "size": 589,
+      "sha256": "1ef56467a63f9c37a9b0a30e684a56afc19885b1573f96980d1139295b7f3494"
+    },
+    {
+      "path": "frontend/src/hooks/__tests__/useGanttData.test.ts",
+      "size": 9167,
+      "sha256": "f80bd6fd708fea2da2100f5c58f25a4354d8daf9ef124be84fd6b2535060eef1"
+    },
+    {
+      "path": "frontend/src/hooks/useAppSettings.ts",
+      "size": 4180,
+      "sha256": "0a045f4b7ff329674679186585964a6a85872cdabff87ee0df701c191699e597"
+    },
+    {
+      "path": "frontend/src/hooks/useGanttData.ts",
+      "size": 6857,
+      "sha256": "49f50f8e86448fa7546d270817df0177702d12590d067f88dbbfd2e77a425c71"
+    },
+    {
+      "path": "frontend/src/hooks/useGridStaging.ts",
+      "size": 3207,
+      "sha256": "1406f467364a6b7d397622bec95253362674cb5206f8c9dfdf9c72c30e084c9d"
+    },
+    {
+      "path": "frontend/src/hooks/useLatestRef.ts",
+      "size": 481,
+      "sha256": "bdedf1d06d6c7c12d6235a9c49bcb149c8545cd327b366ce550f604aee1ced96"
+    },
+    {
+      "path": "frontend/src/hooks/useOpenInputRequests.ts",
+      "size": 2974,
+      "sha256": "80638764f7cffce6731210a29dba54b2f4855773094be47088d540d820dcf282"
+    },
+    {
+      "path": "frontend/src/hooks/useSyncedState.ts",
+      "size": 652,
+      "sha256": "ce87572ec89e9cda9619d479c9292e2a828fc6f6e3980a6db90a2eac46c1a77b"
+    },
+    {
+      "path": "frontend/src/services/__tests__/api.test.ts",
+      "size": 3185,
+      "sha256": "da723d9d5897ac5df5349de522ce1b5aaaa49ef087d25f69b3db2f6706560e48"
+    },
+    {
+      "path": "frontend/src/services/api.ts",
+      "size": 9571,
+      "sha256": "3df2101d94f9a890a62c5ad421c72bc4285f4004ca036cc2989d2e33da854da6"
+    },
+    {
+      "path": "frontend/src/types/gantt.ts",
+      "size": 5409,
+      "sha256": "600df99806f837ea0e5d32b4fb01c76b79a5efe96e7f3d014d9cd1902cb02ead"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/autoMoveTasks.test.ts",
+      "size": 2731,
+      "sha256": "f1ff9c1eeb1b1f461590fd03e7eed04f754b5ded4e4de71a90186d72a0318837"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/filterUtils.test.ts",
+      "size": 17031,
+      "sha256": "3f288e87e1251bfb46058f46e4684fcf4d41b73fe5c5afd805b74a4610f1bdf7"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/ganttTimelineShortcut.test.ts",
+      "size": 3780,
+      "sha256": "2aca4fefddcd3bfe74a4c2df7ec66fd147bff67480b8c56bbace6983a2ac30e0"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/iconUtils.test.ts",
+      "size": 2794,
+      "sha256": "4ccadb5f84df48a486c12189d33cebde6b0aca5485ef1dffe21ed5e956955312"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/taskText.test.ts",
+      "size": 1794,
+      "sha256": "6898b4d280394f1c962c4603acdce57b3d52f2521f0c0a13475bc79d7cfb5cbf"
+    },
+    {
+      "path": "frontend/src/utils/autoMoveTasks.ts",
+      "size": 2030,
+      "sha256": "46933aad2ce8cbba9dbb75e62eaa7dda911532b44a1282b2020c4de51cf91971"
+    },
+    {
+      "path": "frontend/src/utils/filterUtils.ts",
+      "size": 15656,
+      "sha256": "281de0fdf0f34d56fa3b78bae972c1e7d42ad10274b74f3a6390d44a94537a25"
+    },
+    {
+      "path": "frontend/src/utils/ganttTimelineShortcut.ts",
+      "size": 3169,
+      "sha256": "154f1bf968e17bf67083ae02cffb3cc4e67e18ca67105bdad17b1eb93f8d15e2"
+    },
+    {
+      "path": "frontend/src/utils/scheduleParser.test.ts",
+      "size": 5623,
+      "sha256": "0f0d3cd4fb7b68d9b9d59e9d98ebaf424e1da82983067d070712a5f85eb13ae5"
+    },
+    {
+      "path": "frontend/src/utils/taskText.ts",
+      "size": 1148,
+      "sha256": "2a4a5a6962ea30d1fd49e0f55bbade8e33ecc78500f18ffd45e25b3b1f87e620"
+    },
+    {
+      "path": "frontend/src/vite-env.d.ts",
+      "size": 482,
+      "sha256": "bb7454d455c20ccdcac0bb8e7c7943ce0f33d03d8189ca4e4e9fa4afc5df78fe"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "size": 2476,
+      "sha256": "7bb41ef07f3e7df3a0283b90eda10864330d9eef2a37a58f10fdcf7b2ae657ea"
+    }
+  ],
+  "deleted_files": [
+    "backend/test_open_input_154.py",
+    "backend/test_regex.py",
+    "backend/test_regex2.py",
+    "backend/tests/test_holidays_api.py",
+    "backend/tests/test_import_csv.py",
+    "backend/tests/test_load_data.py",
+    "backend/tests/test_pwa_cache_headers.py",
+    "claude.md",
+    "docs/auto_reload.md",
+    "docs/calendar_holiday_contextmenu.md",
+    "docs/calendar_schedule_contextmenu_and_id_search.md",
+    "docs/claude.md",
+    "docs/plan_suppress_lightbox.md",
+    "docs/univer_grid.md",
+    "docs/walkthrough_suppress_lightbox.md",
+    "fix_gantt.patch",
+    "frontend/check_pin.html",
+    "frontend/dist/assets/index-CYeIsup6.js",
+    "frontend/pnpm-lock.yaml",
+    "frontend/src/check_coord.js",
+    "frontend/src/components/GanttChart/ContextMenu.test.ts",
+    "frontend/src/components/GanttChart/GanttChart.test.tsx",
+    "frontend/src/components/GanttChart/GanttChart.tsx.orig",
+    "frontend/src/components/GanttChart/GanttChart.tsx.rej",
+    "frontend/src/services/__tests__/syncToDatabase.test.ts",
+    "frontend/src/services/syncToDatabase.ts",
+    "mockup.html"
+  ],
+  "target_files": [
+    {
+      "path": ".gitignore",
+      "blob": "84747c0077acbc42d0dadc8e60800f7be3e1eb00",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "AGENTS.md",
+      "blob": "b43a7139cb455a000a456c8afa18c8a79481812a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "CLAUDE.md",
+      "blob": "0cfd5162a9b7b0448c868e087c5905afa8211bdd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "README.md",
+      "blob": "a57679d3448ec97547fac96a2773641f7d03ad47",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/.python-version",
+      "blob": "e4fba2183587225f216eeada4c78dfab6b2e65f5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/README.md",
+      "blob": "a917baeb592ff5c7002b4134681a66152550096b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/config.py",
+      "blob": "b6144d738173cd7f7462d67b77a87063f50831ac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/data/business_trips.txt",
+      "blob": "1b34c3970bd2c5f95915089321b417abb16d0e19",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/data/holidays.txt",
+      "blob": "873175e57c1e7c5da3d1f2423ca68d8e058ea480",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/database.py",
+      "blob": "d498c2eea1569364267cc06a289c6347f605be4c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/generate_load_test_data.py",
+      "blob": "bb9f667e5e21f4006045bae208f90a7100db35c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/main.py",
+      "blob": "21238a5dd5cff9c1c98ca40071a2577c19147a79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/models.py",
+      "blob": "b19793683427dd8424edb62b6f26adc03d56bb54",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/pyproject.toml",
+      "blob": "0cd5340a7516a22eedefcff530cf95cb523a6255",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/restore_from_csv.py",
+      "blob": "12ac1977c5b2b0268231148d7fcb46cc9f01a011",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/__init__.py",
+      "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/calendar.py",
+      "blob": "d88bc33749cdea29c722845dabc704c9e0f21118",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/csv_io.py",
+      "blob": "99a5c4222d51e5511568e99fd679673eaa714a77",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/grid.py",
+      "blob": "107bec951d42af5056af9708ed40043f4e60f02a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/links.py",
+      "blob": "326a9954b7bc0770b48366ce91a08c685788a69f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/open_input.py",
+      "blob": "ede2d3b007eaaed55f8f57c1e069b6e7a57e3e27",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/synonyms.py",
+      "blob": "9ab339fb97905c6026968d970ec2031ad5ef6512",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/routers/tasks.py",
+      "blob": "6651b864aaaa8016563aa14a84cbf91bbc9e4455",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/sample_data.py",
+      "blob": "a4668fa9c34979ed977276a3620e3468a84cb076",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/schemas.py",
+      "blob": "ca28806a45b0839ee8a302df9618fb3eb819a3ff",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/__init__.py",
+      "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/browser_window.py",
+      "blob": "7f5be132ddd142dff4ee2bfaf29239bf9b23e835",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/calendar_files.py",
+      "blob": "c4869b9ace933f943773a72f1692e084d07aed4f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/csv_io.py",
+      "blob": "6f885847cb834fb9537e5c6cbd605b3e7b34cbdc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/obsidian_export.py",
+      "blob": "c252419e6a5ade154507df4327ef8b45f4861fd1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/task_text.py",
+      "blob": "8716be124cca048044f2e54d667bb8b7a07f0b50",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/services/update_sequence.py",
+      "blob": "e4e45e5d7ed95d322b4206189cd2e030881d3339",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/conftest.py",
+      "blob": "258935c585ef85a1540cb9e5ff4d9d76526575e9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_calendar_api.py",
+      "blob": "b4ab7747e354c960ff5ac969bf6175f414b0adb4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_csv_io.py",
+      "blob": "bff007594f490883d4c62d0fd2e9d883e9acabbc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_grid.py",
+      "blob": "074948fb282f113604a43424252668171f0bd16a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_links.py",
+      "blob": "5811559372f8a0f18d736026243a2adfa3699c11",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_obsidian.py",
+      "blob": "143484ca318adcdc905b2b1c277ba7b04478d640",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_obsidian_export_sync.py",
+      "blob": "23f1815d2db0daca2b27a941ef076a88a091683d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_open_input.py",
+      "blob": "2207ca0aa705c38cd4d876c285132abe6edb8d2d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_scripts.py",
+      "blob": "bed057ef00632b008101168f192d239bd94860e6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_static_files.py",
+      "blob": "5c4dbbb30a5b393e952844396607b41d549a73cd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_synonyms_api.py",
+      "blob": "687bc8e56ffca9ad2642980968d77e14bad9ac8f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/tests/test_tasks.py",
+      "blob": "7f12bc5efe84b989180a3537526e3dd15e89ea06",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/uv.lock",
+      "blob": "e01b7611985686d5db5020ac6bf68619ad43b28e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/SPECIFICATION.md",
+      "blob": "3407d9e999564003357970c003b4cf530c1cf623",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/.gitignore",
+      "blob": "20c41b1f37ac77148ec8aa904f969906c0e88f10",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/README.md",
+      "blob": "dfd8646d5caadfcfb01f3645c6a9d670d219ca7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-BmRvv7bE.css",
+      "blob": "115bad35caa9e9ade9438b057b3c71e4d5ea33ab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-DszVymYf.js",
+      "blob": "7f1ee52d26652762aa8271aa4d4f22d94bc978f3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/workbox-window.prod.es5-BIl4cyR9.js",
+      "blob": "96f05e8784078ea604f39309cc80fbe82460edde",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/css.svg",
+      "blob": "031bccebc7a9848e726213100283e9211b29ce6c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/excalidraw.ico",
+      "blob": "e40a39d8dedd3a07cc37a2ef93f1d8a4ea6939ec",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/file.svg",
+      "blob": "13439d0fb78efa19f015c1d833d829d7c1bbe3f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/folder.svg",
+      "blob": "3fb8b58ca4ffbd782b31c69f90ddb761a378a523",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/folder_open.svg",
+      "blob": "0f6728207d51dfe445538c7d4543d0a7292b4f2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/folder_project.svg",
+      "blob": "2bc53dca854e56c94112bdaa9b1f33ad60695ec9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/folder_project_open.svg",
+      "blob": "fc8cb474a31f5ac24585052a1e4400f5b7c84c86",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/html.svg",
+      "blob": "52f3df8fc90b039f6427ec492bf198c393f978fa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/image.svg",
+      "blob": "6ae019060a90e8a31dcf6edc427d0c02f224cf2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/javascript.svg",
+      "blob": "786cdbfb9d1386e545cf541eccf651548131684f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/json.svg",
+      "blob": "2a36f1a33a6e8d32a8ea32dd2d8dee1bc13ce5c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/markdown.svg",
+      "blob": "064473aa297394e07c020b991cb912bf542df361",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/pdf.svg",
+      "blob": "f41d8ccc56cfba73fd14c45460e9f3f1fbdc2557",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/python.svg",
+      "blob": "890e6a1e7da4de5ecb8bef654c302967f52ed3d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/typescript.svg",
+      "blob": "0708a9102609ad356b9de69f84d1976d9ac0fefd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/url.svg",
+      "blob": "19f70f794caa57f8dfb045750da30fc876d2aee3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/catppuccin/zip.svg",
+      "blob": "a1909ffa739925adad5aeb34025bd548e311baea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/icon-192x192.png",
+      "blob": "73567381d32b5f5c27a90714ef810c8f89d21274",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/icons/icon-512x512.png",
+      "blob": "0ef6f19ec2cda2c6b82df635b0d74142b96f2acb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "blob": "e8f55765fd5ece3406859ee5280b12c4b6bcd4e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/manifest.webmanifest",
+      "blob": "cedadb827b6fe56ebf8776c94774604ad0e800d1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/sw.js",
+      "blob": "834e65ddc14a76224c89f051452301388b5de755",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/vite.svg",
+      "blob": "e7b8dfb1b2a60bd50538bec9f876511b9cac21e3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/workbox-f19dbf24.js",
+      "blob": "d18f258a1d5faa89bfad2d7542a966445fac1d25",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/eslint.config.js",
+      "blob": "5e6b472f583e34a1cca751440d4f241495475723",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/index.html",
+      "blob": "b1093cf4a0c3486847e0291174f234ded4829246",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "blob": "ed0165828db0f61cd1e03e9ba4da5f2903c8458f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package.json",
+      "blob": "ca9a95fa82063c2910e0c89166117f53fdb8cacd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/css.svg",
+      "blob": "031bccebc7a9848e726213100283e9211b29ce6c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/excalidraw.ico",
+      "blob": "e40a39d8dedd3a07cc37a2ef93f1d8a4ea6939ec",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/file.svg",
+      "blob": "13439d0fb78efa19f015c1d833d829d7c1bbe3f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/folder.svg",
+      "blob": "3fb8b58ca4ffbd782b31c69f90ddb761a378a523",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/folder_open.svg",
+      "blob": "0f6728207d51dfe445538c7d4543d0a7292b4f2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/folder_project.svg",
+      "blob": "2bc53dca854e56c94112bdaa9b1f33ad60695ec9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/folder_project_open.svg",
+      "blob": "fc8cb474a31f5ac24585052a1e4400f5b7c84c86",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/html.svg",
+      "blob": "52f3df8fc90b039f6427ec492bf198c393f978fa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/image.svg",
+      "blob": "6ae019060a90e8a31dcf6edc427d0c02f224cf2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/javascript.svg",
+      "blob": "786cdbfb9d1386e545cf541eccf651548131684f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/json.svg",
+      "blob": "2a36f1a33a6e8d32a8ea32dd2d8dee1bc13ce5c3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/markdown.svg",
+      "blob": "064473aa297394e07c020b991cb912bf542df361",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/pdf.svg",
+      "blob": "f41d8ccc56cfba73fd14c45460e9f3f1fbdc2557",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/python.svg",
+      "blob": "890e6a1e7da4de5ecb8bef654c302967f52ed3d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/typescript.svg",
+      "blob": "0708a9102609ad356b9de69f84d1976d9ac0fefd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/url.svg",
+      "blob": "19f70f794caa57f8dfb045750da30fc876d2aee3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/catppuccin/zip.svg",
+      "blob": "a1909ffa739925adad5aeb34025bd548e311baea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/icon-192x192.png",
+      "blob": "73567381d32b5f5c27a90714ef810c8f89d21274",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/icons/icon-512x512.png",
+      "blob": "0ef6f19ec2cda2c6b82df635b0d74142b96f2acb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/vite.svg",
+      "blob": "e7b8dfb1b2a60bd50538bec9f876511b9cac21e3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/App.css",
+      "blob": "aecfdeeeca7443337e5d4ca80d6d0340b4704b81",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "blob": "c30151c37e16af22166dcd1bed31030c92eeb027",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/assets/react.svg",
+      "blob": "6c87de9bb3358469122cc991d5cf578927246184",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ApiGuide/ApiGuide.css",
+      "blob": "5d35a675e5379f9f102281775991274f70207e2d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ApiGuide/ApiGuide.tsx",
+      "blob": "482ad6367a051d0369ed8230413b540d8e630c45",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/DiffViewer/DiffViewer.css",
+      "blob": "1e99c543641ee4b7f58e203e307604e0dab1d24c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/DiffViewer/DiffViewer.tsx",
+      "blob": "d8121127e666cf627d31701a71bb2e2336db8cb4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ContextMenu.tsx",
+      "blob": "1d30f219f258ce0a223c29e7536f3711d0e89696",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/DateSettingModal.tsx",
+      "blob": "00b90034b0b2a668a31370b74d979157e9fb229e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/GanttChart.tsx",
+      "blob": "06ab94a80bb26c46d7e94dd639be269038967eb2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ScheduleAddModal.tsx",
+      "blob": "1a8f9f143e728f56c9188d3036d13485abe79f11",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/GanttChart.test.tsx",
+      "blob": "163d377dda237dc6bc0f0126ee1b21b27d91d9a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttEvents.test.ts",
+      "blob": "85f3d0cde20d6af38823da26a00bb22f485d3922",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttSync.test.ts",
+      "blob": "4af495336b1a3b03d645e14e3d33ca0468d43849",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttTemplates.test.ts",
+      "blob": "b5d4ad492de6232faf09ddc3b8045438f3a72ef1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/ganttTestHarness.ts",
+      "blob": "34898c5645a947e8863cbc8116f00834cd2fd764",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/__tests__/useGanttKeyboard.test.ts",
+      "blob": "9aa322ffb2f6b9506ccd970602508b01aa5e60b5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/contextMenuItems.test.ts",
+      "blob": "5890f3b46b01f2a5eccbd57b05f7338a31b33397",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/contextMenuItems.ts",
+      "blob": "0352a46fccdc05b1690403b6f59eaa0c96974905",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttEvents.ts",
+      "blob": "7a2fa35567d16916247e331734e2ededb3dcd48e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttSetup.ts",
+      "blob": "686aa0600da0bd8ea64736fd9a81a5cd0ba00512",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttSync.ts",
+      "blob": "e4b61c4164d5a7bd68b016a4dacd9722a1e946db",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttTaskUtils.ts",
+      "blob": "5b6ab5e4f514cef11695d240a437562e4b207542",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/ganttTemplates.ts",
+      "blob": "5037d5ffe42a09c1d670d5e89bc6aa7dbbaff458",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/timelinePointer.ts",
+      "blob": "48ac5245ded6e7c96811c08675b3dc308f95a1e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/useGanttKeyboard.ts",
+      "blob": "ac05d900998c767b6804df9638be254e8a14d702",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/useSchedulePins.ts",
+      "blob": "743daea688b2e94ee67b5b8766a8f827fbbc60e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GanttChart/useTimelineScroll.ts",
+      "blob": "f5a1e884c54c1e41ce90e6f8d328e5fa5206b684",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GridDiffPanel/GridDiffPanel.css",
+      "blob": "35f19682a4a4d06fcca3a8d5194d59b10d727513",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/GridDiffPanel/GridDiffPanel.tsx",
+      "blob": "9dc0ffd9d706eec20002e7ddb52395e0c2ebaedc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/Header/CsvSyncSummaryModal.tsx",
+      "blob": "ac33bc3e8b70abf66aadaad0fd30f338cd4b61e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/Header/HamburgerMenu.tsx",
+      "blob": "9dfb3a9c60c6492398b35664d810ea4d24cf2737",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/Header/Header.css",
+      "blob": "06613ac0780a7387ec0815db6191e5051b89ee24",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/Header/Header.test.tsx",
+      "blob": "d41739d2902e4241585cbf9b29793fc8350681b0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/Header/Header.tsx",
+      "blob": "d02c4aaad2b1f35e2920cc337952856ec39c60af",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/UniverSheet.css",
+      "blob": "2cf4cf884563c91e9e722a55e73f81c738f55bd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/UniverSheet.tsx",
+      "blob": "e1e50570195eb3ea64164755ad98cacb3e19e207",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/gridColumns.ts",
+      "blob": "0e7b244f9e58be64ab11e6c866e3b09bbf18a6ed",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/gridTaskName.test.ts",
+      "blob": "44584264b4ea94dfecdb42339abbb4be0c312576",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/UniverSheet/gridTaskName.ts",
+      "blob": "442be92d30c9933577aff39e0790ca90a25b7954",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/constants/gantt.ts",
+      "blob": "97069b56531423d152eb262d21ee7441c655ccd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/contexts/ThemeContext.tsx",
+      "blob": "0bf936bad6e6b206b0bfd37a8ced6739c6e46798",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/contexts/useTheme.ts",
+      "blob": "d26528e6487e87c923e8ae30aa94dc70c31235c6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/__tests__/useGanttData.test.ts",
+      "blob": "feea6ef2af4e9d5c0a522e3bf983e658dfeb1b82",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useAppSettings.ts",
+      "blob": "29df8b2cc650e046bb11ff84bd477ff2ce09488c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useGanttData.ts",
+      "blob": "451bc49da4bfddd1284ac0b318b167a42ef27cbb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useGridStaging.ts",
+      "blob": "c5d4ce364a51aabb5c3257e257fadb71ff2a32eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useLatestRef.ts",
+      "blob": "ef9db22977f636e2b02e88707844628e62125821",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useLocalStorage.ts",
+      "blob": "2f799571e26e4ebdb2d42fa05b2c6a8c854700de",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useOpenInputRequests.ts",
+      "blob": "38945aef591413c2bdddc132b1742367c3bda8e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/hooks/useSyncedState.ts",
+      "blob": "07779ded227ac24c3f329fffc2d18666a553c3c8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/index.css",
+      "blob": "3763b4973fa29ebc3f31eac6f19c4502ce8d97d5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "blob": "8b30ee450ea6001af9f69958f113fe369f713271",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/services/__tests__/api.test.ts",
+      "blob": "90a8089c47ec2cb690d8efdc4819d2f56922edf5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/services/api.ts",
+      "blob": "03840de8a0a132c6c2333aebdec37e95f4ec6d99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/styles/gantt.css",
+      "blob": "302f0a98a296d22c2029afe2b8f82acf5513ab01",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/styles/print.css",
+      "blob": "028e1d94bd7e41d61a3256453ba4041b7fc7d0c7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/styles/variables.css",
+      "blob": "4a88637fe0a010cabb80e0d9e4d9a9da075b4c79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/types/diff.ts",
+      "blob": "a1e50e7cdc9a993e084d5579469aef972d72d585",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/types/gantt.ts",
+      "blob": "71ec8cc556736e1b766b331effe37b888065a597",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/autoMoveTasks.test.ts",
+      "blob": "1ca5944f6ba8bca14ec630d46631a954094ed670",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/dateUtils.test.ts",
+      "blob": "708960a288564a8aeb29aff32b172c1870583026",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/diffUtils.test.ts",
+      "blob": "8cb2abfca059b483a7c89a6563856a3ca8257b2e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/filterUtils.test.ts",
+      "blob": "417c28de220af3029e32f80e6ab1e9d6306c5187",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/ganttTimelineShortcut.test.ts",
+      "blob": "8def7b2d448836b4a13b6515713434d494dbc2bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/iconUtils.test.ts",
+      "blob": "8cf10ce59ab4caee2e6e16b4c9b96d43710b931a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/taskText.test.ts",
+      "blob": "a6e14d2963f7751d03e0dcc14bf2190203ad18d6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/autoMoveTasks.ts",
+      "blob": "c76d5130b6acb58bdc336f0fdb815eb55a74261c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/dateUtils.ts",
+      "blob": "58344657c90b72d1828eb69099e0d6a665948a83",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/diffUtils.ts",
+      "blob": "609eed00583b5a1ecc3b33fc9f1a084a6300c1df",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/filterUtils.ts",
+      "blob": "71ed930b6a785eabf256cfdbc566cd5bec78fea4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/ganttTimelineShortcut.ts",
+      "blob": "22c09f937a96f9d38b0787d50c5c3ee4d8beb96c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/iconUtils.ts",
+      "blob": "c9119bb7d26196e7a222c54da22d0b673f33ed33",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/scheduleParser.test.ts",
+      "blob": "7f65228db2ac5c06363a1932f116006f0436d59a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/scheduleParser.ts",
+      "blob": "12429fe46584f53734e0a1b470516c9b96573a2a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/utils/taskText.ts",
+      "blob": "3f5ad9501166cee08b17a216052ae7393440ed77",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/vite-env.d.ts",
+      "blob": "f703c570a43b0d7875758a3c551d5931be59a622",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/tsconfig.app.json",
+      "blob": "a9b5a59ca647ca0102d2501b56cedd83ad7b6818",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "blob": "1ffef600d959ec9e396d5a260bd3f5b927b2cef8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/tsconfig.node.json",
+      "blob": "8a67f62f4ceebff3424e6e8cd4b3c25b17347546",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "blob": "f9e30a49126094f3b9a90904e49352d71babe503",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "original_app",
+      "blob": "b9d4d36547ddddfd588d368721f702ca44125efe",
+      "mode": "160000",
+      "type": "commit"
+    },
+    {
+      "path": "sample_data/gantt_tasks_20260117_132759.csv",
+      "blob": "03b133e500e34df39f23ed64fcfefab18c826afc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "start_app.bat",
+      "blob": "b71e19f3a6850cce5153758b969d8e023dfa6e99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "start_app.sh",
+      "blob": "be9530af8ac5a08f4e3fb33b892836c7d7c0d649",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "start_dev.bat",
+      "blob": "157f5f160822ac3ab9cb7c431913a00b571a0eb5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "start_dev.sh",
+      "blob": "328d6e37c7e5e5108105f39d3398ca73c552c21a",
+      "mode": "100755",
+      "type": "blob"
+    }
+  ],
+  "signature": "a41218614208bdfeae05b33ecffa5d93b4dc199374e27219f2e0b975a0c0b4ed"
+}

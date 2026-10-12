@@ -3,15 +3,30 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "obsidian-settings",
-      "sequence": 11,
-      "manifest_path": "packages/obsidian-settings/000011/manifest.json"
+      "repo_id": "excalidraw_myao9494",
+      "sequence": 2,
+      "manifest_path": "packages/excalidraw_myao9494/000002/manifest.json"
     },
     {
-      "repo_id": "visual-diff-tool",
-      "sequence": 4,
-      "manifest_path": "packages/visual-diff-tool/000004/manifest.json"
+      "repo_id": "obsidian-settings",
+      "sequence": 12,
+      "manifest_path": "packages/obsidian-settings/000012/manifest.json"
+    },
+    {
+      "repo_id": "file_manager",
+      "sequence": 6,
+      "manifest_path": "packages/file_manager/000006/manifest.json"
+    },
+    {
+      "repo_id": "gantt_react_myao",
+      "sequence": 2,
+      "manifest_path": "packages/gantt_react_myao/000002/manifest.json"
+    },
+    {
+      "repo_id": "local-fulltext-search",
+      "sequence": 12,
+      "manifest_path": "packages/local-fulltext-search/000012/manifest.json"
     }
   ],
-  "signature": "6564c4bf4c160502379aec71a4554aa29e84816afdbc7f574e1d834aaf66b309"
+  "signature": "c53277abaf0a22b143a094055b20fc811ab70cfc9c6c88ac0bf10cd731f64e9a"
 }

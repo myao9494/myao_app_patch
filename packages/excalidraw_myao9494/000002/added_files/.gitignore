@@ -1,0 +1,30 @@
+# 依存パッケージ（npm ci / pip install で再生成する）
+node_modules/
+backend/venv/
+backend/.venv/
+.venv/
+.venv.broken/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+
+# 実行時に生成されるデータ
+# ※ dist/ はビルドできない環境（社内PC）で使うためgit管理する
+backup/
+uploads/
+upload_local/
+*.db
+*.sqlite3
+*.log
+
+# ローカル環境・エディタ
+*.env
+.DS_Store
+.ipynb_checkpoints/
+test/
+test_obsidian/

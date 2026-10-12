@@ -1,0 +1,25 @@
+.DS_Store
+
+# Backend
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.py[cod]
+.env
+# .env.*
+*.db
+*.sqlite3
+
+# Frontend
+**/node_modules/
+# frontend/dist/
+# frontend/build/
+.npm
+*.log
+
+# OS
+Thumbs.db
+backend/folder_history.json
+# UI設定（利用者ごと。パス置換設定に社内サーバーのアドレスが入るため git 管理しない）
+backend/settings.local.json
+backend/.venv_fix/

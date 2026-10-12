@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+main.js.map
+
+# Operating System files
+.DS_Store
+Thumbs.db
