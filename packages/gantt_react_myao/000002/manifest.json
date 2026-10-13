@@ -623,7 +623,6 @@
     "backend/tests/test_import_csv.py",
     "backend/tests/test_load_data.py",
     "backend/tests/test_pwa_cache_headers.py",
-    "claude.md",
     "docs/auto_reload.md",
     "docs/calendar_holiday_contextmenu.md",
     "docs/calendar_schedule_contextmenu_and_id_search.md",
@@ -1762,5 +1761,5 @@
       "type": "blob"
     }
   ],
-  "signature": "a41218614208bdfeae05b33ecffa5d93b4dc199374e27219f2e0b975a0c0b4ed"
+  "signature": "66b37b635c3a5383f771d4af432676cf13b1fd3dfb90183c852c6eb4736dc79e"
 }

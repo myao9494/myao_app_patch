@@ -7769,7 +7769,6 @@
     "api/save-file.ts",
     "backup/shoki_backup_20260310_055852.excalidraw",
     "backup/test_archive_20260108_054922.txt",
-    "claude.md",
     "components/ExampleApp.scss",
     "components/ExampleApp.tsx",
     "dist/assets/ar-SA-G6X2FPQ2-Co3L94yp.js",
@@ -18898,5 +18897,5 @@
       "type": "blob"
     }
   ],
-  "signature": "9cc4ef338ced0163069c6a1f81346e2df53ca6bd37a0b040518a948f9647436d"
+  "signature": "69cdfc3540ce0f75e3435435cb3b57eb3b3a0b7a4c93644b5110f812635ae366"
 }
