@@ -1,0 +1,86 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "input_box",
+      "type": "rectangle",
+      "x": 60,
+      "y": 100,
+      "width": 240,
+      "height": 90,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "label": "入力テキスト\n「13:00-15:00 会議」\n「13:00to15:00 会議」\n「13:00～15:00 会議」"
+    },
+    {
+      "id": "arrow1",
+      "type": "arrow",
+      "x": 300,
+      "y": 145,
+      "points": [[0, 0], [80, 0]],
+      "strokeColor": "#1e1e1e"
+    },
+    {
+      "id": "normalize_box",
+      "type": "rectangle",
+      "x": 380,
+      "y": 100,
+      "width": 220,
+      "height": 90,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "label": "正規化 (normalize_text)\n全角英数記号の半角化\nスペースの正規化"
+    },
+    {
+      "id": "arrow2",
+      "type": "arrow",
+      "x": 600,
+      "y": 145,
+      "points": [[0, 0], [80, 0]],
+      "strokeColor": "#1e1e1e"
+    },
+    {
+      "id": "extract_box",
+      "type": "rectangle",
+      "x": 680,
+      "y": 80,
+      "width": 280,
+      "height": 130,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "label": "時間範囲抽出 (extract_time_range)\n区切り: - / ー / ― / to / TO / ～ / 〜\n・大文字小文字/全角半角/スペース不問\n・カタカナ長音記号(セミナー等)を保持"
+    },
+    {
+      "id": "arrow3",
+      "type": "arrow",
+      "x": 820,
+      "y": 210,
+      "points": [[0, 0], [0, 80]],
+      "strokeColor": "#1e1e1e"
+    },
+    {
+      "id": "result_box",
+      "type": "rectangle",
+      "x": 680,
+      "y": 290,
+      "width": 280,
+      "height": 90,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "label": "解析結果 (ParsedEvent)\nstart: 13:00\nend: 15:00 (duration: 120分)\nsubject: 会議"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff"
+  }
+}
