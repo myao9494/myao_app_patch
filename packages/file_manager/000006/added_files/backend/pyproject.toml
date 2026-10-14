@@ -1,0 +1,32 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "File Manager バックエンド（FastAPI）"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.104.0",
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "pywinpty>=3.0.0; platform_system == 'Windows'",
+    "pywin32>=306; platform_system == 'Windows'",
+    "python-multipart>=0.0.6",
+    "send2trash>=1.8.0",
+    "uvicorn[standard]>=0.24.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[tool.ruff.lint]
+# 未使用・未定義の名前と構文エラーを検出する（`ruff check app tests`）
+select = ["F", "E9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

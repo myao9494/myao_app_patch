@@ -1,0 +1,78 @@
+/* InputModal.css */
+.input-modal-form {
+    padding: 10px 0;
+}
+
+.input-modal-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 4px;
+    font-size: 14px;
+    background: var(--bg-color, #fff);
+    color: var(--text-color, #1f2937);
+    box-sizing: border-box;
+}
+
+.input-modal-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-modal-label {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-secondary, #6b7280);
+}
+
+.input-modal-message {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--text-secondary, #6b7280);
+    white-space: pre-line;
+}
+
+.input-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary-color, #3b82f6);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover, #2563eb);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-color, #1f2937);
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-hover, #f3f4f6);
+}
