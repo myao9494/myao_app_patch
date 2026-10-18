@@ -1,0 +1,11 @@
+# Pythonバックエンドの静的解析設定（実行には不要。開発時に ruff / mypy で使う）
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true

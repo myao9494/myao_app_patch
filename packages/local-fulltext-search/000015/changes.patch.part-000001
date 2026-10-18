@@ -1,0 +1,1029 @@
+diff --git a/backend/app/services/change_tracking_service.py b/backend/app/services/change_tracking_service.py
+index 422ccac37c889f291a334616d94cdf58175e0233..5811efcaf0e6ac09a1bc39f772355f773a2da53b 100644
+--- a/backend/app/services/change_tracking_service.py
++++ b/backend/app/services/change_tracking_service.py
+@@ -13,6 +13,7 @@ import logging
+ import os
+ import platform
+ import threading
++import time
+ from collections.abc import Callable
+ from pathlib import Path
+ from sqlite3 import Connection
+@@ -25,6 +26,9 @@ from app.services.windows_change_tracking import WindowsChangeTracker
+ 
+ logger = logging.getLogger(__name__)
+ ChangeCallback = Callable[[tuple[str, ...]], None]
++# バックグラウンド差分更新に失敗した対象の再試行間隔（失敗が続くごとに倍にして上限で止める）
++REFRESH_RETRY_BASE_SECONDS = 30.0
++REFRESH_RETRY_MAX_SECONDS = 600.0
+ 
+ 
+ class MacFSEventsObserver:
+@@ -140,8 +144,12 @@ class ChangeTrackingService:
+         connection_factory: Callable[[], Connection] = get_connection,
+         *,
+         ignored_paths: tuple[Path, ...] | None = None,
++        clock: Callable[[], float] = time.monotonic,
+     ) -> None:
+         self._connection_factory = connection_factory
++        self._clock = clock
++        # 差分更新に失敗した対象ごとの (連続失敗回数, 次に再試行してよい時刻)。成功すると消す。
++        self._refresh_failures: dict[str, tuple[int, float]] = {}
+         self._observer = MacFSEventsObserver()
+         self._windows_tracker: WindowsChangeTracker | None = None
+         self._is_running = False
+@@ -294,8 +302,10 @@ class ChangeTrackingService:
+     def _refresh_one_debounced_dirty_target(self) -> None:
+         """2秒以上静まった dirty 対象だけを1件更新し、失敗時は dirty のまま残す。"""
+         connection = self._connection_factory()
++        target = None
++        target_key = ""
+         try:
+-            target = connection.execute(
++            candidates = connection.execute(
+                 """\
+                 SELECT t.full_path, t.exclude_keywords, t.index_depth, t.selected_extensions
+                 FROM targets t
+@@ -304,11 +314,22 @@ class ChangeTrackingService:
+                   AND s.is_tracking = 1 AND s.is_dirty = 1
+                   AND (s.last_event_at IS NULL OR s.last_event_at <= datetime('now', '-2 seconds'))
+                 ORDER BY s.last_event_at
+-                LIMIT 1
+                 """
+-            ).fetchone()
++            ).fetchall()
++            now = self._clock()
++            # 失敗直後の対象は待つ（dirty のまま全走査を繰り返すと、サーバーが応答しなくなる）。
++            # 待機中の対象が先頭にいても、他の dirty 対象の更新は止めない。
++            target = next(
++                (
++                    row
++                    for row in candidates
++                    if self._refresh_failures.get(str(row["full_path"]), (0, 0.0))[1] <= now
++                ),
++                None,
++            )
+             if target is None:
+                 return
++            target_key = str(target["full_path"])
+             logger.info(
+                 "ChangeTrackingService: バックグラウンド差分更新を開始します。target=%s",
+                 target["full_path"],
+@@ -325,12 +346,23 @@ class ChangeTrackingService:
+                 index_depth=int(target["index_depth"]),
+                 types=str(target["selected_extensions"]),
+             )
++            self._refresh_failures.pop(target_key, None)
+             logger.info(
+                 "ChangeTrackingService: バックグラウンド差分更新が完了しました。target=%s",
+                 target["full_path"],
+             )
+         except Exception:
+-            logger.warning("ChangeTrackingService: 変更通知後のバックグラウンド差分更新に失敗しました。", exc_info=True)
++            if target is not None:
++                failure_count = self._refresh_failures.get(target_key, (0, 0.0))[0] + 1
++                delay = min(REFRESH_RETRY_BASE_SECONDS * 2 ** (failure_count - 1), REFRESH_RETRY_MAX_SECONDS)
++                self._refresh_failures[target_key] = (failure_count, self._clock() + delay)
++                logger.warning(
++                    "ChangeTrackingService: 変更通知後のバックグラウンド差分更新に失敗しました。"
++                    "%.0f 秒後に再試行します。target=%s",
++                    delay,
++                    target_key,
++                    exc_info=True,
++                )
+         finally:
+             connection.close()
+ 
+diff --git a/backend/app/services/file_walker.py b/backend/app/services/file_walker.py
+index a5757a24a8196d7bdb3818fd91bd81f2c3494e19..cefbe401a7aa11622438c73d10d1baf4fd16491f 100644
+--- a/backend/app/services/file_walker.py
++++ b/backend/app/services/file_walker.py
+@@ -5,16 +5,21 @@
+ - 除外フォルダへは再帰しない。エントリ名だけで除外判定する（親フォルダは再帰の途中で判定済み）。
+ - 階層数は対象フォルダ直下を 0 と数え、max_depth より深いフォルダへは入らない。
+ - シンボリックリンクはたどらない。
++- 配下のフォルダを開けない（走査中に消えた・開けない名前など。WinError 3 を含む）ときは、そのフォルダだけ読み飛ばして続ける。
++  除外設定へは追加しない。対象フォルダ自体の失敗は例外にする。
+ """
+ 
+ from __future__ import annotations
+ 
++import logging
+ import os
+ from collections.abc import Iterator
+ from pathlib import Path
+ 
+ from app.services import exclude_rules
+ 
++logger = logging.getLogger(__name__)
++
+ 
+ def walk_indexable_files(
+     root: Path,
+@@ -77,7 +82,14 @@ def _walk_files(
+                 ):
+                     continue
+ 
+-                if entry.is_dir(follow_symlinks=False):
++                try:
++                    is_directory = entry.is_dir(follow_symlinks=False)
++                    is_file = False if is_directory else entry.is_file(follow_symlinks=False)
++                except OSError:
++                    # 種別を判定できないエントリ 1 件のために、同じフォルダの残りの走査を止めない。
++                    continue
++
++                if is_directory:
+                     if current_depth < max_depth:
+                         yield from _walk_files(
+                             Path(entry.path),
+@@ -92,7 +104,7 @@ def _walk_files(
+                         )
+                     continue
+ 
+-                if entry.is_file(follow_symlinks=False):
++                if is_file:
+                     resolved_extension = next(
+                         (extension for extension in sorted_allowed_extensions if entry.name.lower().endswith(extension)),
+                         None,
+@@ -106,7 +118,12 @@ def _walk_files(
+             if normalized_root is not None:
+                 auto_excluded_paths.add(normalized_root)
+             return
+-        raise
++        # 対象フォルダ自体の失敗は設定ミスなので、握りつぶさず呼び出し元へ伝える。
++        if current_depth == 0:
++            raise
++        # 配下のフォルダが走査中に消えた / 開けない名前だった（Windows の WinError 3 など）。
++        # そのフォルダだけ読み飛ばし、走査全体は続ける。一時的な事象なので除外設定へは追加しない。
++        logger.warning("走査できないフォルダを読み飛ばしました: %s (%s)", root, error)
+ 
+ 
+ def is_unexpected_network_error(error: OSError) -> bool:
+diff --git a/backend/app/vector/email_html.py b/backend/app/vector/email_html.py
+index dbc627cf7eed6191ed20fb10064ceb979902ae8f..63f98a740d1bf65b74cecf6fa59e79810d6279b6 100644
+--- a/backend/app/vector/email_html.py
++++ b/backend/app/vector/email_html.py
+@@ -33,6 +33,19 @@ def sanitize_outlook_html(html_text: str) -> str:
+     return clean.strip()
+ 
+ 
++# Cc 見出し（半角・全角）。これが無い本文では Cc の除去処理を飛ばす
++_CC_LABEL_PATTERN = re.compile(r"(?:cc|ｃｃ)\s*[:：]", re.IGNORECASE)
++
++# 表の Cc 行: 1 つの <tr> の中の、見出しセルに Cc があり、その行末までを除去する。
++# 行をまたいで先読みしない（tempered greedy）ので、Cc が無い行で文書末尾まで探して遅くなることがない。
++_CC_TABLE_ROW_PATTERN = re.compile(
++    r"<tr\b[^>]*>(?:(?!</tr\s*>)[\s\S])*?"
++    r"<t[hd]\b[^>]*>(?:(?!</t[hd]\s*>)[\s\S])*?(?:cc|ｃｃ)\s*[:：]"
++    r"(?:(?!</tr\s*>)[\s\S])*</tr\s*>",
++    re.IGNORECASE,
++)
++
++
+ def strip_email_cc_lines(text: str, is_html: bool = False) -> str:
+     """
+     メール本文（プレーンテキストまたはHTML）からCc行・Ccブロックを自動除去する。
+@@ -41,33 +54,31 @@ def strip_email_cc_lines(text: str, is_html: bool = False) -> str:
+         return ""
+ 
+     if is_html:
+-        # 1. <tr><th>Cc:</th><td>...</td></tr>
+-        cleaned = re.sub(
+-            r"<tr\b[^>]*>[\s\S]*?<t[hd][^>]*>[\s\S]*?(?:cc|ｃｃ)\s*[:：][\s\S]*?</t[hd]>[\s\S]*?</tr>",
+-            "",
+-            text,
+-            flags=re.IGNORECASE,
+-        )
+-        # 2. <p> または <div> が Cc 行単体で構成されている場合
+-        cleaned = re.sub(
+-            r"<(?:p|div)\b[^>]*>\s*<b>\s*(?:cc|ｃｃ)\s*[:：]</b>[\s\S]*?</(?:p|div)>",
+-            "",
+-            cleaned,
+-            flags=re.IGNORECASE,
+-        )
+-        # 3. <b>Cc:</b> ... <br> のインライン形式（後ろの <br> も巻き込んで除去）
+-        cleaned = re.sub(
+-            r"<b>\s*(?:cc|ｃｃ)\s*[:：]</b>[\s\S]*?(?:<br\s*/?>|(?=<b>|</(?:p|div|tr|td)>|$))",
+-            "",
+-            cleaned,
+-            flags=re.IGNORECASE,
+-        )
+-        # 4. Cc: ... <br> （<b>なし）の形式
+-        cleaned = re.sub(
+-            r"(?im)^\s*(?:cc|ｃｃ)\s*[:：][^<]*(?:<[^>]+>[^<]*)*?(?:<br\s*/?>|$)",
+-            "",
+-            cleaned,
+-        )
++        cleaned = text
++        # Cc 見出しが 1 つも無ければ、除去用の正規表現は走らせない（表だらけの長い本文で遅くなるため）
++        if _CC_LABEL_PATTERN.search(cleaned):
++            # 1. <tr><th>Cc:</th><td>...</td></tr>（その行の中だけを対象にする。手前・後ろの行は消さない）
++            cleaned = _CC_TABLE_ROW_PATTERN.sub("", cleaned)
++            # 2. <p> または <div> が Cc 行単体で構成されている場合
++            cleaned = re.sub(
++                r"<(?:p|div)\b[^>]*>\s*<b>\s*(?:cc|ｃｃ)\s*[:：]</b>[\s\S]*?</(?:p|div)>",
++                "",
++                cleaned,
++                flags=re.IGNORECASE,
++            )
++            # 3. <b>Cc:</b> ... <br> のインライン形式（後ろの <br> も巻き込んで除去）
++            cleaned = re.sub(
++                r"<b>\s*(?:cc|ｃｃ)\s*[:：]</b>[\s\S]*?(?:<br\s*/?>|(?=<b>|</(?:p|div|tr|td)>|$))",
++                "",
++                cleaned,
++                flags=re.IGNORECASE,
++            )
++            # 4. Cc: ... <br> （<b>なし）の形式
++            cleaned = re.sub(
++                r"(?im)^\s*(?:cc|ｃｃ)\s*[:：][^<]*(?:<[^>]+>[^<]*)*?(?:<br\s*/?>|$)",
++                "",
++                cleaned,
++            )
+         # <br> の重複整理
+         cleaned = re.sub(r"(?:<br\s*/?>\s*){3,}", "<br><br>", cleaned, flags=re.IGNORECASE)
+         return cleaned
+diff --git a/backend/app/vector/email_parsing.py b/backend/app/vector/email_parsing.py
+index e98518e584e053bbd80c7a703934fdefc729e8cf..b1c882ab08c8fdcb3f199ffcf28acb52b02fa9fc 100644
+--- a/backend/app/vector/email_parsing.py
++++ b/backend/app/vector/email_parsing.py
+@@ -17,6 +17,7 @@ from pathlib import Path
+ from typing import Any, Dict, List, Optional, Tuple
+ 
+ from app.vector.email_html import sanitize_outlook_html
++from app.vector.export_timing import stage
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -243,125 +244,131 @@ def parse_msg_file(path: Path) -> Optional[Dict[str, Any]]:
+ 
+     msg = None
+     # 1. オープン試行（通常オープン -> UnicodeDecodeError時は overrideEncoding="cp932" で再試行）
+-    for override_enc in (None, "cp932"):
+-        try:
+-            kwargs: Dict[str, Any] = {}
+-            if override_enc:
+-                kwargs["overrideEncoding"] = override_enc
+-            if hasattr(extract_msg, "openMsg"):
+-                msg = extract_msg.openMsg(str(path), **kwargs)
+-            elif hasattr(extract_msg, "Message"):
+-                msg = extract_msg.Message(str(path), **kwargs)
+-            if msg is not None:
+-                break
+-        except UnicodeDecodeError:
+-            continue
+-        except Exception:
+-            continue
++    with stage("MSG オープン", path.name):
++        for override_enc in (None, "cp932"):
++            try:
++                kwargs: Dict[str, Any] = {}
++                if override_enc:
++                    kwargs["overrideEncoding"] = override_enc
++                if hasattr(extract_msg, "openMsg"):
++                    msg = extract_msg.openMsg(str(path), **kwargs)
++                elif hasattr(extract_msg, "Message"):
++                    msg = extract_msg.Message(str(path), **kwargs)
++                if msg is not None:
++                    break
++            except UnicodeDecodeError:
++                continue
++            except Exception:
++                continue
+ 
+     if msg is None:
+         return None
+ 
+     try:
+-        subject = _safe_read_msg_prop(msg, "subject", "0037")
+-        sender = _safe_read_msg_prop(msg, "sender", "0C1A")
+-        to = _safe_read_msg_prop(msg, "to", "0E04")
+-        if not to:
+-            to = _safe_read_msg_prop(msg, "to", "0E03")
+-        date = ""
+-        try:
+-            date = str(getattr(msg, "date", "") or "").strip()
+-        except Exception:
+-            logger.debug("Failed to read the MSG date.", exc_info=True)
+-        body_plain = _safe_read_msg_prop(msg, "body", "1000")
++        with stage("MSG 件名・本文プロパティ取得", path.name):
++            subject = _safe_read_msg_prop(msg, "subject", "0037")
++            sender = _safe_read_msg_prop(msg, "sender", "0C1A")
++            to = _safe_read_msg_prop(msg, "to", "0E04")
++            if not to:
++                to = _safe_read_msg_prop(msg, "to", "0E03")
++            date = ""
++            try:
++                date = str(getattr(msg, "date", "") or "").strip()
++            except Exception:
++                logger.debug("Failed to read the MSG date.", exc_info=True)
++            body_plain = _safe_read_msg_prop(msg, "body", "1000")
+ 
+         # HTML本文の取得
+-        raw_html = None
+-        try:
+-            raw_html = getattr(msg, "htmlBody", None)
+-        except Exception:
+-            logger.debug("Failed to read the MSG HTML body property.", exc_info=True)
+-
+-        if not raw_html:
+-            get_stream = getattr(msg, "getStream", None)
+-            if callable(get_stream):
+-                try:
+-                    raw_html = get_stream("__substg1.0_10130102", prefix=False) or get_stream("__substg1.0_10130102")
+-                except Exception:
+-                    logger.debug("Failed to read the MSG HTML body stream.", exc_info=True)
+-
+-        body_html = ""
+-        if isinstance(raw_html, bytes):
+-            preview = raw_html[:2048].decode("latin1", errors="ignore")
+-            charset_match = re.search(r'charset=["\']?([a-zA-Z0-9_-]+)', preview, re.IGNORECASE)
+-            preferred = [charset_match.group(1).lower()] if charset_match else ["cp932", "shift_jis"]
+-            body_html = decode_best_effort_text(raw_html, preferred)
+-        elif isinstance(raw_html, str):
+-            body_html = raw_html
++        with stage("MSG HTML本文取得", path.name):
++            raw_html = None
++            try:
++                raw_html = getattr(msg, "htmlBody", None)
++            except Exception:
++                logger.debug("Failed to read the MSG HTML body property.", exc_info=True)
++
++            if not raw_html:
++                get_stream = getattr(msg, "getStream", None)
++                if callable(get_stream):
++                    try:
++                        raw_html = get_stream("__substg1.0_10130102", prefix=False) or get_stream("__substg1.0_10130102")
++                    except Exception:
++                        logger.debug("Failed to read the MSG HTML body stream.", exc_info=True)
++
++        with stage("MSG HTML本文デコード", path.name):
++            body_html = ""
++            if isinstance(raw_html, bytes):
++                preview = raw_html[:2048].decode("latin1", errors="ignore")
++                charset_match = re.search(r'charset=["\']?([a-zA-Z0-9_-]+)', preview, re.IGNORECASE)
++                preferred = [charset_match.group(1).lower()] if charset_match else ["cp932", "shift_jis"]
++                body_html = decode_best_effort_text(raw_html, preferred)
++            elif isinstance(raw_html, str):
++                body_html = raw_html
+ 
+         # フォールバック: HTML本文があり、プレーンテキストが空の場合はHTMLからプレーンテキストを生成
+-        if not body_plain and body_html:
+-            cleaned_html = sanitize_outlook_html(body_html)
+-            text = re.sub(r"<br\s*\/?>", "\n", cleaned_html, flags=re.IGNORECASE)
+-            text = re.sub(r"<\/(p|div|section|article|header|footer|h[1-6]|tr)>\s*", "\n\n", text, flags=re.IGNORECASE)
+-            text = re.sub(r"<\/(li)>\s*", "\n", text, flags=re.IGNORECASE)
+-            text = re.sub(r"<li\b[^>]*>", "- ", text, flags=re.IGNORECASE)
+-            text = re.sub(r"<[^>]+>", "", text)
+-            text = html.unescape(text)
+-            body_plain = re.sub(r"\n{3,}", "\n\n", text).strip()
++        with stage("MSG HTML→テキスト変換", path.name):
++            if not body_plain and body_html:
++                cleaned_html = sanitize_outlook_html(body_html)
++                text = re.sub(r"<br\s*\/?>", "\n", cleaned_html, flags=re.IGNORECASE)
++                text = re.sub(r"<\/(p|div|section|article|header|footer|h[1-6]|tr)>\s*", "\n\n", text, flags=re.IGNORECASE)
++                text = re.sub(r"<\/(li)>\s*", "\n", text, flags=re.IGNORECASE)
++                text = re.sub(r"<li\b[^>]*>", "- ", text, flags=re.IGNORECASE)
++                text = re.sub(r"<[^>]+>", "", text)
++                text = html.unescape(text)
++                body_plain = re.sub(r"\n{3,}", "\n\n", text).strip()
+ 
+         # 添付画像の抽出
+-        attachments = []
+-        raw_attachments = []
+-        try:
+-            raw_attachments = getattr(msg, "attachments", []) or []
+-        except Exception:
++        with stage("MSG 添付取得", path.name):
++            attachments = []
+             raw_attachments = []
+-
+-        for att in raw_attachments:
+             try:
+-                data = getattr(att, "data", None)
+-                if not data:
+-                    continue
+-                filename = (
+-                    getattr(att, "longFilename", None)
+-                    or getattr(att, "shortFilename", None)
+-                    or getattr(att, "filename", "")
+-                    or ""
+-                )
+-                cid = getattr(att, "cid", None) or getattr(att, "content_id", None) or ""
+-                if cid:
+-                    cid = str(cid).strip("<>")
+-                mimetype = getattr(att, "mimetype", "") or ""
+-                if not mimetype and filename:
+-                    mimetype = mimetypes.guess_type(filename)[0] or ""
+-
+-                is_img = False
+-                if mimetype.startswith("image/"):
+-                    is_img = True
+-                elif len(data) >= 4:
+-                    if data[:4] == b"\x89PNG" or data[:2] == b"\xff\xd8" or data[:3] == b"GIF" or data[:2] == b"BM":
+-                        is_img = True
+-                        if not mimetype:
+-                            if data[:4] == b"\x89PNG":
+-                                mimetype = "image/png"
+-                            elif data[:2] == b"\xff\xd8":
+-                                mimetype = "image/jpeg"
+-                            elif data[:3] == b"GIF":
+-                                mimetype = "image/gif"
+-                            elif data[:2] == b"BM":
+-                                mimetype = "image/bmp"
+-
+-                if is_img:
+-                    attachments.append({
+-                        "data": data,
+-                        "mime": mimetype or "image/png",
+-                        "cid": cid,
+-                        "filename": filename or f"image_{len(attachments)+1}.png",
+-                        "is_image": True,
+-                    })
++                raw_attachments = getattr(msg, "attachments", []) or []
+             except Exception:
+-                continue
++                raw_attachments = []
++
++            for att in raw_attachments:
++                try:
++                    data = getattr(att, "data", None)
++                    if not data:
++                        continue
++                    filename = (
++                        getattr(att, "longFilename", None)
++                        or getattr(att, "shortFilename", None)
++                        or getattr(att, "filename", "")
++                        or ""
++                    )
++                    cid = getattr(att, "cid", None) or getattr(att, "content_id", None) or ""
++                    if cid:
++                        cid = str(cid).strip("<>")
++                    mimetype = getattr(att, "mimetype", "") or ""
++                    if not mimetype and filename:
++                        mimetype = mimetypes.guess_type(filename)[0] or ""
++
++                    is_img = False
++                    if mimetype.startswith("image/"):
++                        is_img = True
++                    elif len(data) >= 4:
++                        if data[:4] == b"\x89PNG" or data[:2] == b"\xff\xd8" or data[:3] == b"GIF" or data[:2] == b"BM":
++                            is_img = True
++                            if not mimetype:
++                                if data[:4] == b"\x89PNG":
++                                    mimetype = "image/png"
++                                elif data[:2] == b"\xff\xd8":
++                                    mimetype = "image/jpeg"
++                                elif data[:3] == b"GIF":
++                                    mimetype = "image/gif"
++                                elif data[:2] == b"BM":
++                                    mimetype = "image/bmp"
++
++                    if is_img:
++                        attachments.append({
++                            "data": data,
++                            "mime": mimetype or "image/png",
++                            "cid": cid,
++                            "filename": filename or f"image_{len(attachments)+1}.png",
++                            "is_image": True,
++                        })
++                except Exception:
++                    continue
+ 
+         return {
+             "file_name": path.name,
+diff --git a/backend/app/vector/export_document_reader.py b/backend/app/vector/export_document_reader.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..dae6c9550b95e645072401cb7e463f6557c0719f
+--- /dev/null
++++ b/backend/app/vector/export_document_reader.py
+@@ -0,0 +1,40 @@
++"""
++AIインプット書き出しで、対象文書の本文テキストを読む部品。
++
++仕様:
++- 変換対象は次の拡張子だけ。
++  - Markdown / テキスト（.md / .markdown / .txt）: UTF-8 で読み、読めなければ CP932 で読む。
++  - Word / PowerPoint（.docx / .pptx）: 本文テキストを抽出する（段落・表・スライドの文字）。壊れていれば空文字。
++- Excel・PDF・画像・メール・その他の拡張子は変換対象外（None を返し、呼び出し側は文書ごと読み飛ばす）。
++  バイナリを Markdown 変換へ流すと文字化けするうえ極端に遅いため。
++"""
++
++from __future__ import annotations
++
++import logging
++from pathlib import Path
++from typing import Optional
++
++from app.extractors.text_extractor import extract_text
++
++logger = logging.getLogger(__name__)
++
++_PLAIN_TEXT_EXTENSIONS = frozenset({".md", ".markdown", ".txt"})
++_OFFICE_EXTENSIONS = frozenset({".docx", ".pptx"})
++
++
++def read_export_document_text(path: Path) -> Optional[str]:
++    """書き出し対象の文書を読んで本文を返す。変換対象外の拡張子なら None。"""
++    suffix = path.suffix.lower()
++    if suffix in _PLAIN_TEXT_EXTENSIONS:
++        try:
++            return path.read_text(encoding="utf-8")
++        except UnicodeError:
++            return path.read_text(encoding="cp932", errors="replace")
++    if suffix in _OFFICE_EXTENSIONS:
++        try:
++            return extract_text(path)
++        except Exception:
++            logger.warning("Failed to extract text from %s", path, exc_info=True)
++            return ""
++    return None
+diff --git a/backend/app/vector/html_exporter.py b/backend/app/vector/html_exporter.py
+index ca848722ff3f1ee9ac2a906d2d5e68e4e60bd1fb..f6c77be531402a53b8f0b8b1dc65d776271b8032 100644
+--- a/backend/app/vector/html_exporter.py
++++ b/backend/app/vector/html_exporter.py
+@@ -39,6 +39,7 @@ from app.vector.figure_assets import (
+ )
+ from app.vector.image_data_url import svg_text_to_base64_data_url
+ 
++from app.vector.export_document_reader import read_export_document_text
+ from app.vector.export_timing import stage, timed_export
+ from app.vector.file_name_index import uses_file_name_index
+ 
+@@ -386,9 +387,11 @@ def export_documents_to_html(
+             continue
+ 
+         try:
+-            raw_content = target_file.read_text(encoding="utf-8", errors="replace")
++            raw_content = read_export_document_text(target_file)
+         except OSError:
+             continue
++        if raw_content is None:
++            continue  # Excel など変換対象外の拡張子は出力に含めない
+ 
+         valid_docs_count += 1
+         doc_title = target_file.stem
+diff --git a/backend/app/vector/markdown_image_exporter.py b/backend/app/vector/markdown_image_exporter.py
+index c79a14c63ed2f5cbc6a5e232e5980e6f647a5aab..27ee6e8713fff3a48730acd628902ed7022006a2 100644
+--- a/backend/app/vector/markdown_image_exporter.py
++++ b/backend/app/vector/markdown_image_exporter.py
+@@ -28,6 +28,7 @@ from app.vector.email_parsing import parse_email_file
+ from app.vector.excalidraw_drawing import strip_excalidraw_data
+ from app.vector.figure_assets import resolve_image_or_figure_data_url
+ 
++from app.vector.export_document_reader import read_export_document_text
+ from app.vector.export_timing import stage, timed_export
+ from app.vector.file_name_index import uses_file_name_index
+ 
+@@ -401,18 +402,17 @@ def export_documents_to_markdown_and_image(
+         if not path_obj.exists() or not path_obj.is_file():
+             continue
+ 
++        try:
++            with stage("ノート読み込み", path_obj.name):
++                raw_text = read_export_document_text(path_obj)
++        except OSError:
++            raw_text = ""
++        if raw_text is None:
++            continue  # Excel など変換対象外の拡張子は出力に含めない
++
+         doc_count += 1
+         note_name = path_obj.name
+ 
+-        try:
+-            with stage("ノート読み込み", note_name):
+-                raw_text = path_obj.read_text(encoding="utf-8")
+-        except (OSError, UnicodeError):
+-            try:
+-                raw_text = path_obj.read_text(encoding="cp932", errors="replace")
+-            except OSError:
+-                raw_text = ""
+-
+         # 画像リンクを解析・抽出
+         image_links = extract_wiki_and_md_image_links(raw_text)
+         for link_str, target_name in image_links:
+diff --git a/backend/tests/test_change_tracking_service.py b/backend/tests/test_change_tracking_service.py
+index f1295bb73d6ccf00132c0600e4b53a7e550baf62..45f35f3adaa35c16c57c897906286b70b739aeb4 100644
+--- a/backend/tests/test_change_tracking_service.py
++++ b/backend/tests/test_change_tracking_service.py
+@@ -489,3 +489,66 @@ def test_fsevents_observer_can_be_restarted_after_stop(monkeypatch) -> None:
+     observer.stop()
+ 
+     assert stop_flags_at_start == [False, False]
++
++
++def test_failed_background_refresh_is_backed_off_instead_of_retried_every_cycle(monkeypatch, tmp_path: Path) -> None:
++    """
++    バックグラウンド差分更新が失敗した対象は、待機時間が過ぎるまで再試行しない。
++    dirty のまま 0.5 秒ごとに全走査をやり直すと、サーバーが負荷で応答しなくなるため。
++    待機時間は失敗が続くほど延び、成功すると解除される。
++    """
++    database_path = tmp_path / "search.db"
++    root = tmp_path / "tracked"
++    root.mkdir()
++    connection = sqlite3.connect(database_path)
++    connection.row_factory = sqlite3.Row
++    initialize_schema(connection)
++    cursor = connection.execute(
++        """INSERT INTO targets (full_path, index_depth, source_type, created_at, updated_at)
++           VALUES (?, 1, 'local', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)""",
++        (root.as_posix(),),
++    )
++    connection.execute(
++        "INSERT INTO target_change_states (target_id, is_tracking, is_dirty) VALUES (?, 1, 1)",
++        (cursor.lastrowid,),
++    )
++    connection.commit()
++    connection.close()
++
++    def create_connection() -> sqlite3.Connection:
++        created = sqlite3.connect(database_path)
++        created.row_factory = sqlite3.Row
++        return created
++
++    calls = {"count": 0, "fail": True}
++
++    class FlakyIndexService:
++        def __init__(self, connection=None, **kwargs):
++            pass
++
++        def is_running(self):
++            return False
++
++        def ensure_fresh_target(self, **kwargs):
++            calls["count"] += 1
++            if calls["fail"]:
++                raise OSError("boom")
++
++    monkeypatch.setattr("app.services.index_service.IndexService", FlakyIndexService)
++    now = {"value": 1000.0}
++    service = ChangeTrackingService(connection_factory=create_connection, clock=lambda: now["value"])
++
++    service._refresh_one_debounced_dirty_target()
++    assert calls["count"] == 1
++    service._refresh_one_debounced_dirty_target()  # 待機中なので再試行しない
++    assert calls["count"] == 1
++
++    now["value"] += 10_000  # 待機時間が過ぎたので再試行する
++    service._refresh_one_debounced_dirty_target()
++    assert calls["count"] == 2
++
++    calls["fail"] = False
++    now["value"] += 10_000
++    service._refresh_one_debounced_dirty_target()
++    assert calls["count"] == 3
++    assert service._refresh_failures == {}  # 成功すると待機状態は解除される
+diff --git a/backend/tests/test_email_cc_strip_performance.py b/backend/tests/test_email_cc_strip_performance.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..f7ae84ee3ba23e8c9438bbc4fe019568b65ee3ea
+--- /dev/null
++++ b/backend/tests/test_email_cc_strip_performance.py
+@@ -0,0 +1,58 @@
++"""
++メール本文の Cc 行除去（strip_email_cc_lines）の速度と範囲のテスト。
++
++仕様:
++- Cc 行が無い、表だらけの長い HTML メールでも、本文の長さに対して線形に近い時間で終わる
++  （以前は <tr> ごとに文書末尾まで探して 3 乗で遅くなり、数十 KB で数十秒かかった）。
++- 表の Cc 行の除去は、その行（<tr>）の中だけに限る。手前の行・後ろの行の内容は消さない。
++"""
++
++from __future__ import annotations
++
++import time
++
++from app.vector.email_html import strip_email_cc_lines
++
++
++def _tables(n: int) -> str:
++    return "".join(
++        f'<table><tr><td><p class="MsoNormal">本文{i} テキスト <b>太字</b></p></td><td>x</td></tr></table>'
++        for i in range(n)
++    )
++
++
++def test_html_without_cc_is_fast() -> None:
++    html_text = _tables(600)
++    started = time.perf_counter()
++    result = strip_email_cc_lines(html_text, is_html=True)
++    assert time.perf_counter() - started < 1.0
++    assert "本文0 " in result and "本文599 " in result
++
++
++def test_html_with_cc_at_end_is_fast_and_keeps_earlier_rows() -> None:
++    html_text = _tables(600) + "<table><tr><th>Cc:</th><td>a@example.com</td></tr><tr><th>件名:</th><td>x</td></tr></table>"
++    started = time.perf_counter()
++    result = strip_email_cc_lines(html_text, is_html=True)
++    assert time.perf_counter() - started < 1.0
++    assert "本文0 " in result and "本文599 " in result
++    assert "a@example.com" not in result
++    assert "件名:" in result
++
++
++def test_table_cc_row_removal_is_limited_to_that_row() -> None:
++    html_text = (
++        "<table>"
++        "<tr><th>差出人:</th><td>alice</td></tr>"
++        "<tr><th>Cc:</th><td>bob@example.com</td></tr>"
++        "<tr><th>件名:</th><td>subject</td></tr>"
++        "</table>"
++    )
++    result = strip_email_cc_lines(html_text, is_html=True)
++    assert "bob@example.com" not in result
++    assert "alice" in result and "subject" in result
++
++
++def test_inline_forms_still_removed() -> None:
++    assert "x@y.z" not in strip_email_cc_lines("<p><b>Cc:</b> x@y.z</p><p>本文</p>", is_html=True)
++    assert "x@y.z" not in strip_email_cc_lines("<b>Cc:</b> x@y.z<br>本文<br>", is_html=True)
++    assert "本文" in strip_email_cc_lines("<b>Cc:</b> x@y.z<br>本文<br>", is_html=True)
+diff --git a/backend/tests/test_export_document_reader.py b/backend/tests/test_export_document_reader.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..8d2ac8c39080979d04868d3e23572f1fbd68065a
+--- /dev/null
++++ b/backend/tests/test_export_document_reader.py
+@@ -0,0 +1,104 @@
++"""
++AIインプット書き出しの文書読み込み（app.vector.export_document_reader）のテスト。
++
++仕様:
++- Markdown / テキストは文字コードを判定して読み、.docx / .pptx は本文テキストを抽出して読む。
++- Excel・PDF・画像・その他の拡張子は変換対象外（None）。バイナリを Markdown 変換へ流さない。
++- HTML 書き出しと Markdown+画像の書き出しは、対象外の文書を出力に含めない。
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++
++from app.vector.export_document_reader import read_export_document_text
++from app.vector.html_exporter import export_documents_to_html
++from app.vector.markdown_image_exporter import export_documents_to_markdown_and_image
++
++
++def _make_docx(path: Path) -> None:
++    from docx import Document
++
++    doc = Document()
++    doc.add_paragraph("ワード本文のテキスト")
++    doc.save(str(path))
++
++
++def _make_pptx(path: Path) -> None:
++    from pptx import Presentation
++    from pptx.util import Inches
++
++    prs = Presentation()
++    slide = prs.slides.add_slide(prs.slide_layouts[5])
++    box = slide.shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1))
++    box.text_frame.text = "パワポ本文のテキスト"
++    prs.save(str(path))
++
++
++def test_markdown_and_text_are_read(tmp_path: Path) -> None:
++    md = tmp_path / "a.md"
++    md.write_text("# 見出し", encoding="utf-8")
++    txt = tmp_path / "b.txt"
++    txt.write_bytes("日本語".encode("cp932"))
++    assert read_export_document_text(md) == "# 見出し"
++    assert read_export_document_text(txt) == "日本語"
++
++
++def test_docx_and_pptx_are_extracted(tmp_path: Path) -> None:
++    docx_path = tmp_path / "a.docx"
++    pptx_path = tmp_path / "b.pptx"
++    _make_docx(docx_path)
++    _make_pptx(pptx_path)
++    assert "ワード本文のテキスト" in (read_export_document_text(docx_path) or "")
++    assert "パワポ本文のテキスト" in (read_export_document_text(pptx_path) or "")
++
++
++def test_broken_office_file_becomes_empty_text(tmp_path: Path) -> None:
++    broken = tmp_path / "broken.docx"
++    broken.write_bytes(b"not a zip")
++    assert read_export_document_text(broken) == ""
++
++
++def test_other_extensions_are_not_converted(tmp_path: Path) -> None:
++    for name in ("t.xlsx", "t.xlsm", "t.pdf", "t.png", "t.msg", "t.zip", "noext"):
++        p = tmp_path / name
++        p.write_bytes(b"\x00\x01binary")
++        assert read_export_document_text(p) is None, name
++
++
++def test_html_export_skips_unsupported_and_reads_office(tmp_path: Path) -> None:
++    md = tmp_path / "note.md"
++    md.write_text("# ノート本文", encoding="utf-8")
++    docx_path = tmp_path / "doc.docx"
++    pptx_path = tmp_path / "slide.pptx"
++    _make_docx(docx_path)
++    _make_pptx(pptx_path)
++    xlsx = tmp_path / "sheet.xlsx"
++    xlsx.write_bytes(b"PK\x03\x04binary")
++
++    html_content, stats = export_documents_to_html(
++        file_paths=[str(md), str(docx_path), str(pptx_path), str(xlsx)],
++    )
++
++    assert stats["total_documents"] == 3
++    assert "ワード本文のテキスト" in html_content
++    assert "パワポ本文のテキスト" in html_content
++    assert "sheet.xlsx" not in html_content
++
++
++def test_markdown_export_skips_unsupported_and_reads_office(tmp_path: Path) -> None:
++    md = tmp_path / "note.md"
++    md.write_text("# ノート本文", encoding="utf-8")
++    pptx_path = tmp_path / "slide.pptx"
++    _make_pptx(pptx_path)
++    xlsx = tmp_path / "sheet.xlsx"
++    xlsx.write_bytes(b"PK\x03\x04binary")
++
++    text, _image, stats = export_documents_to_markdown_and_image(
++        file_paths=[str(md), str(pptx_path), str(xlsx)],
++        vault_path=str(tmp_path),
++    )
++
++    assert "パワポ本文のテキスト" in text
++    assert "sheet.xlsx" not in text
++    assert stats["total_documents"] == 2
+diff --git a/backend/tests/test_file_walker.py b/backend/tests/test_file_walker.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..b6b0b193ed979332852e19ddcd2c97bf3e31c862
+--- /dev/null
++++ b/backend/tests/test_file_walker.py
+@@ -0,0 +1,136 @@
++"""
++file_walker の走査中エラーの扱いのテスト。
++
++- WinError 59（到達不能な共有先）: そのフォルダを auto_excluded_paths へ追加して走査を続ける。
++- WinError 3（走査中に消えた / 開けない名前のフォルダ）: そのフォルダだけ読み飛ばす。
++  一時的な事象なので auto_excluded_paths へは追加しない（除外設定へ永続化させない）。
++- 対象フォルダ自体が見つからない場合は握りつぶさず例外にする。
++"""
++
++from __future__ import annotations
++
++import os
++from pathlib import Path
++from unittest.mock import patch
++
++import pytest
++
++from app.services import file_walker
++
++
++def _walk(root: Path, auto_excluded: set[str]) -> list[str]:
++    return sorted(
++        path.name
++        for path in file_walker.walk_indexable_files(
++            root,
++            frozenset(),
++            [],
++            excluded_path_prefixes=(),
++            auto_excluded_paths=auto_excluded,
++            allowed_extensions=frozenset({".md"}),
++            sorted_allowed_extensions=(".md",),
++            max_depth=5,
++        )
++    )
++
++
++def _make_tree(tmp_path: Path) -> Path:
++    root = tmp_path / "docs"
++    (root / "broken").mkdir(parents=True)
++    (root / "ok.md").write_text("a", encoding="utf-8")
++    (root / "broken" / "inside.md").write_text("b", encoding="utf-8")
++    return root
++
++
++def _scandir_failing_for(name: str, winerror: int, exc_type: type[OSError]):
++    original = os.scandir
++
++    def fake(path):
++        if Path(path).name == name:
++            error = exc_type(f"[WinError {winerror}]")
++            error.winerror = winerror
++            raise error
++        return original(path)
++
++    return fake
++
++
++def test_winerror_3_in_subfolder_is_skipped_without_auto_exclude(tmp_path: Path) -> None:
++    root = _make_tree(tmp_path)
++    auto_excluded: set[str] = set()
++
++    with patch("app.services.file_walker.os.scandir", side_effect=_scandir_failing_for("broken", 3, FileNotFoundError)):
++        names = _walk(root, auto_excluded)
++
++    assert names == ["ok.md"]
++    assert auto_excluded == set()
++
++
++def test_winerror_59_in_subfolder_is_auto_excluded(tmp_path: Path) -> None:
++    root = _make_tree(tmp_path)
++    auto_excluded: set[str] = set()
++
++    with patch("app.services.file_walker.os.scandir", side_effect=_scandir_failing_for("broken", 59, OSError)):
++        names = _walk(root, auto_excluded)
++
++    assert names == ["ok.md"]
++    assert len(auto_excluded) == 1
++
++
++def test_missing_root_still_raises(tmp_path: Path) -> None:
++    with pytest.raises(FileNotFoundError):
++        _walk(tmp_path / "does-not-exist", set())
++
++
++def test_unreadable_entry_does_not_abort_siblings(tmp_path: Path) -> None:
++    """1 つのエントリの判定が OSError になっても、同じフォルダの残りのエントリは走査する。"""
++    root = tmp_path / "docs"
++    (root / "a").mkdir(parents=True)
++    (root / "z.md").write_text("z", encoding="utf-8")
++    (root / "a" / "in.md").write_text("i", encoding="utf-8")
++    original = os.scandir
++
++    class _Entry:
++        def __init__(self, real):
++            self._real = real
++            self.name = real.name
++            self.path = real.path
++
++        def is_dir(self, follow_symlinks=True):
++            if self.name == "a":
++                raise OSError(22, "invalid")
++            return self._real.is_dir(follow_symlinks=follow_symlinks)
++
++        def is_file(self, follow_symlinks=True):
++            return self._real.is_file(follow_symlinks=follow_symlinks)
++
++    class _Scan:
++        def __init__(self, real):
++            self._real = real
++
++        def __enter__(self):
++            self._entries = [_Entry(e) for e in self._real.__enter__()]
++            return iter(self._entries)
++
++        def __exit__(self, *args):
++            return self._real.__exit__(*args)
++
++    def fake(path):
++        return _Scan(original(path))
++
++    with patch("app.services.file_walker.os.scandir", side_effect=fake):
++        names = _walk(root, set())
++
++    assert "z.md" in names
++
++
++def test_other_oserror_in_subfolder_is_skipped(tmp_path: Path) -> None:
++    """配下フォルダの想定外の OSError で走査全体を止めない（対象フォルダ自体は例外にする）。"""
++    root = _make_tree(tmp_path)
++    auto_excluded: set[str] = set()
++
++    with patch("app.services.file_walker.os.scandir", side_effect=_scandir_failing_for("broken", 22, OSError)):
++        names = _walk(root, auto_excluded)
++
++    assert names == ["ok.md"]
++    assert auto_excluded == set()
+diff --git a/docs/ai_context_export_spec.md b/docs/ai_context_export_spec.md
+index 30427f2058aaa93dc0453fbda770ca81aed15287..61f17b2f6236dbf0fbf93c6d85aabad3a2c8517a 100644
+--- a/docs/ai_context_export_spec.md
++++ b/docs/ai_context_export_spec.md
+@@ -95,3 +95,20 @@
+   段階: リンク展開 / ノート読み込み / 画像・図面の埋め込み・解決 / Excalidraw図面のSVG生成 / SVGラスタライズ / Markdown→HTML変換 /
+   メールリンク探索・解析・描画 / 結合画像の生成 / フォルダ走査（索引作成・早期終了）。
+ - 集計は、書き出し応答の stats（`timings`）、INFO ログ、データフォルダの `export_timing.log`（追記）へ出す。出力内容は変えない。
++
++### メール Cc 行除去の高速化（実測に基づく修正）
++
++- 社内 Windows の実測で、メール描画が書き出し全体の約半分（25 通で 128 秒、1 通 47 秒）を占めた。
++  原因は `strip_email_cc_lines`（HTML）の表の Cc 行用の正規表現が、Cc の無い表だらけの本文で `<tr>` ごとに文書末尾まで探して 3 乗で遅くなること
++  （35 KB で約 30 秒）。
++- 対応: Cc 見出しが 1 つも無い本文では除去用の正規表現を走らせない。表の Cc 行の除去は 1 つの `<tr>` の中だけに限る
++  （以前は手前の行まで巻き込んで消すことがあった）。
++- MSG 解析は、オープン・プロパティ取得・HTML 本文取得とデコード・HTML→テキスト変換・添付取得を段階別に計測する（`export_timing.log`）。
++
++## 書き出し対象の拡張子（変換対象）
++
++- `app/vector/export_document_reader.py` が対象文書の本文を読む。HTML 書き出しと Markdown+画像の書き出しで共通。
++- 変換対象は `.md` / `.markdown` / `.txt`（UTF-8、読めなければ CP932）と、`.docx` / `.pptx`（`extract_text` による本文テキスト抽出。壊れたファイルは空文字）。
++- Excel（`.xlsx` / `.xlsm`）・PDF・画像・メール・その他の拡張子は変換対象外。出力に含めず、文書数にも数えない。
++  以前はバイナリを UTF-8 テキストとして Markdown 変換へ流しており、文字化けするうえ 1 ファイル約 10 秒かかっていた。
++- リンク展開が辿るのは従来どおり `.md` / `.excalidraw.md` のみ。
+diff --git a/docs/change_tracking.md b/docs/change_tracking.md
+index 3b58fe5f80abf301cb1a114a573e77d53d87221f..9fc9a8f6a058289a60d5a3804bb1b94bedacd424 100644
+--- a/docs/change_tracking.md
++++ b/docs/change_tracking.md
+@@ -66,6 +66,8 @@ macOS の FSEvents は通知の頻度が高いため、受信そのものは DEB
+ 
+ `dirty_refresh_worker` によるバックグラウンド差分更新では、スレッドセーフな専用 DB 接続を `IndexService(connection=connection, enable_vector_sync=True)` に渡す。これにより、通常の全文検索（SQLite / FTS5）の更新と削除クリーンアップだけでなく、**ベクトルインデックス（Vector DB）の差分更新（`vector_state.sync_index`）も自動連動**して実行される。ファイル名変更（リネーム）や新規作成が発生した場合も、デフォルトのハイブリッド検索（`hybrid`）ですぐに最新状態が反映される。
+ 
++バックグラウンド差分更新が失敗した対象は dirty のまま残すが、すぐには再試行しない。失敗が続くごとに待機時間を 30 秒から倍にし（上限 10 分）、成功すると解除する（`ChangeTrackingService._refresh_failures`）。待機中の対象があっても、他の dirty 対象の更新は止めない。失敗直後に全走査を 0.5 秒ごとに繰り返すと、サーバーが応答しなくなるため。
++
+ ## 検索時の並行インデックス耐性 (409 Conflict 回避)
+ 
+ ファイル変更直後にデスクトップランチャー等から検索が行われ、バックグラウンド更新とタイミングが重複した場合、`IndexService.ensure_fresh_target()` は `HTTP 409 Conflict: Indexing is already running.` を送出する。
