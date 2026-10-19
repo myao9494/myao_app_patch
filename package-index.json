@@ -4,24 +4,14 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 14,
-      "manifest_path": "packages/obsidian-settings/000014/manifest.json"
+      "sequence": 15,
+      "manifest_path": "packages/obsidian-settings/000015/manifest.json"
     },
     {
       "repo_id": "local-fulltext-search",
-      "sequence": 15,
-      "manifest_path": "packages/local-fulltext-search/000015/manifest.json"
-    },
-    {
-      "repo_id": "spoon_feeder2",
-      "sequence": 3,
-      "manifest_path": "packages/spoon_feeder2/000003/manifest.json"
-    },
-    {
-      "repo_id": "mail_adress_creater",
-      "sequence": 2,
-      "manifest_path": "packages/mail_adress_creater/000002/manifest.json"
+      "sequence": 16,
+      "manifest_path": "packages/local-fulltext-search/000016/manifest.json"
     }
   ],
-  "signature": "d7105133b0842fd0da6b4cc691c8aff1f990fbb14061b2675558b6e378b88b94"
+  "signature": "0fc8855f6713177ea23ec4b1794cf61507fdd0e9e3347920d56fa6a774a84e97"
 }
