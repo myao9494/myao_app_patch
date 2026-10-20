@@ -1,0 +1,321 @@
+diff --git a/backend/app/vector/figure_assets.py b/backend/app/vector/figure_assets.py
+index 6d2ea14346022e399b8e8ae81c4e7c7b7776bbac..e94ce21e638777395eb104e751d5533f97c0359b 100644
+--- a/backend/app/vector/figure_assets.py
++++ b/backend/app/vector/figure_assets.py
+@@ -8,6 +8,13 @@ AIインプット用の画像・図面（PNG / JPG / SVG / draw.io / Excalidraw
+ - 書き出しの時間制限スコープ（app.vector.export_guard）の中では、埋め込み 1 件ごとの解決を制限時間つきで行い、
+   時間切れの画像は記法をそのまま残して飛ばす。埋め込み（`![[...]]` / `![...](...)`）で見つからない画像も記録する。
+   埋め込みでない `[[...]]` は通常のノートへのリンクでもあるため、見つからなくても記録しない。
++  埋め込みでも、画像・図面の拡張子でないもの（`![[メール.msg]]`、`![[ノート]]` の埋め込み表示など）は
++  画像ではないため記録しない（メールはメールの処理が、ノートはリンク展開がそれぞれ扱う）。
++- 探索範囲: 基準フォルダ（vault_path）配下を探し、見つからなければ、ノート（無ければ基準フォルダ）が属する
++  Obsidian Vault のルート（`.obsidian` フォルダがあるフォルダ）配下まで広げる。ノートを絶対パスで選んだときは
++  基準フォルダがノートのフォルダになるため、別の日付フォルダや添付フォルダにある画像・図面はここで見つかる。
++  Vault ルートが見つからないときは、従来どおり基準フォルダの親フォルダ配下までを探す。
++  Excalidraw のキャッシュ画像（キーは Vault 相対パス）と、図面内の貼り付け画像の探索も Vault ルートを基準にする。
+ """
+ 
+ import functools
+@@ -16,7 +23,7 @@ import logging
+ import re
+ import urllib.parse
+ from pathlib import Path
+-from typing import Optional, Tuple
++from typing import List, Optional, Tuple
+ 
+ from app.vector.excalidraw_cache import (
+     find_excalidraw_cache_dirs,
+@@ -30,11 +37,33 @@ from app.vector.excalidraw_drawing import (
+ )
+ from app.vector.export_guard import SKIP_NOT_FOUND, record_skip, run_guarded
+ from app.vector.file_name_index import find_file_by_names
+-from app.vector.image_data_url import IMAGE_EXTENSIONS, file_to_base64_data_url, svg_text_to_base64_data_url
++from app.vector.image_data_url import (
++    FIGURE_EXTENSIONS,
++    IMAGE_EXTENSIONS,
++    file_to_base64_data_url,
++    svg_text_to_base64_data_url,
++)
++from app.vector.link_expander import find_obsidian_vault_root
+ 
+ logger = logging.getLogger(__name__)
+ 
+ 
++def image_search_roots(vault_dir: Path, vault_root: Optional[Path]) -> List[Path]:
++    """
++    画像・図面を同名ファイルで再帰探索するフォルダを、探す順に返す。
++    基準フォルダ → (Vault ルートが基準フォルダの祖先なら) Vault ルート、そうでなければ基準フォルダの親 → Vault ルート。
++    Vault ルートが基準フォルダの祖先のときは、Vault の外（Vault ルートの親）までは探しに行かない。
++    """
++    roots = [vault_dir]
++    if vault_root is not None and vault_root != vault_dir and vault_root in vault_dir.parents:
++        roots.append(vault_root)
++        return roots
++    roots.append(vault_dir.parent)
++    if vault_root is not None and vault_root not in roots:
++        roots.append(vault_root)
++    return roots
++
++
+ def resolve_image_or_figure_data_url(
+     vault_path_str: str,
+     raw_link: str,
+@@ -52,9 +81,6 @@ def resolve_image_or_figure_data_url(
+     decoded_name = urllib.parse.unquote(raw_link.split("?")[0].split("#")[0].strip())
+     clean_name = decoded_name
+ 
+-    cache_dirs = find_excalidraw_cache_dirs(vault_dir)
+-    index_data = load_excalidraw_cache_indices(cache_dirs)
+-
+     # current_dir を安全に特定
+     current_dir = vault_dir
+     current_file_obj = None
+@@ -74,6 +100,12 @@ def resolve_image_or_figure_data_url(
+                 except (TypeError, ValueError):
+                     current_dir = vault_dir
+ 
++    # ノート（無ければ基準フォルダ）が属する Obsidian Vault のルート。図面のキャッシュ・貼り付け画像の基準にも使う
++    vault_root = find_obsidian_vault_root(current_file_obj or vault_dir)
++    asset_root = vault_root or vault_dir
++    cache_dirs = list(dict.fromkeys(find_excalidraw_cache_dirs(vault_dir) + find_excalidraw_cache_dirs(asset_root)))
++    index_data = load_excalidraw_cache_indices(cache_dirs)
++
+     # 1. カレントディレクトリおよびVaultからの探索候補
+     search_candidates = [
+         clean_name,
+@@ -110,6 +142,14 @@ def resolve_image_or_figure_data_url(
+                 target_file = p
+                 break
+ 
++    # 1-2b. Obsidian Vault ルートからの相対パス（![[01_data/2026/05/02/図.excalidraw]] など）
++    if not target_file and vault_root is not None and vault_root != vault_dir:
++        for cand in search_candidates:
++            p = (vault_root / cand).resolve()
++            if p.exists() and p.is_file():
++                target_file = p
++                break
++
+     # 1-3. Vault親ディレクトリ直下を探索 (01_data等のプレフィックスがある場合)
+     if not target_file:
+         for cand in search_candidates:
+@@ -118,14 +158,15 @@ def resolve_image_or_figure_data_url(
+                 target_file = p
+                 break
+ 
+-    # 1-4 / 1-5. Vault 内、次に Vault 親ディレクトリの再帰探索（同名ファイル。走査結果は索引で共有する）
++    # 1-4 / 1-5. 基準フォルダ内、次に Vault ルート（無ければ基準フォルダの親）の再帰探索
++    # （同名ファイル。走査結果は索引で共有する）
+     if not target_file:
+         file_basename = Path(clean_name).name
+         recursive_names = [
+             file_basename, file_basename + ".png", file_basename + ".svg",
+             file_basename + ".drawio.svg", file_basename + ".excalidraw.md", file_basename + ".md",
+         ]
+-        for search_root in (vault_dir, vault_dir.parent):
++        for search_root in image_search_roots(vault_dir, vault_root):
+             target_file = find_file_by_names(search_root, recursive_names, hidden="skip_files")
+             if target_file:
+                 break
+@@ -144,7 +185,7 @@ def resolve_image_or_figure_data_url(
+ 
+                 excalidraw_dict = extract_excalidraw_data(note_text)
+                 if excalidraw_dict:
+-                    gen_svg = excalidraw_to_svg(excalidraw_dict, vault_path=vault_dir, current_file_path=target_file)
++                    gen_svg = excalidraw_to_svg(excalidraw_dict, vault_path=asset_root, current_file_path=target_file)
+                     return svg_text_to_base64_data_url(gen_svg)
+             except Exception:
+                 logger.warning("Failed to render an Excalidraw note as SVG: %s", target_file, exc_info=True)
+@@ -157,7 +198,7 @@ def resolve_image_or_figure_data_url(
+                 return direct_svg, True
+ 
+         # 2-1. .excalidraw-cache からキャッシュ画像を探す
+-        cache_img = find_excalidraw_cache_image(target_file, vault_dir, cache_dirs, index_data)
++        cache_img = find_excalidraw_cache_image(target_file, asset_root, cache_dirs, index_data)
+         if cache_img and cache_img.exists():
+             data_url = file_to_base64_data_url(cache_img)
+             if data_url:
+@@ -191,6 +232,12 @@ def resolve_image_or_figure_data_url(
+ _SKIPPED = object()
+ 
+ 
++def _has_image_extension(raw_link: str) -> bool:
++    """リンク先が画像・図面の拡張子を持つか（見つからないときに画像として記録するかの判定）。"""
++    name = urllib.parse.unquote(raw_link).split("#")[0].split("?")[0].strip().lower()
++    return name.endswith(tuple(IMAGE_EXTENSIONS | FIGURE_EXTENSIONS))
++
++
+ def replace_obsidian_image_embeds(
+     content: str,
+     vault_path: str,
+@@ -221,7 +268,7 @@ def replace_obsidian_image_embeds(
+         if result is _SKIPPED:
+             return None, False
+         data_url, is_excalidraw = result
+-        if report_missing and not data_url and not is_excalidraw:
++        if report_missing and not data_url and not is_excalidraw and _has_image_extension(raw_link):
+             record_skip("image", raw_link, SKIP_NOT_FOUND, source=source_name)
+         return data_url, is_excalidraw
+ 
+diff --git a/backend/tests/test_ai_html_skipped_links.py b/backend/tests/test_ai_html_skipped_links.py
+index 8e530ccbd08e4942fa7d8038559de166aa3eec07..f08120293f2b35e48790718594529a6c47c3946b 100644
+--- a/backend/tests/test_ai_html_skipped_links.py
++++ b/backend/tests/test_ai_html_skipped_links.py
+@@ -169,3 +169,20 @@ def test_link_to_existing_folder_is_not_reported(tmp_path: Path) -> None:
+     _, stats = export_documents_to_html(file_paths=[str(root)], file_depths={str(root): 1})
+ 
+     assert stats["skipped_links"] == []
++
++
++def test_embedded_email_and_note_are_not_reported_as_missing_images(tmp_path: Path) -> None:
++    """`![[メール.msg]]` や `![[ノート]]`（埋め込み表示）は画像ではないため、画像として見つからなくても記録しない。"""
++    msg = EmailMessage()
++    msg["Subject"] = "埋め込んだメール"
++    msg["From"] = "a@example.com"
++    msg["To"] = "b@example.com"
++    msg.set_content("本文")
++    (tmp_path / "RE_test.eml").write_bytes(bytes(msg))
++    note = tmp_path / "note.md"
++    note.write_text("# ノート\n![[RE_test.eml]]\n![[埋め込みノート]]\n![[ない画像.png]]\n", encoding="utf-8")
++
++    _, stats = export_documents_to_html(file_paths=[str(note)])
++
++    assert stats["total_linked_emails"] == 1
++    assert _skips(stats) == [("image", "ない画像.png", "note.md", "not_found")]
+diff --git a/backend/tests/test_ai_html_vault_root_assets.py b/backend/tests/test_ai_html_vault_root_assets.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..19c8cf8ee24a4151c81bde0505396779171ae3d5
+--- /dev/null
++++ b/backend/tests/test_ai_html_vault_root_assets.py
+@@ -0,0 +1,104 @@
++"""
++AI用HTMLの書き出しで、ノートと別のフォルダにある画像・図面を Vault 全体から探して埋め込むテスト。
++
++仕様:
++- ノートを絶対パスで選んだとき（file_paths）、画像・図面の探索はノートのフォルダ配下とその親フォルダ配下だけでなく、
++  ノートが属する Obsidian Vault のルート（`.obsidian` フォルダがあるフォルダ）配下まで広げる。
++  例: 01_data/2026/04/11/ノート.md の `![[図.excalidraw]]` が 01_data/2026/05/02/図.excalidraw.md を指す。
++- 見つかった画像・図面は Data URL として埋め込み、skipped_links に「見つからない画像」として記録しない。
++- Vault ルートが見つからないとき（`.obsidian` が無い）は従来どおりノートのフォルダとその親フォルダだけを探す。
++"""
++
++from __future__ import annotations
++
++import base64
++from pathlib import Path
++from typing import Any, Dict, List
++
++from app.vector.html_exporter import export_documents_to_html
++
++PNG_BYTES = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")
++
++EXCALIDRAW_NOTE = """---
++excalidraw-plugin: parsed
++tags: [excalidraw]
++---
++
++# Excalidraw Data
++
++## Text Elements
++別フォルダの図 ^abc12345
++
++## Drawing
++```json
++{
++  "type": "excalidraw",
++  "version": 2,
++  "elements": [
++    {"id": "r1", "type": "rectangle", "x": 0, "y": 0, "width": 100, "height": 50,
++     "strokeColor": "#000000", "backgroundColor": "transparent"}
++  ],
++  "files": {}
++}
++```
++"""
++
++
++def _image_skips(stats: Dict[str, Any]) -> List[Dict[str, Any]]:
++    return [s for s in stats["skipped_links"] if s["kind"] == "image"]
++
++
++def _make_vault(tmp_path: Path) -> Path:
++    vault = tmp_path / "vault"
++    (vault / ".obsidian").mkdir(parents=True)
++    return vault
++
++
++def test_figure_in_other_date_folder_of_vault_is_embedded(tmp_path: Path) -> None:
++    vault = _make_vault(tmp_path)
++    note_dir = vault / "01_data" / "2026" / "04" / "11"
++    fig_dir = vault / "01_data" / "2026" / "05" / "02"
++    note_dir.mkdir(parents=True)
++    fig_dir.mkdir(parents=True)
++    (fig_dir / "図_別フォルダ.excalidraw.md").write_text(EXCALIDRAW_NOTE, encoding="utf-8")
++    note = note_dir / "ノート.md"
++    note.write_text("# ノート\n![[図_別フォルダ.excalidraw|1475]]\n", encoding="utf-8")
++
++    html, stats = export_documents_to_html(file_paths=[str(note)], file_depths={})
++
++    assert _image_skips(stats) == []
++    assert "![[図_別フォルダ.excalidraw" not in html
++    assert 'alt="図_別フォルダ.excalidraw" width="1475"' in html
++    assert "data:image/svg+xml;base64," in html
++
++
++def test_image_in_vault_attachment_folder_is_embedded(tmp_path: Path) -> None:
++    vault = _make_vault(tmp_path)
++    note_dir = vault / "01_data" / "2026" / "04" / "11"
++    img_dir = vault / "99_attachments"
++    note_dir.mkdir(parents=True)
++    img_dir.mkdir(parents=True)
++    (img_dir / "Pasted image 20260215201159.png").write_bytes(PNG_BYTES)
++    note = note_dir / "ノート.md"
++    note.write_text("# ノート\n![[Pasted image 20260215201159.png]]\n", encoding="utf-8")
++
++    html, stats = export_documents_to_html(file_paths=[str(note)], file_depths={})
++
++    assert _image_skips(stats) == []
++    assert "data:image/png;base64," in html
++
++
++def test_without_vault_root_search_stays_near_the_note(tmp_path: Path) -> None:
++    """`.obsidian` が無ければ、ノートの親フォルダより上へは探しに行かない（従来どおり）。"""
++    top = tmp_path / "top"
++    note_dir = top / "a" / "b"
++    far_dir = top / "far"
++    note_dir.mkdir(parents=True)
++    far_dir.mkdir(parents=True)
++    (far_dir / "遠い画像.png").write_bytes(PNG_BYTES)
++    note = note_dir / "ノート.md"
++    note.write_text("# ノート\n![[遠い画像.png]]\n", encoding="utf-8")
++
++    _, stats = export_documents_to_html(file_paths=[str(note)], file_depths={})
++
++    assert [s["target"] for s in _image_skips(stats)] == ["遠い画像.png"]
+diff --git a/docs/ai_context_export_spec.md b/docs/ai_context_export_spec.md
+index 2b2fc398cd9661108b0939bbea063db88e76372f..590bc38f70ca1fa3b2b3dee41d3e4729ea17a2ad 100644
+--- a/docs/ai_context_export_spec.md
++++ b/docs/ai_context_export_spec.md
+@@ -40,6 +40,14 @@
+    - Markdown やテキスト内の画像リンク（`![alt](path)`）を検出し、ローカルの画像実体（PNG, JPG, GIF, SVG 等）を Base64 Data URI に変換して `<img>` タグへ置換。
+    - `.excalidraw` / `.excalidraw.md`: 描画シーンの SVG データを生成または埋め込み画像から復元し、SVG/Base64 として埋め込み。
+    - `.dio` / `.dio.svg`: draw.io の XML/SVG データをそのまま SVG としてインライン展開。
++   - **探索範囲**（`figure_assets.resolve_image_or_figure_data_url`）: 埋め込み先の画像・図面は、ノートのフォルダ → 基準フォルダ直下 →
++     Obsidian Vault ルート（ノートから親を遡って `.obsidian` がある最初のフォルダ）からの相対パス → 基準フォルダの親直下 →
++     基準フォルダ配下の再帰探索 → Vault ルート配下の再帰探索、の順に探す。
++     ノートを絶対パスで選ぶと基準フォルダはノートのフォルダになるため、別の日付フォルダ（例: `01_data/2026/04/11/ノート.md` の
++     `![[図.excalidraw]]` が `01_data/2026/05/02/図.excalidraw.md`）や添付フォルダの画像は Vault ルート配下の探索で見つかる。
++     Vault ルートが基準フォルダの祖先のときは Vault の外（Vault ルートの親）は探さない。
++     Vault ルートが見つからないとき（`.obsidian` が無い）は、従来どおり基準フォルダとその親フォルダ配下だけを探す。
++   - Excalidraw のキャッシュ画像（`.excalidraw-cache/index.json` のキーは Vault 相対パス）と、図面内の貼り付け画像の探索も Vault ルートを基準にする。
+ 2. **構造化ドキュメント**:
+    - 先頭に AI 向けの `<system-instruction>` / プロンプトブロック。
+    - 目次（Table of Contents）リンク一覧（指定されたドキュメント順序通りに #1, #2... とナンバリング）。
+@@ -120,6 +128,8 @@
+ - 項目が例外を出したときも飛ばして続ける。見つからない項目（選んだノート・リンク先ノート・`![[...]]` / `![...](...)` の画像・メール）も記録する。
+   埋め込みでない `[[...]]` は通常のノートへのリンクでもあるため、画像として見つからなくても記録しない。
+   リンク先が実在するフォルダ（ノートへのリンクではない）のときも記録しない。
++  `![[...]]` / `![...](...)` でも、画像・図面の拡張子（`IMAGE_EXTENSIONS` / `FIGURE_EXTENSIONS`）でないもの
++  （`![[メール.msg]]`、ノートの埋め込み表示 `![[ノート]]` など）は、画像として見つからなくても記録しない。
+ - 時間切れのまま続いているフォルダ走査（ファイル名索引）があれば、同じフォルダの探索は重ねて走査せず、待たずに「見つからない」として返し、
+   `folder_scan` として 1 度だけ記録する。
+ - 記録（`skipped_links`）: 種類（note / linked_note / image / figure / email / render / folder_scan）・対象・リンク元・
