@@ -3,20 +3,15 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "obsidian-settings",
-      "sequence": 16,
-      "manifest_path": "packages/obsidian-settings/000016/manifest.json"
-    },
-    {
       "repo_id": "local-fulltext-search",
-      "sequence": 17,
-      "manifest_path": "packages/local-fulltext-search/000017/manifest.json"
+      "sequence": 18,
+      "manifest_path": "packages/local-fulltext-search/000018/manifest.json"
     },
     {
       "repo_id": "spoon_feeder2",
-      "sequence": 4,
-      "manifest_path": "packages/spoon_feeder2/000004/manifest.json"
+      "sequence": 5,
+      "manifest_path": "packages/spoon_feeder2/000005/manifest.json"
     }
   ],
-  "signature": "f49538350cb13c7fe56cca001dbaa3368134308cfad653a673161ee80d03b902"
+  "signature": "ceb946357efcb57d15d3bc16d65f21a4a880b2ea969e151944e1484f2556b69f"
 }
