@@ -3,15 +3,20 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
+      "repo_id": "file_manager",
+      "sequence": 8,
+      "manifest_path": "packages/file_manager/000008/manifest.json"
+    },
+    {
       "repo_id": "local-fulltext-search",
-      "sequence": 18,
-      "manifest_path": "packages/local-fulltext-search/000018/manifest.json"
+      "sequence": 19,
+      "manifest_path": "packages/local-fulltext-search/000019/manifest.json"
     },
     {
       "repo_id": "spoon_feeder2",
-      "sequence": 5,
-      "manifest_path": "packages/spoon_feeder2/000005/manifest.json"
+      "sequence": 6,
+      "manifest_path": "packages/spoon_feeder2/000006/manifest.json"
     }
   ],
-  "signature": "ceb946357efcb57d15d3bc16d65f21a4a880b2ea969e151944e1484f2556b69f"
+  "signature": "d15c4a6296e999019cf0bafca336644771d8529d76dbeea4ede1de94a7677df3"
 }
