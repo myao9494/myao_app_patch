@@ -3,20 +3,20 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "file_manager",
-      "sequence": 8,
-      "manifest_path": "packages/file_manager/000008/manifest.json"
+      "repo_id": "obsidian-settings",
+      "sequence": 17,
+      "manifest_path": "packages/obsidian-settings/000017/manifest.json"
     },
     {
-      "repo_id": "local-fulltext-search",
-      "sequence": 19,
-      "manifest_path": "packages/local-fulltext-search/000019/manifest.json"
+      "repo_id": "gantt_react_myao",
+      "sequence": 3,
+      "manifest_path": "packages/gantt_react_myao/000003/manifest.json"
     },
     {
-      "repo_id": "spoon_feeder2",
+      "repo_id": "visual-diff-tool",
       "sequence": 6,
-      "manifest_path": "packages/spoon_feeder2/000006/manifest.json"
+      "manifest_path": "packages/visual-diff-tool/000006/manifest.json"
     }
   ],
-  "signature": "d15c4a6296e999019cf0bafca336644771d8529d76dbeea4ede1de94a7677df3"
+  "signature": "514c3c364fbf65d753b04b30c9882f9498a9f7fa31f1057f58f1d253f84d0ee2"
 }
