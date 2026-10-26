@@ -4,19 +4,9 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 17,
-      "manifest_path": "packages/obsidian-settings/000017/manifest.json"
-    },
-    {
-      "repo_id": "gantt_react_myao",
-      "sequence": 3,
-      "manifest_path": "packages/gantt_react_myao/000003/manifest.json"
-    },
-    {
-      "repo_id": "visual-diff-tool",
-      "sequence": 6,
-      "manifest_path": "packages/visual-diff-tool/000006/manifest.json"
+      "sequence": 18,
+      "manifest_path": "packages/obsidian-settings/000018/manifest.json"
     }
   ],
-  "signature": "514c3c364fbf65d753b04b30c9882f9498a9f7fa31f1057f58f1d253f84d0ee2"
+  "signature": "b72effb4508745785853c72352d7273cb2af94de01bfe3c07d040094ab5f3291"
 }
