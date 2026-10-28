@@ -1,0 +1,61 @@
+diff --git a/00_templates/From Clipboard.md b/00_templates/From Clipboard.md
+index d26bbfffcf54f0adfe15a93e87c5f8ce472744d8..39659535ad642d7a214916575facf9d8e9e58e58 100644
+--- a/00_templates/From Clipboard.md	
++++ b/00_templates/From Clipboard.md	
+@@ -213,7 +213,7 @@ const isProbablyCode = (text) => {
+ };
+ 
+ // SharePoint（ホスト名が ghi で始まる http/https の URL）を UNC パスに変換する。変換できなければ null。
+-// 例: http://ghi1.example/Forms/AllItems.aspx?id=%2FDoc%2FA → \\ghi1.example@80\Doc\A
++// 例: http://ghi1.example/Forms/AllItems.aspx?id=%2FDoc%2FA → \\ghi1.example@80\Doc\A（id が無ければ pathname）
+ const convertSharePointUrlToUnc = (urlString) => {
+     try {
+         const urlObj = new URL(urlString);
+@@ -228,6 +228,8 @@ const convertSharePointUrlToUnc = (urlString) => {
+         let pathValue = urlObj.searchParams.get("id") || decodeURIComponent(urlObj.pathname);
+         if (!pathValue.startsWith("/")) pathValue = `/${pathValue}`;
+         pathValue = pathValue.replace(/\//g, "\\").replace(/\\+$/g, "");
++        // 末尾が .aspx のページ（AllItems.aspx など）なら、そのファイル分を除いて親フォルダにする
++        pathValue = pathValue.replace(/\\[^\\]*\.aspx$/i, "");
+         if (!pathValue) return null;
+ 
+         return `\\\\${urlObj.hostname}@${connection}${pathValue}`;
+diff --git a/80_script/register_custom_commands/11_from_clipboard.js b/80_script/register_custom_commands/11_from_clipboard.js
+index 559053bd3969acf60852ce6f79ecbe4822c45f1a..9ecb3f3cf75228647fe79804dd03e0a0bbfee9df 100644
+--- a/80_script/register_custom_commands/11_from_clipboard.js
++++ b/80_script/register_custom_commands/11_from_clipboard.js
+@@ -196,7 +196,7 @@ const getVaultExcalidrawEmbed = (absolutePath) => {
+ };
+ 
+ // SharePoint（ホスト名が ghi で始まる http/https の URL）を UNC パスに変換する。変換できなければ null。
+-// 例: http://ghi1.example/Forms/AllItems.aspx?id=%2FDoc%2FA → \\ghi1.example@80\Doc\A
++// 例: http://ghi1.example/Forms/AllItems.aspx?id=%2FDoc%2FA → \\ghi1.example@80\Doc\A（id が無ければ pathname）
+ const convertSharePointUrlToUnc = (urlString) => {
+     try {
+         const urlObj = new URL(urlString);
+@@ -211,6 +211,8 @@ const convertSharePointUrlToUnc = (urlString) => {
+         let pathValue = urlObj.searchParams.get("id") || decodeURIComponent(urlObj.pathname);
+         if (!pathValue.startsWith("/")) pathValue = `/${pathValue}`;
+         pathValue = pathValue.replace(/\//g, "\\").replace(/\\+$/g, "");
++        // 末尾が .aspx のページ（AllItems.aspx など）なら、そのファイル分を除いて親フォルダにする
++        pathValue = pathValue.replace(/\\[^\\]*\.aspx$/i, "");
+         if (!pathValue) return null;
+ 
+         return `\\\\${urlObj.hostname}@${connection}${pathValue}`;
+diff --git a/docs/from_clipboard_custom_text.md b/docs/from_clipboard_custom_text.md
+index f24a4959ac38df64e29ae80db6dbf368c8e1a157..3ff1f654ce2f4cfe5a149519e4d2d90cb6e48be5 100644
+--- a/docs/from_clipboard_custom_text.md
++++ b/docs/from_clipboard_custom_text.md
+@@ -46,6 +46,7 @@ sequenceDiagram
+ - 前処理（すべての単一行入力）: 前後の空白と引用符を外したあと、末尾の `%0d`（大文字小文字不問）・改行・空白を取り除く。
+ - 接続方式: `http` → `\\ホスト@80\`、`https` → `\\ホスト@SSL\`。ポートが URL に明示されていれば `@ポート`（`https` は `@SSL@ポート`）。
+ - パス: `id` クエリパラメータの値（デコード済み。二重にデコードしない）。なければ `pathname` をデコードして使う。`/` を `\` にし、末尾の `\` を除く。
++- パスの末尾が `.aspx` のページ名（`AllItems.aspx` など）なら、そのファイル分を除いて親フォルダまでにする（`id` でも `pathname` でも同じ）。除いて空になる場合は変換できないものとして扱う。
+ - 変換できない場合（パスが空、URL として解釈できない、`ghi` で始まらない）は従来どおり URL のまま扱う。
+ - リンク先は `http://localhost:8001/api/open-path?path=<UNCパス>`、表示テキストの既定値は変換後パスの最後のフォルダ名。
+ - 変換例: `http://ghi1111.aaa.co.jp/PIA_Doc/Forms/AllItems.aspx?...&id=%2FPA%5FDoc%2F20%5FPLM%2F10%5F会議説明資料%0d` → `\\ghi1111.aaa.co.jp@80\PA_Doc\20_PLM\10_会議説明資料`
+@@ -55,3 +56,4 @@ sequenceDiagram
+ - **2026-05-23**: 新規仕様策定および実装（TDDによる検証を含む）。
+ - **2026-05-23 (追加)**: プロンプト表示時のデフォルトテキスト自動全選択（`select()`）仕様を追加・実装。
+ - **2026-10-26**: SharePoint URL の UNC パス変換と、末尾 `%0d` の除去を追加。
++- **2026-10-29**: UNC パスの末尾が `.aspx` のとき、親フォルダにする処理を追加。
