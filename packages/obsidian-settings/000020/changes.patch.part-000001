@@ -1,0 +1,621 @@
+diff --git a/00_templates/From Clipboard.md b/00_templates/From Clipboard.md
+index 39659535ad642d7a214916575facf9d8e9e58e58..d6107de0ff42b2718a59ebffbfef5cdde1562622 100644
+--- a/00_templates/From Clipboard.md	
++++ b/00_templates/From Clipboard.md	
+@@ -213,26 +213,109 @@ const isProbablyCode = (text) => {
+ };
+ 
+ // SharePoint（ホスト名が ghi で始まる http/https の URL）を UNC パスに変換する。変換できなければ null。
+-// 例: http://ghi1.example/Forms/AllItems.aspx?id=%2FDoc%2FA → \\ghi1.example@80\Doc\A（id が無ければ pathname）
++// SharePoint は同じ場所でも、コピーの仕方で形の違う URL を発行する。パスは次の順に探す。
++//   0. SharePoint 2013 以降の _layouts/15/start.aspx#/<ページ>?<クエリ> 形式は、# 以降が実際のページなので、それを URL として読み直す
++//   1. クエリ id → RootFolder → sourcedoc → parent（名前の大文字小文字は区別しない。値が / で始まるか、http(s):// の URL のものだけ採用）
++//   2. 短縮リンク https://host/:f:/r/<パス> の <パス>（/:f:/s/ など token 形式は解決できないので null）
++//   3. URL の pathname（ファイルへの直リンク）
++// FolderCTID / viewpath / View などパスでないパラメータは見ない。
++// パス末尾の .aspx のページ名（AllItems.aspx など）は除き、親フォルダにする。
++// 例（http://ghi1.example.jp は http://ghi1.example.jp@80 になる。以下は \\ghi1.example.jp@80 以降を示す）:
++//   .../site/Forms/AllItems.aspx?RootFolder=%2Fsite%2Ffolder&FolderCTID=0x01 → \site\folder
++//   .../site/Forms/AllItems.aspx?id=%2Fsite%2Ffolder                         → \site\folder
++//   .../site/Forms/DispForm.aspx?ID=123（項目番号だけ。ファイルは特定できない）→ \site（ライブラリ）
++//   .../site/folder/filename.xlsx                                            → \site\folder\filename.xlsx
++//   .../_layouts/15/Doc.aspx?sourcedoc=%2Fsite%2Ffolder%2Ffile.xlsx          → \site\folder\file.xlsx
++//   https://.../:f:/r/site/folder                                            → \site\folder
++//   .../site/_layouts/15/start.aspx#/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2Fsite%2Ffolder → \site\folder
++// 各パターンの確認は scratch/test_from_clipboard.js にある。
+ const convertSharePointUrlToUnc = (urlString) => {
++    // デコードに失敗する値（% を含むファイル名など）はそのまま使う
++    const decodeSafely = (value) => {
++        try {
++            return decodeURIComponent(value);
++        } catch (e) {
++            return value;
++        }
++    };
++
+     try {
+         const urlObj = new URL(urlString);
+         if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") return null;
+         if (!urlObj.hostname.toLowerCase().startsWith("ghi")) return null;
+ 
++        // start.aspx#/Shared%20Documents/Forms/AllItems.aspx?RootFolder=… は、# 以降が実際のページ（サイトからの相対）。
++        // 実際のページの URL に組み直して、もう一度変換する
++        const startPage = urlObj.pathname.match(/^(.*)\/_layouts\/\d+\/start\.aspx$/i);
++        if (startPage && urlObj.hash.startsWith("#/")) {
++            return convertSharePointUrlToUnc(`${urlObj.origin}${startPage[1]}${urlObj.hash.slice(1)}`);
++        }
++
+         const isHttps = urlObj.protocol === "https:";
+         const connection = urlObj.port
+             ? (isHttps ? `SSL@${urlObj.port}` : urlObj.port)
+             : (isHttps ? "SSL" : "80");
+ 
+-        let pathValue = urlObj.searchParams.get("id") || decodeURIComponent(urlObj.pathname);
+-        if (!pathValue.startsWith("/")) pathValue = `/${pathValue}`;
+-        pathValue = pathValue.replace(/\//g, "\\").replace(/\\+$/g, "");
+-        // 末尾が .aspx のページ（AllItems.aspx など）なら、そのファイル分を除いて親フォルダにする
+-        pathValue = pathValue.replace(/\\[^\\]*\.aspx$/i, "");
+-        if (!pathValue) return null;
++        // クエリの値をパスにする。searchParams が値を一度デコードしてくれる（エンコードされていない値もそのまま）。
++        // 二重エンコード（%252F）は、もう一度デコードして救う。sourcedoc=http://host/site/a.docx のような
++        // 完全な URL は、パス部分だけを使う。それ以外の / で始まらない値（DispForm.aspx?ID=123 の項目番号や
++        // sourcedoc={GUID} の文書 ID）はパスではないため使わない。
++        const toServerPath = (rawValue) => {
++            let value = /^%2F/i.test(rawValue) ? decodeSafely(rawValue) : rawValue;
++            if (/^https?:\/\//i.test(value)) {
++                try {
++                    value = decodeSafely(new URL(value).pathname);
++                } catch (e) {
++                    return null;
++                }
++            }
++            return value.startsWith("/") ? value : null;
++        };
++
++        const pickPathFromQuery = () => {
++            for (const name of ["id", "rootfolder", "sourcedoc", "parent"]) {
++                for (const [key, rawValue] of urlObj.searchParams) {
++                    if (key.toLowerCase() !== name) continue;
++                    const value = toServerPath(rawValue);
++                    if (value !== null) return value;
++                }
++            }
++            return null;
++        };
++
++        let pathValue = pickPathFromQuery();
++        if (pathValue === null) {
++            // クエリにパスが無ければ pathname を使う（pathname は URL エンコードされたままなのでデコードする）
++            pathValue = decodeSafely(urlObj.pathname);
++
++            // 短縮リンク /:f:/r/<パス>。r 以外（s など）は共有 token でパスにならない
++            const shortLink = pathValue.match(/^\/:[a-z]{1,2}:\/(\w)(\/.*)?$/i);
++            if (shortLink) {
++                if (shortLink[1].toLowerCase() !== "r") return null;
++                pathValue = shortLink[2] || "";
++            }
++
++            // /_layouts/15/Doc.aspx など、文書の場所を含まない SharePoint の内部ページ
++            if (/\/_layouts\//i.test(pathValue)) return null;
++        }
++
++        // 区切りを揃える（連続した区切りは1つにまとめる）。値の途中に混ざった改行などの制御文字（%0d）は取り除く
++        const segments = pathValue
++            .split(/[\/\\]+/)
++            .map((segment) => segment.replace(/[\u0000-\u001f]+/g, ""))
++            .filter(Boolean);
++
++        // 末尾が .aspx のページ名なら除く。Forms 配下のページ（AllItems.aspx / DispForm.aspx）なら、
++        // ライブラリのフォルダではない Forms も除いて、ライブラリのフォルダまで戻る
++        if (segments.length > 0 && /\.aspx$/i.test(segments[segments.length - 1])) {
++            segments.pop();
++            if (segments.length > 0 && segments[segments.length - 1].toLowerCase() === "forms") {
++                segments.pop();
++            }
++        }
++        if (segments.length === 0) return null;
+ 
+-        return `\\\\${urlObj.hostname}@${connection}${pathValue}`;
++        return `\\\\${urlObj.hostname}@${connection}\\${segments.join("\\")}`;
+     } catch (e) {
+         return null;
+     }
+@@ -245,8 +328,8 @@ const buildMarkdownLink = async (rawClipboardContent) => {
+     }
+ 
+     clipboardContent = clipboardContent.replace(/^["']|["']$/g, "");
+-    // 末尾の %0d（URLに混入した改行）と空白を取り除く
+-    clipboardContent = clipboardContent.replace(/(?:%0d|\s)+$/i, "").trim();
++    // 末尾の %0d・%0a（URLに混入した改行）と空白を取り除く
++    clipboardContent = clipboardContent.replace(/(?:%0d|%0a|\s)+$/i, "").trim();
+     const uncPath = /^https?:/i.test(clipboardContent) ? convertSharePointUrlToUnc(clipboardContent) : null;
+     if (uncPath) clipboardContent = uncPath;
+     const originalClipboardContent = clipboardContent;
+diff --git "a/03_Dataview/check_\344\270\255\350\272\253\343\201\214\347\251\272\343\201\256\343\203\225\343\202\241\343\202\244\343\203\253.md" "b/03_Dataview/check_\344\270\255\350\272\253\343\201\214\347\251\272\343\201\256\343\203\225\343\202\241\343\202\244\343\203\253.md"
+new file mode 100644
+index 0000000000000000000000000000000000000000..1612246932121b3c65527582f9983550c869a369
+--- /dev/null
++++ "b/03_Dataview/check_\344\270\255\350\272\253\343\201\214\347\251\272\343\201\256\343\203\225\343\202\241\343\202\244\343\203\253.md"
+@@ -0,0 +1,155 @@
++<!--
++仕様:
++1. 01_data ディレクトリ配下で、中身が空のファイルを一覧表示する。
++   - 0バイトのファイル（拡張子を問わない）
++   - Markdown（`.md`）で、本文が空白・改行だけのもの
++   - Markdown（`.md`）で、フロントマター（`---` で囲まれた部分）だけで本文が無いもの
++2. 各行の「理由」で、どの種類の空かを示す。
++3. ファイル名の右に「開く」「削除」ボタンを置く（開いて確認した後、マウス移動を最小にして削除できるように）。
++4. 「削除」ボタンは確認ダイアログを経てゴミ箱へ移動し、300ms 後に再スキャンして表全体を更新する。
++5. 画面上部のチェックボックスで「フロントマターのみ」を一覧に含めるかを切り替える（localStorage に保存）。
++6. 更新日時の新しい順に並べる。03_Dataview 配下は対象外。
++-->
++
++# 中身が空のファイル一覧 (01_data 配下)
++
++```dataviewjs
++/**
++ * 01_data配下で、中身が空のファイルを一覧表示する。
++ * 削除実行時は自動的に再スキャン・再描画する。
++ **/
++const FM_STORAGE_KEY = "obsidian_empty_file_include_frontmatter_only";
++let includeFrontmatterOnly = true;
++try {
++    const saved = localStorage.getItem(FM_STORAGE_KEY);
++    if (saved !== null) includeFrontmatterOnly = saved === "true";
++} catch (e) {
++    console.error("Failed to load option:", e);
++}
++
++const rootEl = this.container.createEl("div");
++
++// オプション: フロントマターのみのファイルを含めるか
++const optionWrap = rootEl.createEl("div", { attr: { style: "margin-bottom: 10px;" } });
++const fmLabel = optionWrap.createEl("label");
++const fmCheckbox = fmLabel.createEl("input", { type: "checkbox" });
++fmCheckbox.checked = includeFrontmatterOnly;
++fmLabel.createEl("span", { text: " フロントマターのみのMarkdownも含める" });
++
++const resultEl = rootEl.createEl("div");
++
++function formatDate(ms) {
++    const d = new Date(ms);
++    const p = (n) => String(n).padStart(2, "0");
++    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
++}
++
++function styleButton(btn) {
++    btn.style.setProperty("background-color", "var(--interactive-accent)");
++    btn.style.setProperty("border-color", "var(--interactive-accent)");
++    btn.style.setProperty("color", "#111111", "important");
++    btn.style.setProperty("-webkit-text-fill-color", "#111111", "important");
++}
++
++// 空の理由を返す。空でなければ null
++async function getEmptyReason(file) {
++    if (file.stat.size === 0) return "0バイト";
++    if (file.extension !== "md") return null;
++    const text = (await app.vault.cachedRead(file)).replace(/^﻿/, "");
++    if (text.trim() === "") return "空白のみ";
++    if (includeFrontmatterOnly) {
++        const m = text.match(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/);
++        if (m && text.slice(m[0].length).trim() === "") return "フロントマターのみ";
++    }
++    return null;
++}
++
++let renderToken = 0;
++
++async function render() {
++    const token = ++renderToken;
++    resultEl.empty();
++    resultEl.createEl("p", { text: "スキャン中..." });
++
++    const candidates = app.vault.getFiles()
++        .filter(f => f.path.startsWith("01_data/") && !f.path.startsWith("03_Dataview/"));
++
++    const checked = await Promise.all(candidates.map(async (file) => {
++        try {
++            return { file, reason: await getEmptyReason(file) };
++        } catch (e) {
++            return { file, reason: null };
++        }
++    }));
++    if (token !== renderToken) return; // 後続の再描画が走った場合は破棄
++
++    const items = checked
++        .filter(x => x.reason)
++        .sort((a, b) => b.file.stat.mtime - a.file.stat.mtime);
++
++    resultEl.empty();
++
++    if (items.length === 0) {
++        resultEl.createEl("p", { text: "中身が空のファイルは見つかりませんでした。" });
++        return;
++    }
++
++    resultEl.createEl("p", { text: `中身が空のファイルが ${items.length} 件見つかりました。` });
++
++    const table = resultEl.createEl("table", { cls: "dataview table-view-table" });
++    const headerRow = table.createEl("thead").createEl("tr");
++    headerRow.createEl("th", { text: "ファイル名" });
++    headerRow.createEl("th", { text: "操作", attr: { style: "width: 150px; text-align: center;" } });
++    headerRow.createEl("th", { text: "理由" });
++    headerRow.createEl("th", { text: "パス" });
++    headerRow.createEl("th", { text: "更新日時" });
++
++    const tbody = table.createEl("tbody");
++
++    for (const { file, reason } of items) {
++        const row = tbody.createEl("tr");
++
++        // ファイル名（クリックで開く内部リンク）
++        const nameCell = row.createEl("td");
++        const link = nameCell.createEl("a", { text: file.name, cls: "internal-link", href: file.path });
++        link.setAttr("data-href", file.path);
++        link.addEventListener("click", (ev) => {
++            ev.preventDefault();
++            app.workspace.getLeaf(ev.ctrlKey || ev.metaKey ? "tab" : false).openFile(file);
++        });
++
++        const actionCell = row.createEl("td", { attr: { style: "text-align: center;" } });
++
++        const openBtn = actionCell.createEl("button", { text: "開く", attr: { style: "margin-right: 5px;" } });
++        styleButton(openBtn);
++        openBtn.addEventListener("click", () => {
++            app.workspace.getLeaf("tab").openFile(file);
++        });
++
++        const deleteBtn = actionCell.createEl("button", { text: "削除" });
++        styleButton(deleteBtn);
++        deleteBtn.addEventListener("click", async () => {
++            if (!confirm(`本当にファイル "${file.path}" を削除（ゴミ箱へ移動）しますか？`)) return;
++            try {
++                await app.vault.trash(file, true);
++                new Notice(`ファイル "${file.path}" を削除しました。`);
++                setTimeout(render, 300);
++            } catch (err) {
++                new Notice(`削除に失敗しました: ${err.message}`);
++            }
++        });
++
++        row.createEl("td", { text: reason });
++        row.createEl("td", { text: file.parent ? file.parent.path : "" });
++        row.createEl("td", { text: formatDate(file.stat.mtime) });
++    }
++}
++
++fmCheckbox.addEventListener("change", () => {
++    includeFrontmatterOnly = fmCheckbox.checked;
++    try { localStorage.setItem(FM_STORAGE_KEY, String(includeFrontmatterOnly)); } catch (e) {}
++    render();
++});
++
++render();
++```
+diff --git "a/03_Dataview/check_\347\204\241\351\241\214\343\201\256\343\203\225\343\202\241\343\202\244\343\203\253.md" "b/03_Dataview/check_\347\204\241\351\241\214\343\201\256\343\203\225\343\202\241\343\202\244\343\203\253.md"
+new file mode 100644
+index 0000000000000000000000000000000000000000..d915a80a7906fa385db9bf4e6e6493e8c3354ca5
+--- /dev/null
++++ "b/03_Dataview/check_\347\204\241\351\241\214\343\201\256\343\203\225\343\202\241\343\202\244\343\203\253.md"
+@@ -0,0 +1,125 @@
++<!--
++仕様:
++1. Vault 内で、ファイル名に「無題のファイル」を含むファイルを一覧表示する（拡張子は問わない。`.base`、`.excalidraw.md` なども対象）。ただし `03_Dataview/` 配下のファイルは対象外。
++2. 画面上部の入力欄で検索語を変更できる（初期値: 無題のファイル）。入力値は localStorage に保存され、次回も復元される。
++3. 更新日時の新しい順に並べ、各行に「ファイル名」「パス」「更新日時」と、「開く」「削除」ボタンを設ける。
++4. 「削除」ボタンは確認ダイアログを経てゴミ箱へ移動し、300ms 後に再スキャンして表全体を更新する。
++-->
++
++# 「無題のファイル」を含むファイル一覧
++
++```dataviewjs
++/**
++ * ファイル名に検索語（初期値: 無題のファイル）を含むファイルを一覧表示する。
++ * 削除実行時は自動的に再スキャン・再描画する。
++ **/
++const KEYWORD_STORAGE_KEY = "obsidian_untitled_file_keyword";
++let keyword = "無題のファイル";
++try {
++    const saved = localStorage.getItem(KEYWORD_STORAGE_KEY);
++    if (saved !== null) keyword = saved;
++} catch (e) {
++    console.error("Failed to load keyword:", e);
++}
++
++const rootEl = this.container.createEl("div");
++
++// 検索語の入力欄
++const inputWrap = rootEl.createEl("div", { attr: { style: "margin-bottom: 10px;" } });
++inputWrap.createEl("span", { text: "ファイル名に含む文字列: " });
++const keywordInput = inputWrap.createEl("input", {
++    type: "text",
++    attr: { style: "width: 260px;" }
++});
++keywordInput.value = keyword;
++
++const resultEl = rootEl.createEl("div");
++
++function formatDate(ms) {
++    const d = new Date(ms);
++    const p = (n) => String(n).padStart(2, "0");
++    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
++}
++
++function styleButton(btn) {
++    btn.style.setProperty("background-color", "var(--interactive-accent)");
++    btn.style.setProperty("border-color", "var(--interactive-accent)");
++    btn.style.setProperty("color", "#111111", "important");
++    btn.style.setProperty("-webkit-text-fill-color", "#111111", "important");
++}
++
++function render() {
++    resultEl.empty();
++
++    const kw = keyword.trim();
++    if (!kw) {
++        resultEl.createEl("p", { text: "検索語を入力してください。" });
++        return;
++    }
++
++    const files = app.vault.getFiles()
++        .filter(f => !f.path.startsWith("03_Dataview/") && f.name.includes(kw))
++        .sort((a, b) => b.stat.mtime - a.stat.mtime);
++
++    if (files.length === 0) {
++        resultEl.createEl("p", { text: `「${kw}」を含むファイルは見つかりませんでした。` });
++        return;
++    }
++
++    resultEl.createEl("p", { text: `「${kw}」を含むファイルが ${files.length} 件見つかりました。` });
++
++    const table = resultEl.createEl("table", { cls: "dataview table-view-table" });
++    const headerRow = table.createEl("thead").createEl("tr");
++    headerRow.createEl("th", { text: "ファイル名" });
++    headerRow.createEl("th", { text: "操作", attr: { style: "width: 150px; text-align: center;" } });
++    headerRow.createEl("th", { text: "パス" });
++    headerRow.createEl("th", { text: "更新日時" });
++
++    const tbody = table.createEl("tbody");
++
++    for (const file of files) {
++        const row = tbody.createEl("tr");
++
++        // ファイル名（クリックで開く内部リンク）
++        const nameCell = row.createEl("td");
++        const link = nameCell.createEl("a", { text: file.name, cls: "internal-link", href: file.path });
++        link.setAttr("data-href", file.path);
++        link.addEventListener("click", (ev) => {
++            ev.preventDefault();
++            app.workspace.getLeaf(ev.ctrlKey || ev.metaKey ? "tab" : false).openFile(file);
++        });
++
++        const actionCell = row.createEl("td", { attr: { style: "text-align: center;" } });
++
++        const openBtn = actionCell.createEl("button", { text: "開く", attr: { style: "margin-right: 5px;" } });
++        styleButton(openBtn);
++        openBtn.addEventListener("click", () => {
++            app.workspace.getLeaf("tab").openFile(file);
++        });
++
++        const deleteBtn = actionCell.createEl("button", { text: "削除" });
++        styleButton(deleteBtn);
++        deleteBtn.addEventListener("click", async () => {
++            if (!confirm(`本当にファイル "${file.path}" を削除（ゴミ箱へ移動）しますか？`)) return;
++            try {
++                await app.vault.trash(file, true);
++                new Notice(`ファイル "${file.path}" を削除しました。`);
++                setTimeout(render, 300);
++            } catch (err) {
++                new Notice(`削除に失敗しました: ${err.message}`);
++            }
++        });
++
++        row.createEl("td", { text: file.parent ? file.parent.path : "" });
++        row.createEl("td", { text: formatDate(file.stat.mtime) });
++    }
++}
++
++keywordInput.addEventListener("input", () => {
++    keyword = keywordInput.value;
++    try { localStorage.setItem(KEYWORD_STORAGE_KEY, keyword); } catch (e) {}
++    render();
++});
++
++render();
++```
+diff --git a/80_script/register_custom_commands/11_from_clipboard.js b/80_script/register_custom_commands/11_from_clipboard.js
+index 9ecb3f3cf75228647fe79804dd03e0a0bbfee9df..6c312f3090436d960e0e3444f7ef6172ce236f07 100644
+--- a/80_script/register_custom_commands/11_from_clipboard.js
++++ b/80_script/register_custom_commands/11_from_clipboard.js
+@@ -196,26 +196,109 @@ const getVaultExcalidrawEmbed = (absolutePath) => {
+ };
+ 
+ // SharePoint（ホスト名が ghi で始まる http/https の URL）を UNC パスに変換する。変換できなければ null。
+-// 例: http://ghi1.example/Forms/AllItems.aspx?id=%2FDoc%2FA → \\ghi1.example@80\Doc\A（id が無ければ pathname）
++// SharePoint は同じ場所でも、コピーの仕方で形の違う URL を発行する。パスは次の順に探す。
++//   0. SharePoint 2013 以降の _layouts/15/start.aspx#/<ページ>?<クエリ> 形式は、# 以降が実際のページなので、それを URL として読み直す
++//   1. クエリ id → RootFolder → sourcedoc → parent（名前の大文字小文字は区別しない。値が / で始まるか、http(s):// の URL のものだけ採用）
++//   2. 短縮リンク https://host/:f:/r/<パス> の <パス>（/:f:/s/ など token 形式は解決できないので null）
++//   3. URL の pathname（ファイルへの直リンク）
++// FolderCTID / viewpath / View などパスでないパラメータは見ない。
++// パス末尾の .aspx のページ名（AllItems.aspx など）は除き、親フォルダにする。
++// 例（http://ghi1.example.jp は http://ghi1.example.jp@80 になる。以下は \\ghi1.example.jp@80 以降を示す）:
++//   .../site/Forms/AllItems.aspx?RootFolder=%2Fsite%2Ffolder&FolderCTID=0x01 → \site\folder
++//   .../site/Forms/AllItems.aspx?id=%2Fsite%2Ffolder                         → \site\folder
++//   .../site/Forms/DispForm.aspx?ID=123（項目番号だけ。ファイルは特定できない）→ \site（ライブラリ）
++//   .../site/folder/filename.xlsx                                            → \site\folder\filename.xlsx
++//   .../_layouts/15/Doc.aspx?sourcedoc=%2Fsite%2Ffolder%2Ffile.xlsx          → \site\folder\file.xlsx
++//   https://.../:f:/r/site/folder                                            → \site\folder
++//   .../site/_layouts/15/start.aspx#/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2Fsite%2Ffolder → \site\folder
++// 各パターンの確認は scratch/test_from_clipboard.js にある。
+ const convertSharePointUrlToUnc = (urlString) => {
++    // デコードに失敗する値（% を含むファイル名など）はそのまま使う
++    const decodeSafely = (value) => {
++        try {
++            return decodeURIComponent(value);
++        } catch (e) {
++            return value;
++        }
++    };
++
+     try {
+         const urlObj = new URL(urlString);
+         if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") return null;
+         if (!urlObj.hostname.toLowerCase().startsWith("ghi")) return null;
+ 
++        // start.aspx#/Shared%20Documents/Forms/AllItems.aspx?RootFolder=… は、# 以降が実際のページ（サイトからの相対）。
++        // 実際のページの URL に組み直して、もう一度変換する
++        const startPage = urlObj.pathname.match(/^(.*)\/_layouts\/\d+\/start\.aspx$/i);
++        if (startPage && urlObj.hash.startsWith("#/")) {
++            return convertSharePointUrlToUnc(`${urlObj.origin}${startPage[1]}${urlObj.hash.slice(1)}`);
++        }
++
+         const isHttps = urlObj.protocol === "https:";
+         const connection = urlObj.port
+             ? (isHttps ? `SSL@${urlObj.port}` : urlObj.port)
+             : (isHttps ? "SSL" : "80");
+ 
+-        let pathValue = urlObj.searchParams.get("id") || decodeURIComponent(urlObj.pathname);
+-        if (!pathValue.startsWith("/")) pathValue = `/${pathValue}`;
+-        pathValue = pathValue.replace(/\//g, "\\").replace(/\\+$/g, "");
+-        // 末尾が .aspx のページ（AllItems.aspx など）なら、そのファイル分を除いて親フォルダにする
+-        pathValue = pathValue.replace(/\\[^\\]*\.aspx$/i, "");
+-        if (!pathValue) return null;
++        // クエリの値をパスにする。searchParams が値を一度デコードしてくれる（エンコードされていない値もそのまま）。
++        // 二重エンコード（%252F）は、もう一度デコードして救う。sourcedoc=http://host/site/a.docx のような
++        // 完全な URL は、パス部分だけを使う。それ以外の / で始まらない値（DispForm.aspx?ID=123 の項目番号や
++        // sourcedoc={GUID} の文書 ID）はパスではないため使わない。
++        const toServerPath = (rawValue) => {
++            let value = /^%2F/i.test(rawValue) ? decodeSafely(rawValue) : rawValue;
++            if (/^https?:\/\//i.test(value)) {
++                try {
++                    value = decodeSafely(new URL(value).pathname);
++                } catch (e) {
++                    return null;
++                }
++            }
++            return value.startsWith("/") ? value : null;
++        };
++
++        const pickPathFromQuery = () => {
++            for (const name of ["id", "rootfolder", "sourcedoc", "parent"]) {
++                for (const [key, rawValue] of urlObj.searchParams) {
++                    if (key.toLowerCase() !== name) continue;
++                    const value = toServerPath(rawValue);
++                    if (value !== null) return value;
++                }
++            }
++            return null;
++        };
++
++        let pathValue = pickPathFromQuery();
++        if (pathValue === null) {
++            // クエリにパスが無ければ pathname を使う（pathname は URL エンコードされたままなのでデコードする）
++            pathValue = decodeSafely(urlObj.pathname);
++
++            // 短縮リンク /:f:/r/<パス>。r 以外（s など）は共有 token でパスにならない
++            const shortLink = pathValue.match(/^\/:[a-z]{1,2}:\/(\w)(\/.*)?$/i);
++            if (shortLink) {
++                if (shortLink[1].toLowerCase() !== "r") return null;
++                pathValue = shortLink[2] || "";
++            }
++
++            // /_layouts/15/Doc.aspx など、文書の場所を含まない SharePoint の内部ページ
++            if (/\/_layouts\//i.test(pathValue)) return null;
++        }
++
++        // 区切りを揃える（連続した区切りは1つにまとめる）。値の途中に混ざった改行などの制御文字（%0d）は取り除く
++        const segments = pathValue
++            .split(/[\/\\]+/)
++            .map((segment) => segment.replace(/[\u0000-\u001f]+/g, ""))
++            .filter(Boolean);
++
++        // 末尾が .aspx のページ名なら除く。Forms 配下のページ（AllItems.aspx / DispForm.aspx）なら、
++        // ライブラリのフォルダではない Forms も除いて、ライブラリのフォルダまで戻る
++        if (segments.length > 0 && /\.aspx$/i.test(segments[segments.length - 1])) {
++            segments.pop();
++            if (segments.length > 0 && segments[segments.length - 1].toLowerCase() === "forms") {
++                segments.pop();
++            }
++        }
++        if (segments.length === 0) return null;
+ 
+-        return `\\\\${urlObj.hostname}@${connection}${pathValue}`;
++        return `\\\\${urlObj.hostname}@${connection}\\${segments.join("\\")}`;
+     } catch (e) {
+         return null;
+     }
+@@ -230,8 +313,8 @@ const buildMarkdownLink = async (rawClipboardContent) => {
+     }
+ 
+     clipboardContent = clipboardContent.replace(/^["']|["']$/g, "");
+-    // 末尾の %0d（URLに混入した改行）と空白を取り除く
+-    clipboardContent = clipboardContent.replace(/(?:%0d|\s)+$/i, "").trim();
++    // 末尾の %0d・%0a（URLに混入した改行）と空白を取り除く
++    clipboardContent = clipboardContent.replace(/(?:%0d|%0a|\s)+$/i, "").trim();
+     const uncPath = /^https?:/i.test(clipboardContent) ? convertSharePointUrlToUnc(clipboardContent) : null;
+     if (uncPath) clipboardContent = uncPath;
+     const originalClipboardContent = clipboardContent;
+diff --git a/docs/from_clipboard_custom_text.md b/docs/from_clipboard_custom_text.md
+index 3ff1f654ce2f4cfe5a149519e4d2d90cb6e48be5..c6e29f7e2151dc78d794192a1e26a17c71ae33c5 100644
+--- a/docs/from_clipboard_custom_text.md
++++ b/docs/from_clipboard_custom_text.md
+@@ -43,11 +43,16 @@ sequenceDiagram
+ ## 4. SharePoint URL の UNC パス変換
+ ホスト名が `ghi` で始まる `http` / `https` の URL（SharePoint）は、そのままリンクにすると Edge で開いてしまうため、UNC パスに変換してから通常のファイルパスと同じリンクにする（`convertSharePointUrlToUnc`）。
+ 
+-- 前処理（すべての単一行入力）: 前後の空白と引用符を外したあと、末尾の `%0d`（大文字小文字不問）・改行・空白を取り除く。
++- 前処理（すべての単一行入力）: 前後の空白と引用符を外したあと、末尾の `%0d`・`%0a`（大文字小文字不問）・改行・空白を取り除く。
+ - 接続方式: `http` → `\\ホスト@80\`、`https` → `\\ホスト@SSL\`。ポートが URL に明示されていれば `@ポート`（`https` は `@SSL@ポート`）。
+-- パス: `id` クエリパラメータの値（デコード済み。二重にデコードしない）。なければ `pathname` をデコードして使う。`/` を `\` にし、末尾の `\` を除く。
+-- パスの末尾が `.aspx` のページ名（`AllItems.aspx` など）なら、そのファイル分を除いて親フォルダまでにする（`id` でも `pathname` でも同じ）。除いて空になる場合は変換できないものとして扱う。
+-- 変換できない場合（パスが空、URL として解釈できない、`ghi` で始まらない）は従来どおり URL のまま扱う。
++- パス（上から順に探す。クエリのパラメータ名は大文字小文字を区別しない）:
++  0. `_layouts/15/start.aspx#/<ページ>?<クエリ>`（SharePoint 2013 以降の MDS 形式）は、`#` 以降が実際のページなので、サイトのパスに組み直してから読む。
++  1. クエリ `id` → `RootFolder` → `sourcedoc` → `parent`。値が `/` で始まるか、`http(s)://` の URL（パス部分だけ使う）のものだけを採用する（`DispForm.aspx?ID=123` の項目番号や `sourcedoc={GUID}` はパスではないため）。値は `URLSearchParams` が一度デコードする（エンコードされていない値もそのまま使える）。二重エンコード（`%252F`）はもう一度デコードする。`FolderCTID` / `viewpath` / `View` などは見ない。
++  2. 短縮リンク `https://host/:f:/r/<パス>` の `<パス>`（`:x:` `:b:` など種類は問わない）。`/:f:/s/…` `/:x:/t/…` のような共有 token 形式は解決できないため変換しない。
++  3. `pathname` をデコードしたもの（ファイルへの直リンク）。`/_layouts/` を含む内部ページ（`Doc.aspx?sourcedoc={GUID}` など）はパスではないため変換しない。
++- 区切りを `\` に揃え、連続する区切りと末尾の区切りは取り除く。値の途中に混ざった改行などの制御文字（`%0d`）も取り除く。
++- パスの末尾が `.aspx` のページ名（`AllItems.aspx` / `DispForm.aspx` など）なら、そのファイル分を除いて親フォルダまでにする。`Forms` 配下のページ（`/site/Forms/AllItems.aspx`）は、`Forms` もライブラリのフォルダではないため除き、ライブラリのフォルダ（`\site`）まで戻る。ファイルへの直リンクは、ファイルのパスのまま。
++- 変換できない場合（パスが空、URL として解釈できない、`ghi` で始まらない、上記のどこにもパスが無い）は従来どおり URL のまま扱う。
+ - リンク先は `http://localhost:8001/api/open-path?path=<UNCパス>`、表示テキストの既定値は変換後パスの最後のフォルダ名。
+ - 変換例: `http://ghi1111.aaa.co.jp/PIA_Doc/Forms/AllItems.aspx?...&id=%2FPA%5FDoc%2F20%5FPLM%2F10%5F会議説明資料%0d` → `\\ghi1111.aaa.co.jp@80\PA_Doc\20_PLM\10_会議説明資料`
+ - 実装: `80_script/register_custom_commands/11_from_clipboard.js` と `00_templates/From Clipboard.md`（同じ実装が2か所にある）。テスト: `scratch/test_from_clipboard.js`。
+@@ -57,3 +62,5 @@ sequenceDiagram
+ - **2026-05-23 (追加)**: プロンプト表示時のデフォルトテキスト自動全選択（`select()`）仕様を追加・実装。
+ - **2026-10-26**: SharePoint URL の UNC パス変換と、末尾 `%0d` の除去を追加。
+ - **2026-10-29**: UNC パスの末尾が `.aspx` のとき、親フォルダにする処理を追加。
++- **2026-10-29 (追加)**: パスの取得元を `id` → `RootFolder` → `sourcedoc` → 短縮リンク → `pathname` の順に拡張。`Forms/…aspx` はライブラリのフォルダまで戻す。
++- **2026-10-29 (全パターン対応の見直し)**: `start.aspx#` 形式、`sourcedoc` の完全な URL、`parent`、値の途中の改行、末尾の `%0a` に対応。
+diff --git a/docs/view_maintenance_tools.md b/docs/view_maintenance_tools.md
+index 5a4e1bce55f4f1394e4bc24ef70acd3704ab177d..be661c08a470e10437fbf17dfccc10e944388346 100644
+--- a/docs/view_maintenance_tools.md
++++ b/docs/view_maintenance_tools.md
+@@ -70,6 +70,27 @@ graph TD
+     - **開く**: Electron の `shell.openPath` を介して、OS のデフォルトのファイルブラウザー（Mac の Finder、Windows のエクスプローラー等）で該当フォルダーを開きます。
+     - **削除**: クリックすると確認プロンプトが表示され、同意後にフォルダーがシステムゴミ箱に退避され、300ms の遅延の後にテーブル全体が自動で再スキャン・再描画（更新）されます。これにより、削除の結果新しく空になった親フォルダーも即座にリストに反映されます。
+ 
++### 3.3 「無題のファイル」を含むファイル一覧 (`03_Dataview/check_無題のファイル.md`)
++
++- **対象**: Vault 内の全ファイルのうち、ファイル名（拡張子込み）に検索語を含むもの。初期値は `無題のファイル`。`.base` や `.excalidraw.md` など拡張子は問わない。ただし `03_Dataview/` 配下のファイルは対象外（この一覧ツール自身が名前に「無題のファイル」を含むため）。
++- **処理ロジック**:
++  1. 画面上部の入力欄の検索語（`localStorage` のキー `obsidian_untitled_file_keyword` に保存・復元）で `app.vault.getFiles()` を絞り込みます。入力を変えると即座に再描画します。
++  2. 更新日時の新しい順に並べます。
++- **表示形式**: ファイル名（リンク）、操作（「開く」「削除」）、パス（親フォルダー）、更新日時の順。開いて確認したあと、マウスを大きく動かさずに削除できるよう、操作列をファイル名のすぐ右に置く。
++  - **開く**: 新規タブで開きます。
++  - **削除**: 確認後にゴミ箱へ移動し、300ms 後に再スキャンして表を更新します。
++
++### 3.4 中身が空のファイル一覧 (`03_Dataview/check_中身が空のファイル.md`)
++
++- **対象**: `01_data/` 配下の全ファイルのうち、次のいずれかに当てはまるもの。
++  - **0バイト**: 拡張子を問わない。
++  - **空白のみ**: Markdown（`.md`）で、空白・改行しかないもの。
++  - **フロントマターのみ**: Markdown で、`---` で囲まれた部分だけで本文が無いもの。画面上部のチェックボックスで含めるか切り替えられ、`localStorage` のキー `obsidian_empty_file_include_frontmatter_only` に保存・復元されます。
++- **処理ロジック**: `app.vault.cachedRead` で Markdown の本文を読んで判定し、更新日時の新しい順に並べます。`03_Dataview/` 配下は対象外です。
++- **表示形式**: ファイル名（リンク）、操作（「開く」「削除」）、理由、パス、更新日時の順。操作列はファイル名のすぐ右にあります。
++  - **開く**: 新規タブで開きます。
++  - **削除**: 確認後にゴミ箱へ移動し、300ms 後に再スキャンして表を更新します。
++
+ ---
+ 
+ ## 4. メンテナンス手順
