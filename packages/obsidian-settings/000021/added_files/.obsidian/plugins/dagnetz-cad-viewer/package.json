@@ -1,0 +1,39 @@
+{
+  "name": "obsidian-cad-viewer",
+  "version": "2.0.0",
+  "description": "View STEP (.step/.stp), FreeCAD (.FCStd), OBJ and STL CAD models in an interactive 3D viewer inside Obsidian.",
+  "main": "main.js",
+  "scripts": {
+    "patch-occt": "node scripts/patch-occt-memory.mjs",
+    "dev": "npm run patch-occt && node esbuild.config.mjs",
+    "build": "npm run patch-occt && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "test": "tsx --test \"src/**/*.test.ts\""
+  },
+  "keywords": [
+    "obsidian",
+    "step",
+    "cad",
+    "3d",
+    "occt",
+    "three"
+  ],
+  "author": "Ondřej Uhnávy",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.0",
+    "@types/three": "^0.160.0",
+    "esbuild": "^0.20.0",
+    "obsidian": "latest",
+    "tslib": "^2.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "js-yaml": "^4.1.0",
+    "occt-import-js": "0.0.23",
+    "three": "^0.160.0"
+  }
+}
