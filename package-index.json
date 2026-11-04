@@ -4,29 +4,9 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 21,
-      "manifest_path": "packages/obsidian-settings/000021/manifest.json"
-    },
-    {
-      "repo_id": "file_manager",
-      "sequence": 9,
-      "manifest_path": "packages/file_manager/000009/manifest.json"
-    },
-    {
-      "repo_id": "local-fulltext-search",
-      "sequence": 20,
-      "manifest_path": "packages/local-fulltext-search/000020/manifest.json"
-    },
-    {
-      "repo_id": "visual-diff-tool",
-      "sequence": 7,
-      "manifest_path": "packages/visual-diff-tool/000007/manifest.json"
-    },
-    {
-      "repo_id": "spoon_feeder2",
-      "sequence": 7,
-      "manifest_path": "packages/spoon_feeder2/000007/manifest.json"
+      "sequence": 22,
+      "manifest_path": "packages/obsidian-settings/000022/manifest.json"
     }
   ],
-  "signature": "c13c4683bb123b8e134b7ccb7fafea608ae092c6a11cbce1a2828b542ad9d158"
+  "signature": "5601629ef986cc8f493c7453b00b7899c537f3ebf8b32bed8c71af01382cba72"
 }
