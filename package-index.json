@@ -4,9 +4,9 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 22,
-      "manifest_path": "packages/obsidian-settings/000022/manifest.json"
+      "sequence": 23,
+      "manifest_path": "packages/obsidian-settings/000023/manifest.json"
     }
   ],
-  "signature": "5601629ef986cc8f493c7453b00b7899c537f3ebf8b32bed8c71af01382cba72"
+  "signature": "361695814093d0ae46929ab6769a4ef73d1905128c5decd3531b6d8cb065f69b"
 }
