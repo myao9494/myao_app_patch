@@ -1,0 +1,1174 @@
+{
+  "schema_version": 1,
+  "repo_id": "visual-diff-tool",
+  "display_name": "visual-diff-tool",
+  "kind": "app",
+  "sequence": 8,
+  "created_at": "2026-11-08T21:55:49.127325+00:00",
+  "source_branch": "main",
+  "source_from_commit": "c735d48a5b825e04398812dede20560bccc8c896",
+  "source_to_commit": "4c8c561ab7d69b49c422b899181e2f5790b24801",
+  "patch_size": 20397,
+  "patch_sha256": "3028a3d73e3bfd9ff303edac2b296bba073855a32feb7456498c8f9cb968312a",
+  "chunks": [
+    {
+      "name": "changes.patch.part-000001",
+      "size": 20397,
+      "sha256": "3028a3d73e3bfd9ff303edac2b296bba073855a32feb7456498c8f9cb968312a"
+    }
+  ],
+  "changed_paths": [
+    "README.md",
+    "backend/app/main.py",
+    "backend/app/routes/ecosystem.py",
+    "docs/claude.md",
+    "tests/test_ecosystem_api.py"
+  ],
+  "added_files": [
+    {
+      "path": "README.md",
+      "size": 11147,
+      "sha256": "49e610922ccccaa02ebe2727d6ba7bf3641b581891cb553439b517c2977ee619"
+    },
+    {
+      "path": "backend/app/main.py",
+      "size": 3331,
+      "sha256": "f1ae21a4589729d10f737d9e0d99cfb0172363f581e2597aa1864f6a00ef5e27"
+    },
+    {
+      "path": "backend/app/routes/ecosystem.py",
+      "size": 6462,
+      "sha256": "acc64187640050f5d1b3332c2b6460420b68291b268248cd6818edefec774325"
+    },
+    {
+      "path": "docs/claude.md",
+      "size": 55646,
+      "sha256": "29a6ec590d03b74784fa1efb09a61435c0c130d49fe13b3ef0113f0c154c4ed8"
+    },
+    {
+      "path": "tests/test_ecosystem_api.py",
+      "size": 5731,
+      "sha256": "b2e69719a5f5b2417b470c8393e543f9a78f009476ae163f697af1a39dfa24f9"
+    }
+  ],
+  "deleted_files": [],
+  "target_files": [
+    {
+      "path": ".gitignore",
+      "blob": "929be67349f160cfcf03bd5a4e74723614828188",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "AGENTS.md",
+      "blob": "f9f4d20a4fbbe40441208a592d38a756dacf292f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "README.md",
+      "blob": "8fcd23dae957a1754dba8a5dc8f76b6b9351709c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/.visual-diff-settings.json",
+      "blob": "e42fb977174d999851418c5adcfd3da27a00dc3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/README.md",
+      "blob": "141ce3fc18de7eee45e63883e8b9ae8b1f32b09b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "blob": "689977fff15b426b820d3e81bb529dde3b09f93a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/alignment.py",
+      "blob": "9f5f7f16967bbdcad64c32bf3704fa112e4b8842",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/attachments.py",
+      "blob": "dacf226ae36bb6a4832a2103b1b08ae8620057f7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/cad_views.py",
+      "blob": "bf8c53caa60f564ccae6ea4184ff0cdf14500291",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/diff_pipeline.py",
+      "blob": "64fed87e03dc599479bf2b38e61b6c1bda571d1f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/diffing.py",
+      "blob": "7ccad73811a198e0d9a2247be86435e8bc243bb5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/file_utils.py",
+      "blob": "b7c7e5fc0b953de209b804776e6dce142116f547",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/git_repo.py",
+      "blob": "5d404ae7274f5b6afffc3bce2a718a1820035f4d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/image_io.py",
+      "blob": "48ad361616305f3012135c19b4ae2ea358606cd7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/main.py",
+      "blob": "f520ff9fd4f89c99dcb43e33eb06d0895b8cbd01",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/markdown_links.py",
+      "blob": "04dd2c71c914b6d8568d2f37796b8b8ff28bb7ce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/mesh_diff.py",
+      "blob": "da0129862e7a4c91485fdfaaedc6e2c1a870b22f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/mesh_jobs.py",
+      "blob": "d883dbc6ffc8644d1f2f4200dc3e8a5f4740da5a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/models.py",
+      "blob": "3329b0393cb557c42d5b9251af9d95a6be2857f1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/raster_cache.py",
+      "blob": "4240a4fff09978d6a69e2b4f6b96df350e311525",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/regions.py",
+      "blob": "87b94d847ffa4e68bd18c3ceda05c29afd8bc3a8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/result_cache.py",
+      "blob": "ed6823ec44bd7c5b9043ca79cd849483a6869605",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/routes/__init__.py",
+      "blob": "df5b40ebb815eef3ec176d48efc66ea374a04937",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/routes/ecosystem.py",
+      "blob": "7ac21bf878855771e691e83bc5a090a324879799",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/routes/git.py",
+      "blob": "519aba1b5287ba528ee7ee1f0a4d762669304192",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/routes/images.py",
+      "blob": "34ce724f06781a15edc475088721a29d2aafcabc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/routes/settings.py",
+      "blob": "4b4450c65cddc228bda4ec950ddd7c8bd5935036",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/routes/three_d.py",
+      "blob": "fe76f8dd90e9070ee6231c1e4eca4723058196d0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/settings_store.py",
+      "blob": "547e0f42f88862af2f5737a712361917387a6251",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/step_mesh.py",
+      "blob": "c8b9a1e68193eea84cb7d257da065e000525b28c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/app/text_diff.py",
+      "blob": "3769062017afcb126f45c057995b8bcbfbeef2c4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "backend/run.py",
+      "blob": "44e4f2ca1223e6944954aa394d324dca981eecd5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "claude.md",
+      "blob": "86afc0e1b48326b01b6132cf3b3819f453ea830f",
+      "mode": "120000",
+      "type": "blob"
+    },
+    {
+      "path": "docs/3d_cad_diff_specification.md",
+      "blob": "9d28f7fc9d6447e9431912aacba224bd9a1f1cbe",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/claude.md",
+      "blob": "10bdf6a2e60daab00833d2c5aa9a629c7b2e0bbd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/git_3d_diff_pipeline.excalidraw",
+      "blob": "6f03a784e97912c021ceb3d5c2277e0a9ba77561",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/git_diff_bottleneck.excalidraw",
+      "blob": "45bf2ad36782b92f17244c1cbf07b79cab294c60",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/obsidian_link_resolution.excalidraw",
+      "blob": "0f1318ec1cd4d4e1379bdfe3be4a924b6c377d99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/obsidian_link_resolution.md",
+      "blob": "a9a18dd47a330edb1d11cb435ada75f38e967edc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/server_settings_management.excalidraw",
+      "blob": "ed2ced90adaa153771b3243e295076dac5398aa2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/server_settings_management.md",
+      "blob": "0bf5c8aa90fd90bc749371119988efd36ba285bb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/smart_text_diff.excalidraw",
+      "blob": "12109ec2bd51fed04eaa997013a18ecd8c41668a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/specification.md",
+      "blob": "619cb5c93b4d70401d44b73c8f5b356b02cc2a9f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/text_diff_line_numbers.excalidraw",
+      "blob": "32c07a24914a201e83940d67d88ac3a28f488525",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/text_diff_overlay_and_colors.excalidraw",
+      "blob": "646499e9451c75e01d917106067afa3502354062",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_measure_annotation.excalidraw",
+      "blob": "1e0994ce311f7ce285a6df37e8a3f035fc4f2bc4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_parallel_acceleration.excalidraw",
+      "blob": "97222e357df9c7af270b847eb916a60d0581eec7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_pipeline.excalidraw",
+      "blob": "ad2e883bd3dd695bd7085b997fb033b9ff452a44",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/three_diff_section_and_smart_dimension.excalidraw",
+      "blob": "2e0723657dba8432d00ebacc8fcf94fef451431e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/.nvmrc",
+      "blob": "db49bb14d78e76cc5ebbf481960bced880636a24",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/ThreeDiffViewer-B3mKdo9F.js",
+      "blob": "b9d16825fa54cae9e4229c718c23326b0c723fab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/ThreeDiffViewer-DC4bDmCv.css",
+      "blob": "afa92a667525afd713cb3cc5065d87eda3a4227e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-Bdem7Sz3.css",
+      "blob": "5f5e072ef54666608796afc200c3d1fea7fe54f2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/index-DMW_5OrB.js",
+      "blob": "4d3c5d25b933b898ddf1f35f2ed1dedc1a540df3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/renderCadView-B0-f00YQ.js",
+      "blob": "60a96a16a468e1e17d9309baa3bb6b5f57c4947f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/assets/sectionPlane-C21fgTdK.js",
+      "blob": "ac764e8a025c3338237d68699f101d0cf2e2b4e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/favicon.svg",
+      "blob": "7c60e47b70e107bad61af3715b0b433de297a46d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "blob": "4fc5d175a9db4c1d5d9e2c2bb8b176fc1273bb09",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/index.html",
+      "blob": "e4ed65bc5cd03d3d65896abdc431e865bffad1c8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "blob": "e264030350a6b1d3415c1d725063d7f2247b7951",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/package.json",
+      "blob": "94859597c583944c62f08ee6b470f7577f9c23a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/public/favicon.svg",
+      "blob": "7c60e47b70e107bad61af3715b0b433de297a46d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/api-guide/ApiGuideApp.jsx",
+      "blob": "e171ba4bb105d673017a3eb34d083d55b347f533",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/app/App.jsx",
+      "blob": "53fb08c1c1eacbd8904d8946f4b717243401a3bd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/cad-view/cadViewDiff.js",
+      "blob": "bb3684b71de71c9ff8c7af2a35517f1a1ed18fac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/cad-view/cadViewModel.js",
+      "blob": "7c73d23afbccec6300d265708b1c92085ca21366",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/cad-view/renderCadView.js",
+      "blob": "54ad6bb32af2974e60e4a01d1360d3af2cdf0e22",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/AppHeader.jsx",
+      "blob": "24bc24c55446f357585633e1c0fea064bc4cc921",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/DiffInspector.jsx",
+      "blob": "48b28b35668464327c90fc6da313a3802e320ee5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ErrorBoundary.jsx",
+      "blob": "303dab0d6173f298a8de7fa58ba086d60d85fda8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ImagePane.jsx",
+      "blob": "356725ea1073ba3711154f627022f9bca7b1d758",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/SettingsMenu.jsx",
+      "blob": "e1fe66b95c6ff83978d8e55d6b00889df195257c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ShortcutHelp.jsx",
+      "blob": "5ad90afbb6a74c15deb16ab7bfeb14f6bedee045",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/SourceCard.jsx",
+      "blob": "f82ed55d14a6ecbb9ab0d58e3c4741e031b61cd6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/components/ViewerToolbar.jsx",
+      "blob": "f3be08983d887086ccbf50dd5b7c2c1768f50489",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/git/GitSidebar.jsx",
+      "blob": "bf6a2506266be8b4e17c1b5ffded61022103a144",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/git/TextDiffView.jsx",
+      "blob": "49ae2edec72b633d0f1632bce5f4b68a8a6ea9ff",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/git/gitLabels.js",
+      "blob": "50dc623c3553971903bec732e87b64ec0f33ea99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/git/useGitTextEditor.js",
+      "blob": "d31faf414fec61c8f4224159f43a42703f09d13e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/anchorRegion.js",
+      "blob": "0b44c059aaedea4b31a09d50021a5043d15953ab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/api.js",
+      "blob": "62be1a6c69e3c01bfe86ef96db6801da08d53bab",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/errors.js",
+      "blob": "c14159e7785d095ad65672e3cd264fa193729044",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/files.js",
+      "blob": "13488c7a0c3b5723674f017bce54b56a6ee3f997",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/location.js",
+      "blob": "3692a129bfefbd12c41d3ae756ce662861e093c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/memoStore.js",
+      "blob": "e37cef9139711e30ef8e180ec86a9644d8e91fae",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/storage.js",
+      "blob": "6af7059e65136442aa5438e59aa2487f7d4e735c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/lib/util.js",
+      "blob": "abc1652c66a9b82090c8fd6c18591034efc561d0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/main.jsx",
+      "blob": "b98c5abd3205ec87f51d732821b005b27f7009e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/memo/MemoDiffApp.jsx",
+      "blob": "bdf68e42475642e9da870e29fc99e3bc5b74ac66",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/memo/MemoSidebar.jsx",
+      "blob": "8e01524b82244c8f16eb2916e58cec41fdb8e229",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/memo/MemoStageItems.jsx",
+      "blob": "c05d30dcd154b2b25dea875ac976cbaa1dc355be",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/memo/memoCanvas.js",
+      "blob": "5f9e1998d5e9be269611325b4f0a06a644c262a3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/memo/memoModel.js",
+      "blob": "b45882303344667c899ebe45d56ba7f988256410",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/report/ReportPreviewPage.jsx",
+      "blob": "b5fc0279da75a864d89b719eddbb42deffce7642",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/report/reportEntries.js",
+      "blob": "801c45300572383c10e162d5e91989ea1467dfe4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/report/reportGeometry.js",
+      "blob": "873342612f67026335f53b083868f4f0722bb0ae",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/report/standaloneReport.js",
+      "blob": "52ab4a856f5819d846925ab646eb6d413feacd0d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/styles.css",
+      "blob": "66027a588d4f0b4d099668d65588f8034d0bfe52",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/theme.css",
+      "blob": "b7dc950124790bf9912e5527bf5b833d33baf8d7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/MeasureAnnotationLayer.jsx",
+      "blob": "b50fae92cc08bfa6a1f1616f0f96061b9b7cdeca",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/ThreeDiffViewer.jsx",
+      "blob": "b11ce2a500834312cc016e48eaf7e9a95727277a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/materials.js",
+      "blob": "8907b14715bf86ed4f9d54cd7192f74ebd089a9b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/measureUtils.js",
+      "blob": "266cde3812fa5d555c4e10ea35514b14b36368c1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/sectionPlane.js",
+      "blob": "eea72179d53ae9ea6d00dc06b990f2e38739a9fc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/three-diff.css",
+      "blob": "f71783f485daa6872e27df2a4b3b0ae7701d81dd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/src/three-diff/vdm1.js",
+      "blob": "193e6c38148be2ddd6404020e2f77d14a5c30a12",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/cad_view.test.js",
+      "blob": "694a34b7aaff0d4d1f0f9d93d91782407d734675",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/errors.test.js",
+      "blob": "85fe9bbaf00aa13c2e517087772be783db9fe825",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/jsx_runtime.test.js",
+      "blob": "9367ed56b4f378afd54ed85604370274a18fdd81",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/lib.test.js",
+      "blob": "83e9b364a653fa7ea5a2a098218e7adf866b07d3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/measure_utils.test.js",
+      "blob": "4cc46ac7131e5093f8a02bacf0b87811ef404088",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/memo_model.test.js",
+      "blob": "c3090c4f9d11a2899e5970a662f63064dd1522af",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/report.test.js",
+      "blob": "a66895ed361c58bacbeb9720a9748d9270241c40",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "frontend/test/section_plane.test.js",
+      "blob": "ec77ff774cbbefc631afb394f403e0a794ed24e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "requirements-3d.txt",
+      "blob": "c05bfff2980d06a75e304a03e72cfe5287fe65b2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "requirements.txt",
+      "blob": "c192afeb2e8aebbac3c284c9f9eddea25118c1dc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bathtub_curve_a.png",
+      "blob": "638a0f3517ef3542570732a28e7fa2c99650fdd6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bathtub_curve_b.png",
+      "blob": "377f63e9cb7fba568edfb3d1749cfc5db2db25b5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bolt_a.png",
+      "blob": "09d5cdc09adc82e3b1c289c627979da6d99dd4c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bolt_b.png",
+      "blob": "de76a4ce710dc10be4cffcd7d401dd4e5384af30",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bom_a.png",
+      "blob": "6b10114d03157d34ea3587a9c5ebe8896c470cd5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bom_b.png",
+      "blob": "2626e2d28420b54c5eb54a44b349f5b979f43c8f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bracket_a.png",
+      "blob": "273d39a0be03115421c34697cf1994ddca177158",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/bracket_b.png",
+      "blob": "3de409202e9290ff42348659fc1aedfb6f2fdca6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/ecn_a.png",
+      "blob": "ef378931f91af2cdaeaf5e82aa072a04eece3376",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/ecn_b.png",
+      "blob": "6c0d06d2a0851e86d9ae89bcb0f20074d3b81442",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/factory_layout_a.png",
+      "blob": "d205fe034c0696eddcbec08aa0d81b973adbb44d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/factory_layout_b.png",
+      "blob": "2104468131914131971f370b86f37ca6bfe329b4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/fft_spectrum_a.png",
+      "blob": "51d0d95019280715423fa37be16bc9a928fe1f9d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/fft_spectrum_b.png",
+      "blob": "1614926f0fd3cf6afcbd949efc8c8322272ddd38",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/flange_a.png",
+      "blob": "4d047689bc53b287e03e08c8395e9e68181c6b98",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/flange_b.png",
+      "blob": "cb223a16229176624eda772c3a85df4ffffeeb0f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/gear_a.png",
+      "blob": "bbf5875cd09b1c499bf59c64a174db8e643abde7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/gear_b.png",
+      "blob": "6aa4696eaa06a9ffc41b29d05d753731aab57535",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/inspection_certificate_a.png",
+      "blob": "46989e9ca804961cdefac3b659e8ff6e6b08cab2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/inspection_certificate_b.png",
+      "blob": "370d634cc8fdab9766339824e537877b167f678f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/pcb_a.png",
+      "blob": "7b8861ffa972dbebbb24b03ed4543ba7d2513c55",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/pcb_b.png",
+      "blob": "3ce09cf9665c66431cf5b94f3bbd1155177d077f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/shaft_a.png",
+      "blob": "2f2914208bbfe263d4134c9f222dc71f5d93b20f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/shaft_b.png",
+      "blob": "bd7e5b4d5970dca5ee35caf67a584595a78e4c0c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/added_boss_a.step",
+      "blob": "01c02de6dfd46ae231ca40135e11d3a7e193d81b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/added_boss_b.step",
+      "blob": "65c74947cf88f4b295853ddbdf820e668c1077a9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/dimension_a.step",
+      "blob": "a3edd1c87020ba2691e7acda02794ae3486dba8e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/dimension_b.step",
+      "blob": "5c7a49c130eb5f3edea8ed873904faf30100adce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/hole_position_a.step",
+      "blob": "7352fff4c669bd8e0978cd6c4478ac668cabcb2a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/hole_position_b.step",
+      "blob": "d8959ee9f8a861907228ad39552a31b05861b170",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_a.step",
+      "blob": "b7c54a4a45fc5c1936911ae6132f3ead5cd7dbc4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_b.step",
+      "blob": "59b4543bec5b7b269d6e0c29dac53401e6ff2651",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_diff_a.step",
+      "blob": "d26e2c93f10cbc610b3c5c92799e0a5dad10f178",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/moved_rotated_diff_b.step",
+      "blob": "e679f98bb98aac73e210e81339c7cb835b740d82",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/unit_inch_a.step",
+      "blob": "c7c166dd6f1ec49f3918ebfeb7f0e9fa02ab2dc9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/step/unit_inch_b.step",
+      "blob": "c684d7299b0f932f9eddf24a005ff97a83c864e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/stress_strain_a.png",
+      "blob": "621a4bb0ef68e6b62c87adc98f132805b50a3302",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/stress_strain_b.png",
+      "blob": "f1f654ec8d2c56bd23b4cb675cced1d34f307b3e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/thermal_heatmap_a.png",
+      "blob": "9fae3275ed6da877d7a910f3bd0db9d223336e38",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/thermal_heatmap_b.png",
+      "blob": "1928e7f55bd5e7e9263cb57667f335a29f94dd3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/workflow_flowchart_a.png",
+      "blob": "50f11ca497495fbc6a19eb94c400ba2676bf150a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "samples/workflow_flowchart_b.png",
+      "blob": "7759d14cc6499afa38d85131c3097789ff4f2cb6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "scripts/generate_samples.py",
+      "blob": "7a4a13958e142189a0960953e4665a1107fe8d04",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "scripts/generate_step_samples.py",
+      "blob": "d5f340bf6eee9920bac094c63868b2b5c7ee159c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "scripts/verify_samples.py",
+      "blob": "c5f84df73d08357bea9a7e7e4fa92ee47876ce4b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "start_mac.sh",
+      "blob": "d39f88adadc5a5710bbaa01637995b6c74d806b1",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "start_windows.bat",
+      "blob": "1bf6d4cdf4afc6402b65d4e9f84437b042e0cfa4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_alignment_candidates.py",
+      "blob": "a303bb39461de9745b980e8dd96dd3a3da5058e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_api_safety.py",
+      "blob": "d9d679971c7e4d5ab555990177c6149e2ddacce1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_backend_pipeline.py",
+      "blob": "d7b47b2f72b1c0cee16f2ee777086c775dc4654a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_cad_views.py",
+      "blob": "151caa4291130507fdd62acba389bece37e4d901",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_ecosystem_api.py",
+      "blob": "22574d241d87502e1789186d4efc81187ccee371",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_git_3d_diff.py",
+      "blob": "60ffeacd804daff0e57daf79d897b91e135de7e5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_git_3d_single.py",
+      "blob": "a789cc8dbd33d603e4944bea0e28f05e9d168feb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_git_commit.py",
+      "blob": "872e08532bf7cfa07ea4698d5ac63efd2a3e436e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_git_text_editing.py",
+      "blob": "510a0c70e5be709b74f74103e56ca0615c986e10",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_markdown_cad_links.py",
+      "blob": "1d409cd3a2c4d00afce0789a25304f4582ca1856",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_alignment.py",
+      "blob": "27b131dc313115009568bae5f8a8cdde0b33a290",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_api.py",
+      "blob": "a94127bdf71516672c875aaa43d5db79ede65985",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_distance.py",
+      "blob": "bbab1cd0ce6410d3e0bdbbbd243d633f4c150d7c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_mesh_parallel.py",
+      "blob": "cf0b40b5dede92e023e5458f36f6a010da41e7bc",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_obsidian_linked_images_diff.py",
+      "blob": "c574ef38fa2b7e4de363b98a53bcd1557b5b48ce",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_performance_and_parallel.py",
+      "blob": "f6ddfb235fbaa2089fcdb1d1f68942c7e2e8fa7b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_sample_generator.py",
+      "blob": "bf6cc154c5d17dc2a58266ab34a20557bdfcb1aa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_server_settings.py",
+      "blob": "96dd7df01675f4670914d32cb7ff052aeaf3fd6f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_smart_text_diff.py",
+      "blob": "19e9fed9a32f8bd6655fbf61ad2a5b0a3fcf229f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_step_mesh.py",
+      "blob": "eb290100d22d4e3c3a428e5b3eb0ff515a5c153b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_text_diff_line_numbers.py",
+      "blob": "da49b71341a0e759f8474e9d3a767046caaad44b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_text_diff_view_style.py",
+      "blob": "5d24ef8d4bdb3c05ba1f08cf68df5e9b054bb65c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_webp_support.py",
+      "blob": "49936dc43026331a71ffe8e44450504a62955c8d",
+      "mode": "100644",
+      "type": "blob"
+    }
+  ],
+  "signature": "d4aa3926a88466daa84f4ea6f3a443faab6ffa17ddcccf468e1ff52627ab6c39"
+}

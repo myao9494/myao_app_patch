@@ -1,0 +1,331 @@
+diff --git a/README.md b/README.md
+index 751b99d702f54b8c36b20109c26e0da65606afc4..8fcd23dae957a1754dba8a5dc8f76b6b9351709c 100644
+--- a/README.md
++++ b/README.md
+@@ -56,6 +56,7 @@ Request/response examples for external apps are available in the app at `/api-gu
+ - Git diff: `POST /api/git/images`, `POST /api/git/files`, `POST /api/git/markdown` / `GET /api/git/markdown?path=...`, `POST /api/git/item`, `POST /api/git/text-diff`, `POST /api/git/save-text`, `POST /api/git/revert-line`, `POST /api/git/commit`, `POST /api/git/diff`, `POST /api/git/cad-view/jobs`, `POST /api/git/cad-view/model`, `POST /api/git/cad-view/diff`
+ - 3D diff: `GET /api/3d/status`, `GET /api/3d/samples`, `POST /api/3d/samples/load`, `POST /api/3d/jobs`, `GET /api/3d/jobs/{job_id}`, `GET /api/3d/jobs/{job_id}/mesh/{side}`, `DELETE /api/3d/jobs/{job_id}`, `POST /api/git/3d/jobs`
+ - Settings and reports: `GET /api/settings/obsidian`, `PUT /api/settings/obsidian`, `POST /api/reports/save`
++- Ecosystem (for the opencode harness and the other apps): `GET /api/ecosystem` (app manifest: version, deep links, operations), `POST /api/ecosystem/diff` (compare two local files by path; returns numbers and 3x3 positions only, no images; does not open the browser unless `open_browser` is true)
+ 
+ `/api/diff` normally returns a bounded in-memory `result_id` in addition to the encoded result images. The UI uses that ID with `/api/rediff` when only the diff threshold changes, so threshold tuning reuses the aligned images instead of converting and aligning the files again. Extremely large pairs that cannot fit in the cache return `null` for this optional field.
+ 
+diff --git a/backend/app/main.py b/backend/app/main.py
+index bc9160512732c133aee701c09bad450c1b43af00..f520ff9fd4f89c99dcb43e33eb06d0895b8cbd01 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -5,6 +5,7 @@ Visual Diff Tool APIサーバーのエントリポイント。
+   - routes/git.py      : Git差分（Obsidian Markdown起点を含む）
+   - routes/three_d.py  : 3D CAD差分（STEP比較・非同期ジョブ）
+   - routes/settings.py : サーバー設定とHTMLレポート保存
++  - routes/ecosystem.py: エコシステム API (ハーネスやほかのアプリから使う共通の入口。パスで比べて数値だけ返す)
+ - 起動は backend/run.py（127.0.0.1:8078）
+ """
+ 
+@@ -17,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
+ from fastapi.responses import FileResponse
+ from fastapi.staticfiles import StaticFiles
+ 
+-from .routes import git, images, settings, three_d
++from .routes import ecosystem, git, images, settings, three_d
+ 
+ DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+ ASSETS_DIR = DIST_DIR / "assets"
+@@ -44,7 +45,7 @@ def health() -> dict[str, str]:
+     return {"status": "ok"}
+ 
+ 
+-for module in (images, git, three_d, settings):
++for module in (images, git, three_d, settings, ecosystem):
+     app.include_router(module.router)
+ 
+ 
+diff --git a/backend/app/routes/ecosystem.py b/backend/app/routes/ecosystem.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..7ac21bf878855771e691e83bc5a090a324879799
+--- /dev/null
++++ b/backend/app/routes/ecosystem.py
+@@ -0,0 +1,146 @@
++"""
++エコシステム API (ハーネスの LLM や、ほかの自作アプリから使う共通の入口)。
++共通の形は、ハーネス (opencode) の docs/apps.md の「エコシステム API 1」。
++
++- GET  /api/ecosystem       : アプリの名乗り。版、人が開く深いリンクのひな形、使ってよい操作の一覧
++- POST /api/ecosystem/diff  : ローカルのファイルのパスを 2 つ受け取り、画像の差分を「数値と位置の言葉」で返す
++    入力: {"path_a", "path_b", "page_a"=0, "page_b"=0, "category"="汎用", "threshold"=0.1,
++           "max_rects"=10, "open_browser"=false}
++    出力: result_id、画面の URL、大きさ、位置合わせの結果、差分の画素数と割合、
++          差分の領域 (大きい順。位置は 3x3 の「上左」〜「下右」、面積の割合つき)、変換の注意
++    画像の中身 (base64) は返さない。画像を見られない LLM が、トークンを使わずに差分を理解するため。
++    ブラウザは、open_browser が true で、localhost からの呼び出しのときだけ開く (既存の /api/diff と同じ決まり)。
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++
++from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
++from pydantic import BaseModel, Field
++
++from ..diff_pipeline import build_diff_response, schedule_open_result
++from ..image_io import MAX_UPLOAD_BYTES
++
++router = APIRouter()
++
++ECOSYSTEM_VERSION = 1
++APP_ID = "diff"
++APP_TITLE = "Visual Diff Tool (画像・図面・3D の差分)"
++APP_VERSION = "0.1.0"
++
++OPERATIONS = [
++    {"id": "diff.files", "method": "POST", "path": "/api/ecosystem/diff", "effect": "read"},
++    {"id": "diff.result", "method": "GET", "path": "/api/diff/{result_id}", "effect": "read"},
++    # Obsidian のノートを起点にした Git の変更一覧 (ノート・埋め込みの図・画像) と、人が開く画面の diff_url。読み取りだけ
++    {"id": "git.markdown", "method": "GET", "path": "/api/git/markdown", "effect": "read"},
++]
++# コミット・書き戻し (/api/git/commit・save-text・revert-line) は、外から使わせないので載せない
++LINKS = {"home": "/", "result": "/?result_id={result_id}", "markdown": "/?markdown_path={path}"}
++
++
++class EcosystemDiffRequest(BaseModel):
++    path_a: str = Field(min_length=1)
++    path_b: str = Field(min_length=1)
++    page_a: int = Field(0, ge=0)
++    page_b: int = Field(0, ge=0)
++    category: str = "汎用"
++    threshold: float = Field(0.1, ge=0.0, le=1.0)
++    max_rects: int = Field(10, ge=0, le=100)
++    open_browser: bool = False
++
++
++def _base_url(request: Request) -> str:
++    return str(request.base_url).rstrip("/")
++
++
++@router.get("/api/ecosystem")
++def ecosystem_manifest(request: Request) -> dict:
++    """アプリの名乗り (エコシステム API 1 の共通の形)。"""
++    return {
++        "ecosystem": ECOSYSTEM_VERSION,
++        "app": APP_ID,
++        "title": APP_TITLE,
++        "version": APP_VERSION,
++        "base_url": _base_url(request),
++        "links": LINKS,
++        "operations": OPERATIONS,
++    }
++
++
++def _read_local_file(raw: str) -> tuple[str, bytes]:
++    """ローカルのファイルを読む。無い・フォルダ・大きすぎるものは拒否する。"""
++    path = Path(raw).expanduser()
++    if not path.exists():
++        raise HTTPException(status_code=404, detail=f"ファイルがありません: {raw}")
++    if not path.is_file():
++        raise HTTPException(status_code=400, detail=f"ファイルではありません: {raw}")
++    size = path.stat().st_size
++    if size > MAX_UPLOAD_BYTES:
++        raise HTTPException(status_code=413, detail=f"ファイルが大きすぎます。上限は1ファイル {MAX_UPLOAD_BYTES / (1024 * 1024):.0f} MB です")
++    return path.name, path.read_bytes()
++
++
++def position_label(x: int, y: int, width: int, height: int, image_width: int, image_height: int) -> str:
++    """領域の中心が、画像を 3x3 に分けたどこにあるかを「上左」〜「下右」で返す。"""
++    cx = (x + width / 2) / max(1, image_width)
++    cy = (y + height / 2) / max(1, image_height)
++    row = "上" if cy < 1 / 3 else "中" if cy < 2 / 3 else "下"
++    col = "左" if cx < 1 / 3 else "中" if cx < 2 / 3 else "右"
++    return row + col
++
++
++@router.post("/api/ecosystem/diff")
++def ecosystem_diff(payload: EcosystemDiffRequest, request: Request, background_tasks: BackgroundTasks) -> dict:
++    """2 つのローカルのファイルの差分を、画像なしの要約で返す。"""
++    name_a, content_a = _read_local_file(payload.path_a)
++    name_b, content_b = _read_local_file(payload.path_b)
++    response = build_diff_response(
++        filename_a=name_a,
++        content_a=content_a,
++        filename_b=name_b,
++        content_b=content_b,
++        category=payload.category,
++        diff_threshold=payload.threshold,
++        page_a=payload.page_a,
++        page_b=payload.page_b,
++    )
++    if payload.open_browser:
++        schedule_open_result(background_tasks, request, response.result_id)
++    total = max(1, response.width * response.height)
++    rects = sorted(response.diff_rects, key=lambda r: r.area, reverse=True)
++    alignment = response.alignment
++    return {
++        "result_id": response.result_id,
++        "ui_url": f"{_base_url(request)}/?result_id={response.result_id}" if response.result_id else None,
++        "filename_a": name_a,
++        "filename_b": name_b,
++        "page_a": response.page_a,
++        "page_b": response.page_b,
++        "width": response.width,
++        "height": response.height,
++        "alignment": {
++            "success": alignment.success,
++            "method": alignment.method,
++            "warning": alignment.warning,
++            "matches": alignment.matches,
++            "inliers": alignment.inliers,
++        },
++        "diff_pixels": response.diff_pixels,
++        "diff_ratio": response.diff_ratio,
++        "threshold": response.diff_threshold,
++        "rect_count": len(rects),
++        "rects": [
++            {
++                "x": r.x,
++                "y": r.y,
++                "width": r.width,
++                "height": r.height,
++                "area": r.area,
++                "area_ratio": round(r.area / total, 6),
++                "position": position_label(r.x, r.y, r.width, r.height, response.width, response.height),
++            }
++            for r in rects[: payload.max_rects]
++        ],
++        "warnings": list(response.conversion_warnings),
++    }
+diff --git a/docs/claude.md b/docs/claude.md
+index e98d6e75473b6aaa6c2fdb7f8666a9287d3031b3..10bdf6a2e60daab00833d2c5aa9a629c7b2e0bbd 100644
+--- a/docs/claude.md
++++ b/docs/claude.md
+@@ -62,7 +62,7 @@
+   - **ポート**: `8078` (ローカルサーバー、`backend/run.py`)
+   - **依存管理**: `requirements.txt` にて3D差分関連（`requirements-3d.txt`）も参照しており、`pip install -r requirements.txt` の1回で全機能の環境構築が可能。
+   - `main.py`: アプリ生成、CORS、各 APIRouter の登録、`frontend/dist` の配信（dist直下のファイルのみ返す）。
+-  - `routes/`: エンドポイント。`images.py`（ファイル差分）、`git.py`（Git差分・テキスト編集・コミット）、`three_d.py`（3D差分ジョブ）、`settings.py`（サーバー設定・レポート保存）。
++  - `routes/`: エンドポイント。`images.py`（ファイル差分）、`git.py`（Git差分・テキスト編集・コミット）、`three_d.py`（3D差分ジョブ）、`settings.py`（サーバー設定・レポート保存）、`ecosystem.py`（エコシステム API。ハーネスやほかのアプリ向けの共通の入口）。
+   - `diff_pipeline.py`: 変換 → 位置合わせ → 差分 → PNGエンコードの共通処理（`/api/diff` と `/api/git/diff` で共用）、アップロード読み込み。
+   - `alignment.py`: 位置合わせ。候補は「補正なし → 平行移動（インクの相互相関）→ 相似変換 → ホモグラフィ（SIFT / AKAZE / ORB と ECC）」の順に単純で、実際に画素を重ねて比べ、複雑な補正は不一致画素が15%以上減るときだけ採用する。範囲指定があれば、その範囲の一致だけで選ぶ。
+   - `diffing.py`: YIQベースのピクセル差分、細線を維持するマスク生成、オーバーレイ、矩形抽出。
+@@ -91,6 +91,8 @@
+ - `POST /api/diff`: ファイル変換、ページ選択、位置合わせ、初回差分生成を行う。レスポンスには補正済み画像と、キャッシュ可能な場合の `result_id` を含める。
+ - `POST /api/rediff`: `result_id` と新しいしきい値から差分オーバーレイとマスクだけを再生成する。キャッシュが利用できない場合は `image_a` と `image_b_aligned` を直接送るフォールバックも受け付ける。
+ - `GET /api/diff/{result_id}`: キャッシュ済みの比較結果を返す（外部アプリが `/?result_id=...` でWeb画面を開くときに使う）。localhost から `/api/diff` を呼んだ場合は、この形式のURLをブラウザで自動的に開く（`VISUAL_DIFF_OPEN_BROWSER=0` で無効）。
++- `GET /api/ecosystem`: エコシステム API 1 の名乗り（`ecosystem`・`app: "diff"`・`title`・`version`・`base_url`・人が開く深いリンク `links`・使ってよい操作 `operations`）。`links.markdown`（`/?markdown_path={path}`。ノートの Git の変更を見る画面）と、`operations` の `git.markdown`（`GET /api/git/markdown`。読み取り）を含む。コミット・書き戻しは載せない。ハーネス（opencode）や、ほかの自作アプリが、起動しているか・何ができるかを知るために使う。共通の形はハーネスの `docs/apps.md`。
++- `POST /api/ecosystem/diff`: ローカルのファイルのパス 2 つ（`path_a`・`path_b`。任意で `page_a`・`page_b`・`category`・`threshold`・`max_rects`・`open_browser`）を `/api/diff` と同じ処理で比べ、**画像を含まない要約**を返す（`result_id`・`ui_url`・大きさ・位置合わせ・`diff_pixels`・`diff_ratio`・差分の領域を大きい順に `max_rects` 件まで。各領域は 3x3 の位置 `上左`〜`下右` と面積の割合つき）。画像を見られない LLM が、少ないトークンで差分を理解するためのもの。ブラウザは既定で開かない（`open_browser: true` かつ localhost のときだけ）。無いパス 404、フォルダ 400、上限超え 413。実装は `routes/ecosystem.py`。
+ - `POST /api/git/images`: Git管理フォルダ配下の変更画像を列挙する。
+ - `POST /api/git/files`: Git管理フォルダ配下の変更画像・設定対象テキストを列挙する。
+ - `POST /api/git/markdown` / `GET /api/git/markdown`: Obsidianの現在ノートを受け取り、Markdown起点の変更一覧とDIFF画面用の `diff_url` を返す。
+diff --git a/tests/test_ecosystem_api.py b/tests/test_ecosystem_api.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..22574d241d87502e1789186d4efc81187ccee371
+--- /dev/null
++++ b/tests/test_ecosystem_api.py
+@@ -0,0 +1,109 @@
++"""
++エコシステム API (ハーネスや他のアプリから使う、共通の入口) の回帰テスト。
++- GET /api/ecosystem: アプリの名乗り (共通の形。版、深いリンク、使ってよい操作)
++- POST /api/ecosystem/diff: ローカルのファイルのパスを 2 つ受け取り、差分を「数値と位置の言葉」だけで返す
++  (画像を見られない LLM 向け。base64 の画像は返さない。既定ではブラウザを開かない)
++"""
++
++import tempfile
++import unittest
++from pathlib import Path
++from unittest.mock import patch
++
++from fastapi.testclient import TestClient
++
++from backend.app import diff_pipeline
++from backend.app.main import app
++
++SAMPLES = Path(__file__).resolve().parents[1] / "samples"
++
++
++class TestEcosystemManifest(unittest.TestCase):
++    def test_manifest_has_common_shape(self):
++        client = TestClient(app)
++        response = client.get("/api/ecosystem")
++        self.assertEqual(response.status_code, 200)
++        body = response.json()
++        self.assertEqual(body["ecosystem"], 1)
++        self.assertEqual(body["app"], "diff")
++        self.assertTrue(body["title"])
++        self.assertTrue(body["version"])
++        self.assertEqual(body["base_url"], "http://testserver")
++        self.assertEqual(body["links"]["result"], "/?result_id={result_id}")
++        # Obsidian のノートの Git の変更 (ノート・埋め込みの図・画像) を、人が開く画面
++        self.assertEqual(body["links"]["markdown"], "/?markdown_path={path}")
++        operations = {op["id"]: op for op in body["operations"]}
++        self.assertEqual(operations["diff.files"], {"id": "diff.files", "method": "POST", "path": "/api/ecosystem/diff", "effect": "read"})
++        self.assertEqual(operations["git.markdown"], {"id": "git.markdown", "method": "GET", "path": "/api/git/markdown", "effect": "read"})
++        self.assertNotIn("/api/git/commit", {op["path"] for op in body["operations"]}, "コミット・書き戻しは載せない")
++        for op in body["operations"]:
++            self.assertIn(op["effect"], {"read", "write", "open"})
++
++    def test_manifest_is_not_swallowed_by_spa_route(self):
++        # SPA の受け皿 (/{path:path}) より先に登録されていること
++        response = TestClient(app).get("/api/ecosystem")
++        self.assertEqual(response.headers["content-type"].split(";")[0], "application/json")
++
++
++class TestEcosystemDiff(unittest.TestCase):
++    def setUp(self):
++        self.client = TestClient(app)
++        self.a = SAMPLES / "bolt_a.png"
++        self.b = SAMPLES / "bolt_b.png"
++
++    def test_returns_numbers_and_positions_without_images(self):
++        with patch.object(diff_pipeline, "_open_browser") as opened:
++            response = self.client.post("/api/ecosystem/diff", json={"path_a": str(self.a), "path_b": str(self.b)})
++        self.assertEqual(response.status_code, 200, response.text)
++        body = response.json()
++        self.assertTrue(body["result_id"])
++        self.assertEqual(body["ui_url"], f"http://testserver/?result_id={body['result_id']}")
++        self.assertEqual(body["filename_a"], "bolt_a.png")
++        self.assertGreater(body["width"], 0)
++        self.assertGreater(body["diff_pixels"], 0)
++        self.assertGreater(body["diff_ratio"], 0)
++        self.assertIn("success", body["alignment"])
++        self.assertNotIn("matrix", body["alignment"])
++        self.assertGreaterEqual(body["rect_count"], len(body["rects"]))
++        for rect in body["rects"]:
++            self.assertRegex(rect["position"], r"^(上|中|下)(左|中|右)$")
++            self.assertGreater(rect["area_ratio"], 0)
++        # 画像の中身 (base64) は返さない。返すとトークンを大量に使う
++        text = response.text
++        for key in ("image_a", "overlay", "mask", '"data"'):
++            self.assertNotIn(key, text)
++        opened.assert_not_called()
++
++    def test_rects_are_largest_first_and_limited(self):
++        response = self.client.post("/api/ecosystem/diff", json={"path_a": str(self.a), "path_b": str(self.b), "max_rects": 1})
++        body = response.json()
++        self.assertLessEqual(len(body["rects"]), 1)
++        full = self.client.post("/api/ecosystem/diff", json={"path_a": str(self.a), "path_b": str(self.b)}).json()
++        areas = [r["area"] for r in full["rects"]]
++        self.assertEqual(areas, sorted(areas, reverse=True))
++
++    def test_same_file_has_no_difference(self):
++        body = self.client.post("/api/ecosystem/diff", json={"path_a": str(self.a), "path_b": str(self.a)}).json()
++        self.assertEqual(body["diff_pixels"], 0)
++        self.assertEqual(body["rects"], [])
++
++    def test_open_browser_only_when_asked(self):
++        with patch.object(diff_pipeline, "_open_browser") as opened:
++            # TestClient のホストは testserver なので、localhost 以外では開かない (既存の安全の決まり)
++            self.client.post("/api/ecosystem/diff", json={"path_a": str(self.a), "path_b": str(self.b), "open_browser": True})
++        opened.assert_not_called()
++
++    def test_rejects_missing_or_non_file_paths(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            for path_a in (str(Path(tmp) / "none.png"), tmp, ""):
++                response = self.client.post("/api/ecosystem/diff", json={"path_a": path_a, "path_b": str(self.b)})
++                self.assertIn(response.status_code, {400, 404, 422}, path_a)
++
++    def test_rejects_too_large_file(self):
++        with patch("backend.app.routes.ecosystem.MAX_UPLOAD_BYTES", 10):
++            response = self.client.post("/api/ecosystem/diff", json={"path_a": str(self.a), "path_b": str(self.b)})
++        self.assertEqual(response.status_code, 413)
++
++
++if __name__ == "__main__":
++    unittest.main()

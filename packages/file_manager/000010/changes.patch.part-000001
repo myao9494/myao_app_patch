@@ -1,0 +1,119 @@
+diff --git a/backend/app/main.py b/backend/app/main.py
+index 30503f9c2edd9e153059b40f5b51e3b3a21a4356..6be05b9d35c0ff12011abd551cc06e3f760d9dcf 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -31,7 +31,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+ from pydantic import BaseModel
+ 
+ from app.config import get_editor_preferences, save_editor_preferences, settings
+-from app.routers import clipboard, everything, files, fulltext, history, launcher, operations, terminal, viewer
++from app.routers import clipboard, ecosystem, everything, files, fulltext, history, launcher, operations, terminal, viewer
+ from app.security import OriginGuardMiddleware, cors_origin_regex
+ from app.services.paths import is_within
+ 
+@@ -99,6 +99,7 @@ app.include_router(fulltext.router, prefix="/api", tags=["fulltext"])
+ app.include_router(history.router, prefix="/api", tags=["history"])
+ app.include_router(clipboard.router, prefix="/api", tags=["clipboard"])
+ app.include_router(terminal.router, prefix="/api", tags=["terminal"])
++app.include_router(ecosystem.router, prefix="/api", tags=["ecosystem"])  # ハーネスやほかのアプリ向けの名乗り (docs/architecture.md)
+ 
+ 
+ class EditorPreferencesRequest(BaseModel):
+diff --git a/backend/app/routers/ecosystem.py b/backend/app/routers/ecosystem.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..a576c5e07d00a78d4c0f21ea5d4ed2a8e845c0bb
+--- /dev/null
++++ b/backend/app/routers/ecosystem.py
+@@ -0,0 +1,37 @@
++"""
++エコシステム API ルーター（ハーネスの LLM や、ほかの自作アプリから使う共通の入口）
++- GET /api/ecosystem: アプリの名乗り。版、人が開く深いリンクのひな形、外から使ってよい操作の一覧
++  共通の形は、ハーネス（opencode）の docs/apps.md の「エコシステム API 1」
++- operations に載せるのは、読み取りだけ（一覧・パスの情報・最近のフォルダ）。
++  OS のアプリを起動する操作（open/*・fullpath・open-path。実行ファイルを開くと実行される）、
++  削除・実行・端末は、外の LLM から使わせないので載せない
++- links は、人がブラウザで開く画面の URL のひな形（{path} は、呼ぶ側が URL エンコードして埋める）
++"""
++from fastapi import APIRouter, Request
++
++router = APIRouter()
++
++ECOSYSTEM_VERSION = 1
++APP_ID = "files"
++APP_TITLE = "File Manager（ファイルとフォルダ）"
++
++OPERATIONS = [
++    {"id": "files.list", "method": "GET", "path": "/api/files", "effect": "read"},
++    {"id": "files.path_info", "method": "GET", "path": "/api/path-info", "effect": "read"},
++    {"id": "history", "method": "GET", "path": "/api/history", "effect": "read"},
++]
++LINKS = {"home": "/", "folder": "/?path={path}"}
++
++
++@router.get("/ecosystem")
++def ecosystem_manifest(request: Request) -> dict:
++    """アプリの名乗り（エコシステム API 1 の共通の形）"""
++    return {
++        "ecosystem": ECOSYSTEM_VERSION,
++        "app": APP_ID,
++        "title": APP_TITLE,
++        "version": request.app.version,
++        "base_url": str(request.base_url).rstrip("/"),
++        "links": LINKS,
++        "operations": OPERATIONS,
++    }
+diff --git a/backend/tests/test_ecosystem.py b/backend/tests/test_ecosystem.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..a2fd0645a3bee6ea125dbecc33684d976a89591b
+--- /dev/null
++++ b/backend/tests/test_ecosystem.py
+@@ -0,0 +1,30 @@
++"""
++エコシステム API（ハーネスの LLM や、ほかの自作アプリから使う共通の入口）のテスト。
++GET /api/ecosystem: アプリの名乗り（共通の形。版、人が開く深いリンク、外から使ってよい操作）。
++OS のアプリを起動する操作（open/*・fullpath・open-path）、削除・実行・端末は載せない。
++"""
++
++
++class TestEcosystemManifest:
++    def test_common_shape(self, client):
++        response = client.get("/api/ecosystem")
++        assert response.status_code == 200
++        body = response.json()
++        assert body["ecosystem"] == 1
++        assert body["app"] == "files"
++        assert body["title"]
++        assert body["version"] == "2.0.0"
++        assert body["base_url"] == "http://testserver"
++        assert body["links"]["folder"] == "/?path={path}"
++        operations = {op["id"]: op for op in body["operations"]}
++        assert operations["files.list"] == {"id": "files.list", "method": "GET", "path": "/api/files", "effect": "read"}
++        assert operations["history"]["path"] == "/api/history"
++        assert all(op["effect"] in {"read", "write", "open"} for op in body["operations"])
++
++    def test_dangerous_operations_are_not_listed(self, client):
++        paths = {op["path"] for op in client.get("/api/ecosystem").json()["operations"]}
++        for forbidden in ("/api/delete", "/api/delete/batch", "/api/open/execute", "/api/terminal/ws", "/api/fullpath", "/api/open-path", "/api/open/default"):
++            assert forbidden not in paths
++
++    def test_is_json_not_spa(self, client):
++        assert client.get("/api/ecosystem").headers["content-type"].startswith("application/json")
+diff --git a/docs/architecture.md b/docs/architecture.md
+index a12ee30334d7087c53b635542c47529f9568083b..d6112ae851a3ad0eb0f2d5eeb0550c9df9d1cb92 100644
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -312,6 +312,14 @@ file_viewer/templates/base.htmlに準拠したアイコン配置：
+ | POST | /api/clipboard/copy | ファイルを OS クリップボードへ（Windows のみ） |
+ | WS | /api/terminal/ws?cwd= | サーバーターミナル |
+ 
++#### エコシステム API（`routers/ecosystem.py`）
++
++ハーネス（opencode）の LLM や、ほかの自作アプリが使う共通の入口。共通の形は、ハーネスの `docs/apps.md` の「エコシステム API 1」。
++
++| メソッド | パス | 説明 |
++|----------|------|------|
++| GET | /api/ecosystem | アプリの名乗り（`{ecosystem: 1, app: "files", title, version, base_url, links, operations}`）。`links.folder` は人が開く画面のひな形 `/?path={path}`。`operations` は外から使ってよい読み取りの操作（`/api/files`・`/api/path-info`・`/api/history`）だけ。OS のアプリを起動する操作（`open/*`・`fullpath`・`open-path`。実行ファイルは実行される）、削除・実行・端末は載せない |
++
+ ### 外部API（file_index_service:8080）
+ 
+ 詳細は [file_index_service](../file_index_service/README.md) を参照。
