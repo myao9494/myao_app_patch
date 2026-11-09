@@ -4,7 +4,7 @@
   "display_name": "file_manager",
   "kind": "app",
   "sequence": 11,
-  "created_at": "2026-11-09T22:17:50.098764+00:00",
+  "created_at": "2026-11-09T22:23:34.444322+00:00",
   "source_branch": "main",
   "source_from_commit": "3543ff0a2db22157574666bd1cb85d2096f55751",
   "source_to_commit": "745374973fe3dc775b377bd31b491bbef5ef8bb5",
@@ -10579,5 +10579,5 @@
       "type": "blob"
     }
   ],
-  "signature": "5a4db6924a44bb66efa03cd8c5f70e0687647d317c3c2b400786aa36d30b9aec"
+  "signature": "91acffc34cdc485d935e3795e7125a6870b6ec3e24f6c05dff4eb27d9aac4c25"
 }

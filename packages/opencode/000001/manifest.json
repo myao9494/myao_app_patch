@@ -4,7 +4,7 @@
   "display_name": "opencode",
   "kind": "app",
   "sequence": 1,
-  "created_at": "2026-11-09T22:17:50.098764+00:00",
+  "created_at": "2026-11-09T22:23:34.444322+00:00",
   "source_branch": "main",
   "source_from_commit": "4b5530b72e9f93dced74ced8e6ebc8ca6903ebb6",
   "source_to_commit": "0c8656acc0ae3e023b8d5a6c6ba92bb7b7814e67",
@@ -2666,5 +2666,5 @@
       "type": "blob"
     }
   ],
-  "signature": "da5ecb635ac6add8851e43cb3ae68f34fc31facf52ece38fd0c5002465a7cf32"
+  "signature": "3f02ae02c1d1ba3ee31ffccf8e1c84b53a1bdf5e441a6d96b1b152890a9a88b0"
 }

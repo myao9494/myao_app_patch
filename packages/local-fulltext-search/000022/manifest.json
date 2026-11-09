@@ -4,12 +4,12 @@
   "display_name": "Local-fulltext-search",
   "kind": "app",
   "sequence": 22,
-  "created_at": "2026-11-09T22:17:50.098764+00:00",
+  "created_at": "2026-11-09T22:23:34.444322+00:00",
   "source_branch": "main",
   "source_from_commit": "9ff0b14669e2ac6661940b00d7340847a4b78fb7",
-  "source_to_commit": "7a20cd198e1733e31f8c617089f6306003bd1392",
-  "patch_size": 52514299,
-  "patch_sha256": "a27310caf8d806827353d0343f9894e70ad9c5c392bd4dcd01eb7ae132138be6",
+  "source_to_commit": "de35e59065f8748e0651412fcbed0dac6389ff90",
+  "patch_size": 52517046,
+  "patch_sha256": "fe14678eb54489ae572b80bff604b472b4eae260761ff8f832042172ca41f15b",
   "chunks": [
     {
       "name": "changes.patch.part-000001",
@@ -23,8 +23,8 @@
     },
     {
       "name": "changes.patch.part-000003",
-      "size": 10571259,
-      "sha256": "1d67076a95b2665c23e92968baf34dfc4d7cb6611429cd8ed019b3165daf1958"
+      "size": 10574006,
+      "sha256": "796ecddf7802e9388aa8a3a6b4526e7dd9339293b90207f64e1679be8a02bca1"
     }
   ],
   "changed_paths": [
@@ -561,50 +561,50 @@
     },
     {
       "path": "launcher/windows/publish/folder/LocalSearchLauncher.dll",
-      "size": 190976,
-      "sha256": "1697393d6570ac68ace03b220e1af2612043f8e6579721b3945a6cba03267f31"
+      "size": 196608,
+      "sha256": "77a4e2e094489cb28735e4589b0de9cc402d796d285836c85518a45f5e2efab6"
     },
     {
       "path": "launcher/windows/publish/folder/LocalSearchLauncher.exe",
       "size": 152064,
-      "sha256": "3840b604dcbbb44df22e8284a4a7d437942352f53316d70415884aea797a6f9c"
+      "sha256": "69c7b8fa8398ab3d8c5554ef6f00ea63885789ab6f39605306ffcc456d5d9204"
     },
     {
       "path": "launcher/windows/publish/single-file/LocalSearchLauncher.exe",
-      "size": 161787447,
-      "sha256": "e095301cf2e99c957737cec954c94152b1fdc2b0620766b926c49f5d5a28e414",
+      "size": 161795639,
+      "sha256": "882a7ff99408546981f862f88f946ad8300c6885bede429eced96229bd150e9d",
       "parts": [
         {
           "size": 20971520,
-          "sha256": "3ebebcc4f385056677cefe38590a40740d6b08c2f0f67180aa2c827a5a6ebf8e"
+          "sha256": "21e319e53917b3f8701e3a5635bdf47d74a62bd98f7e1afab0c1ffe8d88a0b3f"
         },
         {
           "size": 20971520,
-          "sha256": "70d39dbfd97f4a1f403e1b14cc332e397b6d93596c38577d55be41a4f66d884b"
+          "sha256": "8a5476661dac3aca2718c05d5623ac16793dde80f5e37da9cdeb7c76de6b24df"
         },
         {
           "size": 20971520,
-          "sha256": "df98b3dd8a1a046ef027a090ff348c6d541ece1fbcf47f5382e4e589d3c32c7b"
+          "sha256": "be6151d7cd0e3d01412ae69d7b8cbe2f36f797bb0d80410a195b7bef4ae70d69"
         },
         {
           "size": 20971520,
-          "sha256": "d598d7331a0b2d607735dc31aba3a7681f26bdabe9a503d316da6b2f8ea676e5"
+          "sha256": "5d63b868e44eee236989e15c5f1681219f26fef0e9286fc50f72d60cb97614e5"
         },
         {
           "size": 20971520,
-          "sha256": "f912af84ee3dbd6856710288319b12f9278527a07fb3964abb4fd077c03ba839"
+          "sha256": "195228b4b11246c595205101769bbdf5200d3e678ff644b64726c885d08597ed"
         },
         {
           "size": 20971520,
-          "sha256": "1f1ced152530fc4356a597d4c3b3926d2288b6ef82c38295040196a0d6b28e29"
+          "sha256": "2bbd968a87a220b21eda3e676db686680da72a160acc57430a8e6dd9774e0891"
         },
         {
           "size": 20971520,
-          "sha256": "46e4721380b7ba0fc3bf04b2dfede9af8d53121dfa3beaa7e8980e4b6f215d91"
+          "sha256": "a3589a1b8f155ef9012de2a7995dd5a3e5485a7a38a10bd5baa581e7d7a2bde9"
         },
         {
-          "size": 14986807,
-          "sha256": "72d33e9b68916435c0dba54a59004f93d4ad0edf38cc10d4909b7ced7cb73f18"
+          "size": 14994999,
+          "sha256": "86cdadb8f8cc1ec099667aeb353777b4e49519879fe085c962cd91c5c18b032a"
         }
       ]
     },
@@ -3930,13 +3930,13 @@
     },
     {
       "path": "launcher/windows/publish/folder/LocalSearchLauncher.dll",
-      "blob": "e51b70d4300e04d45a023f93eca608003b3c2647",
+      "blob": "8307d3000bbc3de0ace348071f4c5657fbb6f28a",
       "mode": "100644",
       "type": "blob"
     },
     {
       "path": "launcher/windows/publish/folder/LocalSearchLauncher.exe",
-      "blob": "5f7375e01640772e98822419ee8feed31723ee21",
+      "blob": "eaf3d8b629eae9194e9c77238aa4327f905df8f3",
       "mode": "100644",
       "type": "blob"
     },
@@ -6816,7 +6816,7 @@
     },
     {
       "path": "launcher/windows/publish/single-file/LocalSearchLauncher.exe",
-      "blob": "bfbd6735147099a7986a01577e6885e738866b9b",
+      "blob": "198b1e94c81b3b69056cb8547764b8492d5da209",
       "mode": "100644",
       "type": "blob"
     },
@@ -6869,5 +6869,5 @@
       "type": "blob"
     }
   ],
-  "signature": "9d934bfbbdd19fcf1b18b078f7634ccd4a5d5cf9de962f4fe5bb469be92423cd"
+  "signature": "ac7ce3a7486fe07988b72979a1ea927b9c5522f7367fc95d7a84d16351224345"
 }
