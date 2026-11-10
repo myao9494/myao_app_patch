@@ -1,0 +1,315 @@
+diff --git a/backend/routers/ecosystem.py b/backend/routers/ecosystem.py
+index 87fbe11e1cab2b749805ac0553200d8bc387faf6..6eb92128a35c56e238847218774a8245ac9610e8 100644
+--- a/backend/routers/ecosystem.py
++++ b/backend/routers/ecosystem.py
+@@ -14,7 +14,9 @@
+           ToDo の先頭 100 文字（改行は「 / 」でつないだ 1 行）、メモの有無、つながっているノートの名前 link）。期限切れ・残り日数・due_within_days は最終日で判定する。
+           メモの本文は返さない（詳しくは GET /api/tasks/{id}）。
+     並び: open と all は終了日の早い順、done は終了日の遅い順。
+-作成・更新は、既存の POST /api/tasks・PUT /api/tasks/{id} を使う（operations に載せる）。削除は載せない。
++作成・更新は、既存の POST /api/tasks・PUT /api/tasks/{id} を使う（operations に載せる）。
++ノート: POST /api/tasks/with-note（タスクとノートを 1 回で作る）、POST /api/tasks/{id}/note（既存タスクのノート。
++        どちらも {task_id, note_path, created} を返す。中身を書くのは呼ぶ側）。削除は載せない。
+ """
+ from datetime import date, datetime, timedelta
+ from typing import Literal, Optional
+@@ -36,6 +38,8 @@ OPERATIONS = [
+     {"id": "tasks.get", "method": "GET", "path": "/api/tasks/{task_id}", "effect": "read"},
+     {"id": "tasks.create", "method": "POST", "path": "/api/tasks", "effect": "write"},
+     {"id": "tasks.update", "method": "PUT", "path": "/api/tasks/{task_id}", "effect": "write"},
++    {"id": "tasks.create_with_note", "method": "POST", "path": "/api/tasks/with-note", "effect": "write"},
++    {"id": "tasks.note", "method": "POST", "path": "/api/tasks/{task_id}/note", "effect": "write"},
+ ]
+ LINKS = {"home": "/"}
+ 
+diff --git a/backend/routers/tasks.py b/backend/routers/tasks.py
+index e436b7b645e1fd8289e39eaef2a7b21a8a447351..69d59bbfc961daa6c67047095b412aad39f943f8 100644
+--- a/backend/routers/tasks.py
++++ b/backend/routers/tasks.py
+@@ -25,6 +25,8 @@ from schemas import (
+     DeleteResponse,
+     TaskReorderRequest,
+     ResolvedTaskLink,
++    TaskNote,
++    TaskWithNote,
+ )
+ from services import update_sequence
+ from services.task_text import (
+@@ -209,6 +211,25 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
+     return db_task
+ 
+ 
++@router.post("/with-note", response_model=TaskWithNote)
++def create_task_with_note(task: TaskCreate, obsidian_home: str | None = None, db: Session = Depends(get_db)):
++    """
++    タスクを作り、そのタスクの Obsidian ノートも作って、タスクとノートのパスを 1 回で返す。
++    タスクの作り方は POST /api/tasks と同じ。ノートは POST /api/tasks/{id}/note と同じ。
++    ノートの作成に失敗しても、タスクは作成済みのまま残る（detail に ID を書く。続きは POST /api/tasks/{id}/note）。
++    """
++    obsidian_home = _resolve_obsidian_home(obsidian_home)  # Vault が無いなら、タスクも作らない
++    db_task = create_task(task, db)
++    try:
++        note_path, created = _ensure_note(db, db_task, obsidian_home)
++    except HTTPException as e:
++        raise HTTPException(
++            status_code=e.status_code,
++            detail=f"タスク {db_task.id} は作成済みですが、ノートを作れませんでした: {e.detail}",
++        )
++    return TaskWithNote(task_id=db_task.id, note_path=note_path, created=created, task=db_task)
++
++
+ @router.put("/{task_id}", response_model=Task)
+ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
+     """Update a task. 送られてきた項目だけを更新する。"""
+@@ -270,18 +291,26 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
+     return DeleteResponse(deleted_id=task_id, deleted_children=deleted_children)
+ 
+ 
+-@router.post("/{task_id}/obsidian", response_model=Task)
+-def create_obsidian_note(task_id: int, obsidian_home: str | None = None, db: Session = Depends(get_db)):
++def _resolve_obsidian_home(obsidian_home: str | None) -> str:
++    """Vault のパスを決める（指定がなければ環境変数 OBSIDIAN_HOME か既定値）。無いフォルダーなら 400。"""
++    home = obsidian_home or default_obsidian_home()
++    # Vault が無い場所（環境変数の未設定・書き間違い）に、フォルダーごと作ってしまわない
++    if not os.path.isdir(os.path.expanduser(home)):
++        raise HTTPException(status_code=400, detail=f"Obsidian home not found: {home}")
++    return home
++
++
++def _ensure_note(db: Session, db_task: TaskModel, obsidian_home: str | None) -> tuple[str, bool]:
+     """
+-    Create an Obsidian note for the task and update its hyperlink.
++    タスクの Obsidian ノートを用意し、タスクの hyperlink にそのパスを保存する。戻り値は (ノートの絶対パス, 今回新しく作ったか)。
+ 
+     作成先: {obsidian_home}/01_data/{YYYY}/{MM}/{DD}/{タスク名}【{id}】.md
+-    同名ファイルが既にあれば作り直さず、そのパスをリンクする。
++    同名ファイルが既にあれば作り直さず、そのパスをリンクする（中身は変えない）。
+     """
+-    db_task = _get_task_or_404(db, task_id)
++    task_id = db_task.id
++    created = False
+ 
+-    if not obsidian_home:
+-        obsidian_home = default_obsidian_home()
++    obsidian_home = _resolve_obsidian_home(obsidian_home)
+     now = datetime.now()
+     folder_path = os.path.join(obsidian_home, "01_data", now.strftime("%Y/%m/%d"))
+     os.makedirs(folder_path, exist_ok=True)
+@@ -305,15 +334,36 @@ def create_obsidian_note(task_id: int, obsidian_home: str | None = None, db: Ses
+                     f.write(content)
+             except Exception as e:
+                 raise HTTPException(status_code=500, detail=f"Failed to create Obsidian note file: {str(e)}")
++            created = True
+ 
+     db_task.hyperlink = file_path
+     db_task.updated_at = now_string()
+     db.commit()
++    update_sequence.increment()
+     db.refresh(db_task)
+ 
++    return file_path, created
++
++
++@router.post("/{task_id}/obsidian", response_model=Task)
++def create_obsidian_note(task_id: int, obsidian_home: str | None = None, db: Session = Depends(get_db)):
++    """Create an Obsidian note for the task and update its hyperlink（画面の「O」キー用。タスク全体を返す）。"""
++    db_task = _get_task_or_404(db, task_id)
++    _ensure_note(db, db_task, obsidian_home)
+     return db_task
+ 
+ 
++@router.post("/{task_id}/note", response_model=TaskNote)
++def create_task_note(task_id: int, obsidian_home: str | None = None, db: Session = Depends(get_db)):
++    """
++    タスクの Obsidian ノートを作り（あれば再利用し）、そのパスだけを返す（AI などの外部呼び出し用）。
++    画面の「O」と同じ処理。ノートの中身を書くのは呼び出し側（返ったパスのファイルへ書く）。
++    """
++    db_task = _get_task_or_404(db, task_id)
++    note_path, created = _ensure_note(db, db_task, obsidian_home)
++    return TaskNote(task_id=task_id, note_path=note_path, created=created)
++
++
+ @router.post("/{task_id}/resolve-link", response_model=ResolvedTaskLink)
+ def resolve_task_link(task_id: int, obsidian_home: str | None = None, db: Session = Depends(get_db)):
+     """Resolve a task hyperlink, re-linking Obsidian notes by task id if the file was renamed."""
+diff --git a/backend/schemas.py b/backend/schemas.py
+index ca28806a45b0839ee8a302df9618fb3eb819a3ff..52d2e51f9f2f3981934c9d5eb4411c4f498a6e80 100644
+--- a/backend/schemas.py
++++ b/backend/schemas.py
+@@ -207,6 +207,17 @@ class ResolvedTaskLink(BaseModel):
+     updated: bool = False
+ 
+ 
++class TaskNote(BaseModel):
++    """タスクにつないだ Obsidian ノート。note_path は絶対パス、created は今回新しく作ったか。"""
++    task_id: int
++    note_path: str
++    created: bool
++
++
++class TaskWithNote(TaskNote):
++    task: Task
++
++
+ class HolidayListResponse(BaseModel):
+     holidays: List[str]
+     raw_text: str
+diff --git a/backend/tests/test_ecosystem.py b/backend/tests/test_ecosystem.py
+index c78d7113ca5e20f7642049d79037ba09db37ecad..9fb7c799c7186e1545aaf5cda196e32fd0c0ef2a 100644
+--- a/backend/tests/test_ecosystem.py
++++ b/backend/tests/test_ecosystem.py
+@@ -20,6 +20,8 @@ def test_manifest_has_common_shape(client):
+     assert operations["tasks.search"] == {"id": "tasks.search", "method": "GET", "path": "/api/ecosystem/tasks", "effect": "read"}
+     assert operations["tasks.create"]["effect"] == "write"
+     assert operations["tasks.update"] == {"id": "tasks.update", "method": "PUT", "path": "/api/tasks/{task_id}", "effect": "write"}
++    assert operations["tasks.create_with_note"] == {"id": "tasks.create_with_note", "method": "POST", "path": "/api/tasks/with-note", "effect": "write"}
++    assert operations["tasks.note"] == {"id": "tasks.note", "method": "POST", "path": "/api/tasks/{task_id}/note", "effect": "write"}
+     assert all(op["effect"] in {"read", "write", "open"} for op in body["operations"])
+     assert not any(op["method"] == "DELETE" for op in body["operations"]), "削除はエコシステムに出さない"
+ 
+diff --git a/backend/tests/test_obsidian.py b/backend/tests/test_obsidian.py
+index 143484ca318adcdc905b2b1c277ba7b04478d640..3b4cf5ae3e002af36d383c3b9d0af1f04c4d87f7 100644
+--- a/backend/tests/test_obsidian.py
++++ b/backend/tests/test_obsidian.py
+@@ -145,3 +145,99 @@ def test_resolve_link_without_hyperlink_returns_404(client, vault):
+ 
+     assert response.status_code == 404
+     assert response.json()["detail"] == "Task hyperlink not found"
++
++
++# ---- 外部（AI など）向け: パスを返す API ----
++
++
++def test_note_api_returns_path_and_created_flag(client, vault):
++    first = client.post(f"/api/tasks/{TASK_ID}/note", params={"obsidian_home": str(vault)})
++    assert first.status_code == 200, first.text
++    body = first.json()
++    expected = vault / "01_data" / datetime.now().strftime("%Y/%m/%d") / f"テストタスク_名前【{TASK_ID}】.md"
++    assert body["task_id"] == TASK_ID
++    assert same_path(body["note_path"], expected)
++    assert body["created"] is True
++    assert expected.is_file()
++
++    Path(body["note_path"]).write_text("AI が書いた内容", encoding="utf-8")
++    second = client.post(f"/api/tasks/{TASK_ID}/note", params={"obsidian_home": str(vault)}).json()
++    assert second["note_path"] == body["note_path"]
++    assert second["created"] is False
++    assert Path(second["note_path"]).read_text(encoding="utf-8") == "AI が書いた内容"
++
++
++def test_note_api_links_task_hyperlink(client, vault, db):
++    note_path = client.post(f"/api/tasks/{TASK_ID}/note", params={"obsidian_home": str(vault)}).json()["note_path"]
++
++    db.expire_all()
++    assert db.get(TaskModel, TASK_ID).hyperlink == note_path
++
++
++def test_note_api_missing_task_returns_404(client, vault):
++    response = client.post("/api/tasks/12345/note", params={"obsidian_home": str(vault)})
++
++    assert response.status_code == 404
++
++
++def test_note_api_uses_obsidian_home_env(client, vault, monkeypatch):
++    monkeypatch.setenv("OBSIDIAN_HOME", str(vault))
++
++    body = client.post(f"/api/tasks/{TASK_ID}/note").json()
++
++    assert body["note_path"].startswith(str(vault))
++
++
++def test_note_api_rejects_missing_vault_without_creating_it(client, tmp_path):
++    missing = tmp_path / "no-such-vault"
++
++    response = client.post(f"/api/tasks/{TASK_ID}/note", params={"obsidian_home": str(missing)})
++
++    assert response.status_code == 400
++    assert not missing.exists()
++
++
++def test_note_creation_bumps_update_sequence_so_other_tabs_refresh(client, vault):
++    before = client.get("/api/tasks/update-sequence").json()["sequence"]
++
++    client.post(f"/api/tasks/{TASK_ID}/note", params={"obsidian_home": str(vault)})
++    after_note_api = client.get("/api/tasks/update-sequence").json()["sequence"]
++    client.post(f"/api/tasks/{TASK_ID}/obsidian", params={"obsidian_home": str(vault)})
++    after_screen_api = client.get("/api/tasks/update-sequence").json()["sequence"]
++
++    assert after_note_api != before
++    assert after_screen_api != after_note_api
++
++
++def test_with_note_creates_task_and_note_in_one_call(client, vault, db):
++    response = client.post(
++        "/api/tasks/with-note",
++        params={"obsidian_home": str(vault)},
++        json={"text": "メール: 見積依頼", "start_date": "2026-11-10 00:00:00", "end_date": "2026-11-11 00:00:00"},
++    )
++
++    assert response.status_code == 200, response.text
++    body = response.json()
++    new_id = body["task_id"]
++    assert new_id != TASK_ID
++    assert body["task"]["id"] == new_id
++    assert body["task"]["text"] == "メール: 見積依頼"
++    assert body["created"] is True
++    assert body["task"]["hyperlink"] == body["note_path"]
++    note = Path(body["note_path"])
++    assert note.name == f"メール_ 見積依頼【{new_id}】.md"
++    assert note.read_text(encoding="utf-8").startswith("---\ncreated: ")
++    assert client.get(f"/api/tasks/{new_id}").json()["hyperlink"] == body["note_path"]
++
++
++def test_with_note_does_not_create_task_when_vault_is_missing(client, tmp_path):
++    before = len(client.get("/api/tasks").json()["tasks"])
++
++    response = client.post(
++        "/api/tasks/with-note",
++        params={"obsidian_home": str(tmp_path / "no-such-vault")},
++        json={"text": "作られないタスク", "start_date": "2026-11-10 00:00:00", "end_date": "2026-11-11 00:00:00"},
++    )
++
++    assert response.status_code == 400
++    assert len(client.get("/api/tasks").json()["tasks"]) == before
+diff --git a/docs/SPECIFICATION.md b/docs/SPECIFICATION.md
+index d1c75c45281b0677d195416e243b29279db0585e..bb50ceb6012b7c35165b968675eeb3f11f7f36be 100644
+--- a/docs/SPECIFICATION.md
++++ b/docs/SPECIFICATION.md
+@@ -282,7 +282,11 @@ Excel風のグリッドでタスク・リンクをまとめて編集する画面
+   ---
+   ```
+ - 作成後、タスクの `hyperlink` にファイルの絶対パスを保存し、ノートを開きます。
+-- Obsidianホームが未設定の場合、バックエンドは環境変数 `OBSIDIAN_HOME` のパスを使います。
++- Obsidianホームが未設定の場合、バックエンドは環境変数 `OBSIDIAN_HOME` のパスを使います。Obsidianホームのフォルダーが存在しなければ、作らずに 400 を返します。
++- ノートを作る・リンクするたびに更新シーケンスを進めるので、開いている他のタブにもリンクが反映されます。
++- **外部（AI など）から使う API**: 画面の「O」と同じ処理を、パスを返す形で公開しています（→ 7.6）。AI は、返ったパスのファイルに内容を書きます（バックエンドは中身を書きません。既にあるノートの中身も変えません）。
++  - `POST /api/tasks/with-note?obsidian_home=`: タスクの作成（本文は `POST /api/tasks` と同じ）とノートの作成を 1 回で行い、`{task_id, note_path, created, task}` を返す。Obsidianホームが無ければ、タスクも作らず 400。ノートの作成だけ失敗したときは、タスクは作成済みで、エラーの `detail` に ID を書く
++  - `POST /api/tasks/{id}/note?obsidian_home=`: 既存タスクのノートを作る（あれば再利用）。`{task_id, note_path, created}` を返す。`created` は今回新しく作ったか
+ - **リンクの再解決**: ノートのファイル名を変えたり移動したりしても、ファイル名に `【{id}】` が残っていれば、リンクを開くときに Vault 内を探して `hyperlink` を更新します。
+ 
+ ### 5.2 差分比較（過去のエクスポートとの比較）
+@@ -346,7 +350,9 @@ FastAPI の Swagger UI（`/docs`）でも確認できます。失敗時は HTTP
+ | DELETE | `/api/tasks/{id}` | タスクと子孫、それらに付いたリンクを削除（`{deleted_id, deleted_children}`） |
+ | POST | `/api/tasks/{id}/clone?target_id=` | 子孫ごと複製（進捗は0）。`target_id` 指定時はそのタスクの直後、省略時はコピー元の直後に挿入 |
+ | POST | `/api/tasks/reorder` | 並び順と親の一括更新（`{items: [{id, sortorder, parent}]}`） |
+-| POST | `/api/tasks/{id}/obsidian?obsidian_home=` | Obsidianノート作成（→ 5.1） |
++| POST | `/api/tasks/{id}/obsidian?obsidian_home=` | Obsidianノート作成。タスク全体を返す（画面の「O」用。→ 5.1） |
++| POST | `/api/tasks/{id}/note?obsidian_home=` | Obsidianノート作成。`{task_id, note_path, created}` を返す（外部呼び出し用。→ 5.1） |
++| POST | `/api/tasks/with-note?obsidian_home=` | タスクとノートを 1 回で作る。`{task_id, note_path, created, task}` を返す（→ 5.1） |
+ | POST | `/api/tasks/{id}/resolve-link?obsidian_home=` | リンク先の確認と再解決（`{task_id, hyperlink, updated}`） |
+ | GET | `/api/tasks/update-sequence` | 更新シーケンス番号（→ 9.2） |
+ 
+@@ -405,11 +411,11 @@ FastAPI の Swagger UI（`/docs`）でも確認できます。失敗時は HTTP
+ 
+ ### 7.6 エコシステム API（ハーネスやほかの自作アプリ向け）
+ 
+-ハーネス（opencode）の LLM や、ほかの自作アプリが使う共通の入口です。共通の形は、ハーネスの `docs/apps.md` の「エコシステム API 1」。実装は `backend/routers/ecosystem.py`。読み取りだけで、データは変えません。
++ハーネス（opencode）の LLM や、ほかの自作アプリが使う共通の入口です。共通の形は、ハーネスの `docs/apps.md` の「エコシステム API 1」。実装は `backend/routers/ecosystem.py`。`/api/ecosystem` と `/api/ecosystem/tasks` は読み取りだけで、データは変えません。
+ 
+ | Method | Endpoint | 説明 |
+ | --- | --- | --- |
+-| GET | `/api/ecosystem` | アプリの名乗り（`{ecosystem: 1, app: "gantt", title, version, base_url, links, operations}`）。`operations` は、外から使ってよい操作（探す・1 件取得・作成・更新）。削除は載せない |
++| GET | `/api/ecosystem` | アプリの名乗り（`{ecosystem: 1, app: "gantt", title, version, base_url, links, operations}`）。`operations` は、外から使ってよい操作（探す・1 件取得・作成・更新・ノートの作成）。削除は載せない |
+ | GET | `/api/ecosystem/tasks` | タスクを LLM が読みやすい小さな形で探す（下の表） |
+ 
+ `/api/ecosystem/tasks` の入力と出力:

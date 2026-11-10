@@ -1,4 +1,0 @@
-launcher/windows/publish/single-file/LocalSearchLauncher.exe filter=lfs diff=lfs merge=lfs -text
-# Windows のバッチは CRLF でないと cmd が行を読み違えるため、作業ツリーでは常に CRLF にする
-*.bat text eol=crlf
-*.cmd text eol=crlf
