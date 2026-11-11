@@ -1,0 +1,2375 @@
+diff --git a/.gitignore b/.gitignore
+index be87c73fb022405647bf5af386754d9cbc315d2d..792ed72b0dba3814a91272762028a0177feb58ae 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -5,6 +5,9 @@ company*.json
+ *.local.json
+ *.crt
+ 
++# --- 利用者のプロフィール(会社の PC にだけ置く。雛形は templates/memory/) ---
++/memory/
++
+ # --- Python の仮想環境 ---
+ .venv/
+ __pycache__/
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 5baddd7961d2087654c1e00026c8c50154cd3fc9..133afc0fb5e235da13fa229ce5bc60416e986692 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -4,6 +4,107 @@
+ 
+ myao-patch-bridge で運ぶと、Git の履歴は会社に届かない。このファイルが、会社側で「何が変わったか」「手で反映すること」を知る手がかりになる。変更したら、先頭に書き足す。
+ 
++## 0.29.1 (2026-11-12)
++
++**会社側で直した `agents/browser.md`(会社のコミット 495c942「[myao-patch] opencode update」。会社で Playwright が動かないことがあったため)を取り込み、このエージェントが実行できる形に直した。**
++
++### 変更
++
++- `agents/browser.md`: 会社側の考え(起動の確認と、作業の後の片付け)を、手順 2 と 7 として取り込んだ。番号は 2〜7。ただし会社側の文の `run.bat status`・`start` と「MCP を停止する」は、このエージェントでは実行できない(`shell` と `skill` が `deny`。MCP は OpenCode が起動する)ので、次のように書き換えた
++  - 手順 2: MCP とブラウザは、最初の道具の呼び出しで自動で起動する。自分で起動・停止しない。既にタブがあれば使う。`browser_navigate` が失敗したら 1 回だけやり直し、だめならエラーの文言を書いて返す
++  - 手順 7: 自分で開いた余分なタブだけを `browser_tabs` で閉じる(同梱の 0.0.83 に `close` がある)。ブラウザと MCP は閉じない・止めない
++  - 「ブラウザを閉じない」の行を、手順 7 に合わせた
++- `sample_opencode.json`: 変えていない。会社で足した Playwright MCP の引数(`--isolated`、`--image-responses omit`、`--output-dir`)は、雛形に既にある
++
++### 確かめていないこと
++
++- 会社で Playwright が動かなかった原因。この変更で直るかは分からない
++- 会社の `opencode.json` で、`--console-level error`、`--no-webmcp`、`--block-service-workers` を消したかどうか(消したなら、雛形からも外す)
++
++### 会社で手で行うこと
++
++- なし(`agents/browser.md` はパッチで運ばれ、会社側の文を置き換える)
++
++## 0.29.0 (2026-11-12)
++
++**ランチャー(Local-fulltext-search)の作業フォルダ AI_work のひな形 `templates/ai_work/` を足した**(利用者の依頼「自動化を AI_work に集め、スキルと Python を組み合わせて、ランチャーのスラッシュコマンドから日本語で動かしたい。AI と一緒に作りたい」)。経緯は README の 6.37。
++
++### 追加
++
++- `templates/ai_work/AGENTS.md`: 使う・作るの見分け、取り消せない操作の前で止まる、画面の操作はハーネスのスキルを通す、など
++- `templates/ai_work/自動化一覧.md`、`launcher_slash_commands.sample.json`(`/auto`・`/auto-new`・`/auto-fix`・`/auto-list`・`/env-check`)、`.gitignore`、`requirements.in`、`README.md`(置き方)
++- `templates/ai_work/.opencode/skills/automation-builder/`: 自動化を作る・直す手順と、ひな形を置くスクリプト(`new`・`list`・`slash`。種類は python・browser・outlook。上書きしない)
++- `templates/ai_work/.opencode/skills/env-check/`: 動作確認と今日の日付(自動化の見本)
++- `templates/ai_work/.opencode/commands/`: TUI 用の `/auto`・`/auto-new`・`/auto-fix`
++- `クイックスタート.md`: 会社の PC で人が行うこと(ファイルの配置、`opencode.json`、各スキルの `config.local.json`、環境変数、ひな形のコピー、確認、更新のとき)だけを順にまとめた
++- テスト: ひな形のスキルのテストを `run_tests.py` に足した。整合性テストに、AI_work のひな形の名前・参照・コマンドの例の形を足した
++
++### 確かめたこと・確かめていないこと
++
++- 確かめた: `python run_tests.py`。Mac で、写したフォルダでの `new`・`list`・`slash`・`env-check`、`browser` のひな形が `--allow-submit` を拒むこと
++- **確かめていない:** 会社の Windows・ランチャーから `.opencode/skills/` のスキルが読まれるか。自動承認を切ったときの許可の扱い。実際のモデルが手順(聞き取り → 承認 → ひな形)を守るか
++
++### 会社で手で行うこと
++
++- `templates\ai_work\` の中身を AI_work へ写す(既存は上書きしない。手順は `templates\ai_work\README.md`)
++- ランチャーに 5 つのコマンドを登録する(「/ コマンド」の画面か、`launcher_slash_commands.json` が無いときだけファイルで)
++- ランチャーで `/env-check` を送って、流れが通るかを確かめる
++
++## 0.28.0 (2026-11-12)
++
++**利用者のプロフィール(環境・立場・好み)を毎回読ませる仕組みと、覚えさせるコマンド `/remember` を足した**(利用者の依頼「Windows であることや自分の立場を、毎回入力し直すのは非効率」)。経緯は README の 6.36、設計は [docs/memory.md](docs/memory.md)。
++
++### 追加
++
++- `templates/memory/profile.md`: プロフィールのひな形(環境・立場・書き方の好み・よく使う場所)
++- スキル `memory`: 覚える・忘れるの手順。利用者が言ったことだけを、1 行 1 事実で、案を示して承認の後に書く。2,000 文字以内。他人のことは `people` へ
++- コマンド `/remember`
++- `sample_opencode.json`: `"instructions": ["~/.config/opencode/memory/*.md"]`
++- `.gitignore`: `/memory/`(会社の情報を Git に入れない)
++- テスト: `instructions` と `.gitignore`、ひな形の大きさ。雛形の想定のキーに `instructions` を足した
++
++### 変更
++
++- 説明文の合計の上限を 2,980 → 3,080 文字にした(いまは 3,057 文字)
++- `docs/company-checklist.md`: 22 にプロフィールの確認を足し、結果のまとめを 23 にした
++
++### 確かめたこと・確かめていないこと
++
++- 確かめた: `python run_tests.py`。Mac の v2.2.6 で、`instructions` の `~` と `*` が展開され、ダミーのプロフィールが読まれること
++- **確かめていない:** 会社の Windows での読み込み。子セッションにも読まれるか。実際のモデルが `/remember` の手順(承認の前に書かない)を守るか。myao-patch-bridge で `memory/` が消えないか
++
++### 会社で手で行うこと
++
++- `templates\memory\profile.md` を `%USERPROFILE%\.config\opencode\memory\profile.md` にコピーし、【 】を書き換える(要らない行は消す)
++- 会社の `opencode.json` に `"instructions": ["~/.config/opencode/memory/*.md"]` を足す(`sample_opencode.json` を見比べる)
++- `docs/company-checklist.md` の 22
++
++## 0.27.0 (2026-11-12)
++
++**Obsidian でノートを開く `open` を `obsidian-run` に足し、返答のノートを `[[ノート名]]` で示して Claudian のチャットでクリックで開けるようにした**(利用者の依頼)。経緯は README の 6.35、設計は `docs/obsidian.md` の 5 と 11。
++
++### 追加
++
++- `obsidian-run` の `open <ノート名|パス|[[ノート名]]> [--new-tab] [--dry-run]`: Vault に実在するノートを、Local REST API の `POST /open/` で Obsidian の画面に開く。無いノート・同名が複数・ドットの場所・Vault の外・`# ^ | [ ]` を含む名前・表示できない種類は、通信せずに止める。出力に `[[リンク]]` の形が出る
++- テスト: `skills/obsidian-run/tests/test_obsidian.py` に `OpenTests`(12 件)。安全のテストで、呼んでよい API に `POST /open/` を足した
++
++### 変更
++
++- `skills/obsidian-run/SKILL.md`: 説明文に「ノートを開く」、節「ノートを開く」。エディタのコマンドの前に `open` で対象を開く
++- `skills/vault-notes/SKILL.md`: 作ったノートを `[[リンク]]` とパスで報告する
++- `templates/obsidian/AGENTS.md`: 対応表に `open`、「返答でノートを示すときは `[[ノート名]]`」、「ノートを開いて」は `open`
++- 説明文の合計: 2,951 → 2,960 文字(上限 2,980 は変えていない)
++
++### 確かめたこと・確かめていないこと
++
++- 確かめた: `python run_tests.py`。偽のサーバーでの `open`。Local REST API 5.5.2 と Claudian 2.3.39 の `main.js` を読んで、`/open/` の動作(無ければ作る)と、チャットの `[[ ]]` のリンク化の条件を確認した
++- **確かめていない:** 本物の Obsidian での `open`、Claudian の画面でリンクを押して開くこと、Windows での動作、会社の Claudian の版
++
++### 会社で手で行うこと
++
++- 会社の Vault の `AGENTS.md` に、`templates/obsidian/AGENTS.md` の `open` の行と「返答でノートを示すときは `[[ノート名]]`」の行を反映する
++- `sample_opencode.json` の変更は無い(メインでは、`obsidian-run` の `run.bat open` は既定で確認なしに動く)
++
+ ## 0.26.0 (2026-11-11)
+ 
+ **登場人物(自分も)を覚える、スキル `people` とインタビューのコマンド `/people` を足した**(利用者の依頼)。経緯は README の 6.34、設計は [docs/people.md](docs/people.md)。
+diff --git a/README.md b/README.md
+index f2f09d764728cf7080c096c111abf464a2bbaca5..6e58223017a34997b97030cf24f2f464163cd81b 100644
+--- a/README.md
++++ b/README.md
+@@ -42,6 +42,8 @@
+ | `mcp/` | MCP サーバーのコードと、同梱した依存(Playwright MCP の `node_modules` を含む。約 18 MB) | 読まない(設定で起動する) |
+ | `templates/project/coding/AGENTS.md`、`templates/project/csharp/AGENTS.md`、`templates/project/document/AGENTS.md` | プロジェクト用のひな形(coding: Python のプログラム・設計計算・CAE、csharp: C# (.NET) のプログラム、document: 手順書・報告書などの一般資料。Git 前提)。`/init-project` が各プロジェクトのルートへ置く(手でコピーしてもよい) | 読まない(置いた先で読まれる) |
+ | `templates/obsidian/AGENTS.md` | Obsidian 用のひな形。Vault のルートへコピーして書き換える | 読まない(コピー先で読まれる) |
++| `templates/ai_work/` | ランチャー(Local-fulltext-search)の作業フォルダ AI_work のひな形。`AGENTS.md`、自動化一覧、ランチャーのコマンドの例、自動化を作るスキル `automation-builder`、見本の `env-check`。人が AI_work へコピーする。手順はその中の `README.md` | 読まない(コピー先で読まれる) |
++| `templates/memory/profile.md` | 利用者のプロフィール(環境・立場・好み)のひな形。会社の PC の `memory\profile.md` へコピーして書く。`memory/` は Git に入れない | 読まない(コピー先が `instructions` で毎回読まれる) |
+ | `requirements.in` / `requirements.lock` | スクリプトが使う Python パッケージ(pywin32、pypdf。ハッシュ付き)。ハーネスの `.venv` に入れる | 読まない |
+ | `tests/`、`run_tests.py` | 整合性テストと、全テストの入口 | 読まない |
+ | `docs/` | 運用メモ(下の一覧) | 読まない |
+@@ -74,7 +76,7 @@
+ | `file-finder` | ファイル検索と、見つけたテキストの読み取り(スクリプト)。**読み取り専用。対象は設定のフォルダだけ** |
+ | `doc-convert` | Word・Excel・PowerPoint・PDF・CSV を Markdown に変換する(スクリプト)。**読み取り専用。書くのは `.handoff/converted/` だけ** |
+ | `vault-notes` | Obsidian のノートの保存(今日のフォルダーに新規作成)と修正(バックアップ → 変更案の承認 → 最小の変更 → **`mark-edit` で「AI が直した・未レビュー」の印**)。日付・時刻は `today` で取る。人のレビューが済んでいない AI のノートと、印の付け忘れの疑いの一覧(`unreviewed`)。**削除はしない。Vault の中だけに書く** |
+-| `obsidian-run` | Obsidian のコマンドの実行(Local REST API)。**許可リストにあるものだけ。** 実行結果は返らないので、前後のフォルダの差でできたファイルを知らせる |
++| `obsidian-run` | Obsidian のコマンドの実行(Local REST API)。**許可リストにあるものだけ。** 実行結果は返らないので、前後のフォルダの差でできたファイルを知らせる。**ノートを開く `open`**(実在するノートだけ。無いノートは作らない。許可リストは要らず、メインから直接) |
+ | `excalidraw-diagram` | Excalidraw の図を、**仕様から作る**(`build`。フロー図・スイムレーン・ツリー・マインドマップ)、点検する(`check`)。LLM は仕様だけを書き、座標・矢印・日本語の幅はスクリプトが計算する |
+ | `diagram-reader` | **図(Excalidraw・draw.io)を、画像を見なくても分かる文章(または Mermaid)にして読む**(`describe`。圧縮された図、複数ページも可)。ノートに埋め込まれた図の場所を探す(`links`)。読み取り専用。会社の LLM は画像を認識できないため |
+ | `project-init` | **プロジェクトのフォルダの初期設定**(`check` / `draft` / `plan` / `apply`)。中身を見てテンプレート(coding / csharp / 一般資料)を選び、中身とインタビューの答えで `AGENTS.md` を埋めて置く。`.handoff/` と `.gitignore` の行も。上書き・削除はしない |
+@@ -87,6 +89,7 @@
+ | `handoff-clean` | `.handoff/` の古いファイルを整理する(スクリプト)。**削除はせず、`_trash` へ移動する。** 実行は人間の承認の後 |
+ | `app-ecosystem` | **自作の Web アプリ**(ガント・ファイルマネージャー・差分・Excalidraw・全文検索)を API で使う(スクリプト)。起動の確認、タスクの検索・追加・更新(`--dry-run` → 承認)、**タスクと Obsidian のノートをつなぐ**(`task-add --with-note` でタスクとノートを 1 回で作り、ノートのパスを得る。`task-note` は既存のタスク用。`task-link` は、自分で作ったノートをつなぐ。ノートの名前は `名前【ID】.md`)、**資料を更新した後の差分**(`review`。前回のコミットからの変更と、差分ツールで人が見る URL)、**画像・PDF・図面の差分を数値と位置で読む**(画像が見られない LLM 向け)、人が開く URL。**削除・コマンドの実行・OS のアプリ起動はできない。呼ぶ先はこの PC だけ** |
+ | `people` | **登場人物(自分も)を覚える**(スクリプト)。人が判断する情報は Vault の人物ノート(`05_people/`、1 人 1 ノート)、メールから分かる事実(件数、最後の連絡、よく一緒の人、最近の件)は保存せず、`outlook-mail` のキャッシュを読み取り専用で集計する。`who`(名前・アドレス、`--mail ID` でそのメールの全員、`--self`)、`candidates`(未登録でやり取りの多い人)、`new` / `set` / `memo`(承認の後)、`check`。**書くのは業務の事実だけ。電話番号・住所は機械的に止める。AI が作ったノートは未レビュー** |
++| `memory` | **利用者の環境・立場・好みを覚える・忘れる**(手順だけ。スクリプトなし)。プロフィール `memory/profile.md` は設定の `instructions` で毎回読まれる。1 行 1 事実、2,000 文字以内。**利用者が言ったことだけを、案を示して承認の後に書く。** 他人のことは `people` へ |
+ 
+ スキルは、スラッシュコマンドでは呼び出せません。モデルが、名前と説明を見て読み込みます。人が呼び出したいスキルには、同名のコマンドを置いています。
+ 
+@@ -109,6 +112,7 @@
+ | `/handoff-clean` [日数] | `.handoff/` の状況を見せ、承認の後に、古いファイルを `_trash` へ退避する |
+ | `/apps` 依頼 | スキル `app-ecosystem` で、自作の Web アプリを使う(タスク、差分、開く URL)。最初に起動を確かめる |
+ | `/people` [名前・自分] | スキル `people` で、登場人物をインタビューして人物ノートを作る・直す。省略すると、自分のノートが無ければ自分から、あればやり取りが多いのに未登録の人から。メールの集計を先に調べ、おすすめの答えつきで聞き、まとめの承認の後に保存する |
++| `/remember` 内容 | スキル `memory` で、環境・立場・好みをプロフィールに覚える(「忘れて」なら消す)。省略すると、この会話で何度も伝えた前提から候補を挙げる。書く内容の承認の後に保存する |
+ 
+ ### MCP(`mcp/`)
+ 
+@@ -131,6 +135,7 @@
+ | [docs/convert.md](docs/convert.md) | 文書の変換の設計、方式、変換されないもの、安全の設計、確認できていないこと |
+ | [docs/apps.md](docs/apps.md) | 自作の Web アプリのエコシステム(アプリと場所、各アプリに足した共通の API「エコシステム API 1」、ハーネス側の使い方、安全の設計、確認できたこと) |
+ | [docs/people.md](docs/people.md) | 登場人物を覚える仕組み(人物ノートの形、メールの集計、照合の問題、インタビュー、書かないこと、段階) |
++| [docs/memory.md](docs/memory.md) | 利用者のプロフィールを毎回読ませる仕組み(置き場所、`instructions`、`/remember`、opencode-mem を採らなかった理由) |
+ | [docs/company-checklist.md](docs/company-checklist.md) | 会社で、上から順に確認するチェックリスト |
+ 
+ ## 3. 会社の環境の前提
+@@ -165,6 +170,8 @@
+ 
+ ## 4. 会社への持ち込みと反映
+ 
++人が行うこと(ファイルの置き方、`opencode.json`、`config.local.json`、環境変数、ひな形のコピー)だけを短くまとめたものは [クイックスタート.md](クイックスタート.md)。
++
+ 1. 自宅で `python3 run_tests.py` を通し、myao-patch-bridge の公開前検証とリハーサルを通して、パッチを公開する。
+ 2. 会社で、ZIP を検証・適用する。`.config\opencode` を `company_repo_paths` で対応付けてある。
+ 3. `sample_opencode.json` と、会社側の `opencode.json` を見比べて、人間が反映する(**OpenCode V2 の書き方。V1 では動かない**。モデルの `limit` も書く: [docs/operations.md](docs/operations.md) の 5.4)。**会社側の `opencode.json`(社内LLMの設定)はリポジトリに入れず、パッチでも上書きされない。**
+@@ -264,7 +271,7 @@ foreach ($bat in Get-ChildItem "$cfg\skills\*\run.bat") {
+ & "$cfg\skills\app-ecosystem\run.bat" status
+ & "$cfg\.venv\Scripts\python.exe" "$cfg\mcp\playwright\smoke_test.py" msedge
+ 
+-# 5. ハーネス全体のテスト実行 (全 16 スイート・550 テスト)
++# 5. ハーネス全体のテスト実行 (全 19 スイート・680 テスト。AI_work のひな形のスキルを含む)
+ #    相対パスで動かすので、ハーネスのフォルダに移ってから実行する (B の場合は、$cfg ではなくリポジトリのルートへ移る)
+ Set-Location $cfg
+ .\.venv\Scripts\python.exe run_tests.py
+@@ -299,6 +306,7 @@ Set-Location $cfg
+ - 「〇〇のノートに、△△の修正を入れて」(`vault-notes`: バックアップを取り、変更前後を見せて承認を得てから、最小の変更だけを入れる)
+ - 「この手順を、スイムレーンのフローチャートにして」(`diagram`: 仕様を書き、`図_〇〇.excalidraw.md` を作る。見た目の最終確認は、Obsidian で人が行う)
+ - 「このノートの図の内容を説明して」(`diagram-reader` の `links` → `describe`: Excalidraw でも draw.io でも、画像が見られなくても、箱・矢印・分岐・レーンを文章で読む)
++- 「〇〇のノートを開いて」(`obsidian-run` の `open`: Obsidian の画面に開く。返答には `[[〇〇]]` を書くので、Claudian のチャットからもクリックで開ける)
+ - 「印刷用の HTML を書き出して」(`obsidian`: 許可リストにあるコマンドだけ。できたファイルの場所が返る)
+ - 「今週が期限のタスクを教えて。期限切れは来週の金曜まで延ばして」(`/apps`: `tasks --due-within 7` → 新しい最終日を確かめ → `task-update … --dry-run` → 承認 → 実行)
+ - 「この 2 つの図面(PDF)の違いを教えて」(`app-ecosystem` の `diff`: 違いの量と位置(上左〜下右)を数値で返す。中身は人が画面で確かめる URL が返る)
+@@ -493,6 +501,27 @@ Set-Location $cfg
+ - **言葉の決まりも合わせた:** `AGENTS.md` の「削除・上書きは必ず確認」を、「Git で管理するファイルは確認なしに変えてよい。管理外のファイルは確認」にした。権限の確認と、モデルが会話で聞く確認が二重にならないようにするため。
+ - **残る穴:** `python -c "…"` の中での削除のように、コマンドの文字列から分からない操作は、確認にならない(Claude Code と同じ)。Git で管理していないフォルダで作業するときは、注意が要る。
+ 
++### 6.37 ランチャーの AI_work のひな形 `templates/ai_work/`(2026-11-12)
++
++- **依頼:** Local-fulltext-search のランチャー(OpenCode ペイン)の作業フォルダ `AI_work` に、自動化(Outlook の予定の作成、Web の勤怠入力など)を集め、スキルと Python を組み合わせて、ランチャー独自のスラッシュコマンドから日本語の指示で動かしたい。AI と一緒に自動化を作れるように、Obsidian と同じく、人がコピーするひな形がほしい。
++- **分かったこと:** ① ランチャーのスラッシュコマンドは、プロンプトの定型(`$ARGUMENTS` を置き換えて `opencode run` に渡す。保存は `backend/data/launcher_slash_commands.json` の配列)。② `opencode run` には許可の確認画面が無く、ランチャーは「自動承認」で代えている。③ `browser-session` の `run` は、作業フォルダの中のスクリプトだけを動かす。④ ハーネスの許可の決まりは、外から見えるコマンドの文字列で判定する(自作の `run.bat` の中で `--allow-submit` を付けると、決まりをすり抜ける)。
++- **決めたこと:** ① 自動化 1 つ = AI_work の `.opencode/skills/<名前>/` のスキル 1 つ(`SKILL.md` + `scripts/` + `tests/` + `config.sample.json`)。② 処理は Python、画面の操作と取り消せない操作は、ハーネスの `browser-session`・`outlook-mail` を通す。`browser` のひな形の `run.bat` は `--allow-submit` を拒み、送信は承認の後に `browser-session` を直接呼ぶ。③ ランチャーには確認画面が無いので、AI_work の `AGENTS.md` で「取り消せない操作の前で止まり、返事を待つ」を決まりにした。④ ひな形はスクリプト(`automation-builder` の `new`)で置く(社内LLMに、名前の決まり・ASCII の `.bat`・テストの形を毎回書かせないため)。⑤ ランチャーのコマンドは、汎用の 5 つ(`/auto`・`/auto-new`・`/auto-fix`・`/auto-list`・`/env-check`)を例に入れ、自動化ごとのものは `slash` で示して人が登録する。
++- **試験:** ひな形のスキルのテスト(`run_tests.py` に足した)、ハーネスの整合性テスト、Mac で写したフォルダでの `new`・`list`・`slash`・`env-check`。**確かめていない:** 会社の Windows・ランチャーから `.opencode/skills/` のスキルが読まれるか(自宅の v2.2.6 では、読まれたスキルの一覧を出す方法が見つからなかった)、自動承認を切ったときの許可の扱い、実際のモデルが聞き取り → 承認 → ひな形の順を守るか。
++
++### 6.36 利用者のプロフィールを覚える `memory`(2026-11-12)
++
++- **依頼:** Windows であることや自分の立場を、毎回入力し直すのは非効率。memory を入れたい。opencode-mem はどうか。
++- **分かったこと:** ① OpenCode V2 に組み込みの memory は無い。② 設定の `instructions`(追加の指示ファイル)で、任意のファイルを毎回読ませられる。v2.2.6 で、`~` と `*` が展開されることを、ダミーのプロフィールで確かめた。③ 環境の欄に `Platform:` は入るが、シェル(PowerShell)やパスの書き方は伝わらない。
++- **決めたこと:** ① プロフィール `memory/profile.md` を、会社の PC にだけ置き(Git に入れない)、`instructions` で毎回読ませる。② 書くのは `/remember`(スキル `memory`)で、案を示して承認の後だけ。AI が自分の判断では書かない。③ 2,000 文字以内(窓が約 13 万のため)。④ opencode-mem は採らなかった(npm での導入、Hugging Face からの埋め込みモデルの取得、裏で LLM を呼ぶ自動の記録、Windows で複数のセッションが同じ DB を使えない、など。[docs/memory.md](docs/memory.md))。
++- **試験:** ハーネスの全テスト、Mac での読み込み。**確かめていない:** 会社の Windows での読み込み、子セッションにも読まれるか、`/remember` を実際のモデルが手順どおりに使うか。
++
++### 6.35 ノートを開く `open` と、Claudian のチャットのリンク(2026-11-12)
++
++- **依頼:** Obsidian のスキルに、ノートを開くものが無いので足す。Claudian のチャットに、ノートのリンクを載せられないか。
++- **分かったこと:** ① Local REST API(5.5.2)に `POST /open/<パス>` がある。中身は `workspace.openLinkText` で、**無いパスを渡すと新しいノートを作る**。② Claudian(2.3.39)は、返答の `[[ノート名]]` を、先が Vault に実在すれば**クリックで開けるリンクに置き換える作りが既にある**(コードブロックの中とパスだけの表記は対象外)。足りないのは、モデルがパスだけで返答していたこと。
++- **決めたこと:** ① 新しいスキルにせず、`obsidian-run` に `open` を足した(接続・API キー・TLS の設定を共有するため。説明文の合計の上限も、新しいスキルを足す余裕が無い)。② 実在を確かめたファイルが 1 つに決まったときだけ API に渡す(無い・同名が複数なら通信しない)。ドットの場所、Vault の外、`# ^ | [ ]` を含む名前、表示できない種類は開かない。③ ファイルを変えないので許可リストは要らず、メインから直接使う。④ 返答でノートを示すときは `[[ノート名]]`(同名があればフォルダつき)を決まりにした(ひな形の「作業のしかた」、`vault-notes` の報告、`open` の出力)。
++- **試験:** 偽のサーバーで `open` の 12 件(名前・パス・`[[ ]]`・絶対パス、同名、無いノート、危ない指定、Mac の濁点、キー)。**確かめていない:** 本物の Obsidian での `open`、Claudian の画面でリンクを押して開くこと、Windows。
++
+ ### 6.34 登場人物を覚える `people`(2026-11-11)
+ 
+ - **依頼:** AI にメールを読ませるとき、登場人物の補足が要る。自分も含めて、登場人物を覚えていくようにしたい。インタビューで覚えさせたい。
+diff --git a/agents/browser.md b/agents/browser.md
+index 9afefdfe6c3207f66b7cab184f01e7ffbabb8719..32978ca99270c3d533617917a1a4b09a4066b26f 100644
+--- a/agents/browser.md
++++ b/agents/browser.md
+@@ -73,10 +73,12 @@ permissions:
+ ## 手順
+ 
+ 1. 依頼の「見たいページ(URL)」と「知りたいこと」を確認する。URL が分からないときは、質問を返答する(ページは検索できない)。知りたいことが書かれていなければ、ページの要点を返す(聞き返さない)。
+-2. `browser_navigate` でページを開き、`browser_snapshot` で内容を読む。大きなページでは、`browser_find` で目的の部分を探す。
+-3. 別のページへ進む必要があるときは、リンクを `browser_click` で開く。進む回数は、必要最小限にする。
+-4. 知りたいことが分かったら、止める。関係ないページを巡回しない。
+-5. 下の「結果の返し方」に従って返す。
++2. **ブラウザ/MCP の起動:** Playwright MCP とブラウザは、ブラウザの道具を最初に呼んだときに自動で起動する。自分で起動・停止しない(`run.bat` やコマンドは使えない)。すでにタブがあれば、そのタブを使う(`browser_tabs` で確かめる)。`browser_navigate` が失敗したとき(ブラウザが起動しない、MCP につながらない)は、1 回だけやり直す。それでも開けないときは、止めて、エラーの文言をそのまま書いて返答する(結論: ページを開けなかった)。
++3. `browser_navigate` でページを開き、`browser_snapshot` で内容を読む。大きなページでは、`browser_find` で目的の部分を探す。
++4. 別のページへ進む必要があるときは、リンクを `browser_click` で開く。進む回数は、必要最小限にする。
++5. 知りたいことが分かったら、止める。関係ないページを巡回しない。
++6. 下の「結果の返し方」に従って返す。
++7. **作業完了後の片付け:** 作業中に自分で開いた余分なタブは、`browser_tabs` で閉じる(最後の 1 つは残す)。ブラウザそのものと MCP は、閉じない・止めない。
+ 
+ ## 守ること
+ 
+@@ -85,7 +87,7 @@ permissions:
+ - **ログインが必要なページでは、止まる。** パスワードやコードを入力しない。ログイン画面になったことを返答して、ブラウザのウィンドウで人間にログインしてもらう。ログイン後に、続きを依頼される。
+ - **送信・購入・削除・承認・申請のように、元に戻せないボタンは押さない。** 押さないと進めないときは、そのボタンの名前を示して、質問を返答する。
+ - フォームへの入力、キー操作、ファイルのアップロード、スクリプトの実行(`browser_evaluate`)は、確認が求められる。依頼に必要なときだけ使う。
+-- 作業の最後に、ブラウザを閉じない(続けて依頼されることがある)。
++- 作業の最後に、ブラウザを閉じない(続けて依頼されることがある)。閉じてよいのは、手順 7 の、自分で開いた余分なタブだけ。
+ - ページの文章を、そのまま大量に写さない。必要な部分だけを短く引用する。
+ - 推測で補わない。ページに書かれていないことは、書かれていないと答える。
+ 
+diff --git a/commands/remember.md b/commands/remember.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa7a6f70a1f53500e28e7d6bec19223ee560006d
+--- /dev/null
++++ b/commands/remember.md
+@@ -0,0 +1,9 @@
++---
++description: 環境・立場・好みを毎回読まれるプロフィールに覚える(使い方 /remember 内容)
++---
++
++スキル `memory` を読み込み、その「覚える」の手順に従って、次の内容をプロフィールに覚えてください: $ARGUMENTS
++
++内容が「忘れて」「消して」のときは、「忘れる」の手順に従ってください。内容が書かれていなければ、この会話で私が何度も伝えた前提(環境、立場、好み)から候補を挙げ、どれを覚えるか聞いてください。保存は、書く内容を示して私の承認を得てからにしてください。
++
++読み込めなかったときは、読み込めなかったことを最初に報告してください。
+diff --git a/docs/company-checklist.md b/docs/company-checklist.md
+index 347fe0ea15af592f9a324cff6970a7bf81b5586c..a8a5311c1e9bd9e6457aa5c77296cee5b7c1eea7 100644
+--- a/docs/company-checklist.md
++++ b/docs/company-checklist.md
+@@ -319,9 +319,21 @@ Outlook を起動してから行う。詳細は [outlook.md](outlook.md)。
+ | [ ] 「〇〇さんからの最新のメールを要約して」 | `outlook` が `who --mail` で引き、「〇〇さん(客先・…)(未レビュー)」と補う。確認なしで動く | 引かなかったら、`agents\outlook.md` の手順 3 を強める。確認が出たら、`people` の許可パターン |
+ | [ ] 初めての人が出るメールを要約させる | 返答に「人物メモの案」。メインが保存するか聞く。`outlook` は書かない | - |
+ 
+-## 22. 結果のまとめ
++## 22. プロフィール(`memory` / `/remember`)
++
++| 確認すること | 期待する結果 | うまくいかないときに見る所 |
++|---|---|---|
++| [ ] `templates\memory\profile.md` を `memory\profile.md` にコピーし、【 】を書き換える。`opencode.json` に `instructions` を足す | `opencode debug config` に `instructions` が出る | JSON の書き方。`~` が効かなければ、`C:/Users/<ユーザー>/.config/opencode/memory/*.md` と絶対パスで書く |
++| [ ] 新しいセッションで「私の立場と、使っている OS は?」 | プロフィールのとおりに答える | 答えられなければ、`instructions` のパス。`git status` で `memory/` が出ないこと(Git に入らない) |
++| [ ] 「ファイルの一覧を出すコマンドは?」 | PowerShell の書き方(`Get-ChildItem` など)で答える | Mac・Linux の書き方なら、プロフィールの「環境」の書き方を強める |
++| [ ] `/remember 報告書は、です・ます調で書く` | 足す節と行を示し、承認の後に書く。文字数を報告する | 承認の前に書いたら、手順書の「守ること」を強める |
++| [ ] `/remember 〇〇さんは△△の担当` | プロフィールには書かず、`people` を勧める | - |
++| [ ] サブエージェント(`researcher` など)にプロフィールの事実を聞く | 答えられるか記録する(読まれない場合も、依頼文で渡せば足りる) | - |
++| [ ] myao-patch-bridge で次の版を反映した後 | `memory\profile.md` が消えていない | 消えたら、運び方を見直す |
++
++## 23. 結果のまとめ
+ 
+ - 確認日:
+ - OpenCode のバージョン(CLI / Desktop):
+-- 総合: [ ] 共通ルール  [ ] スキル・コマンド  [ ] サブエージェント  [ ] Outlook  [ ] ブラウザ  [ ] ファイル検索  [ ] 文書の変換  [ ] 掃除  [ ] Obsidian 連携  [ ] 図の読み込み・作成  [ ] Claudian  [ ] プロジェクトの初期設定  [ ] 自作の Web アプリ  [ ] 計算の検算・長い文書  [ ] ブラウザの自動化・インタビュー  [ ] 登場人物
++- 総合: [ ] 共通ルール  [ ] スキル・コマンド  [ ] サブエージェント  [ ] Outlook  [ ] ブラウザ  [ ] ファイル検索  [ ] 文書の変換  [ ] 掃除  [ ] Obsidian 連携  [ ] 図の読み込み・作成  [ ] Claudian  [ ] プロジェクトの初期設定  [ ] 自作の Web アプリ  [ ] 計算の検算・長い文書  [ ] ブラウザの自動化・インタビュー  [ ] 登場人物  [ ] プロフィール
+ - 見つかった問題と、直した場所:
+diff --git a/docs/memory.md b/docs/memory.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..423dd90b8cb38462db1667d1b1752a4a5c7e6f50
+--- /dev/null
++++ b/docs/memory.md
+@@ -0,0 +1,53 @@
++# 利用者のプロフィールを覚える仕組み(`memory`)
++
++0.28.0 で入れた。
++
++## 結論
++
++- 「Windows である」「自分の立場」のような、**毎回前提にしたい短い事実**を、プロフィール `memory/profile.md` に書く。
++- 設定の `instructions` で、プロフィールを**すべてのセッションの最初に読み込ませる**。検索して思い出す方式ではないので、必ず効く。
++- 書き足し・削除は `/remember`(スキル `memory`)で行う。AI は案を示し、**利用者の承認の後に**書く。AI が自分の判断では書かない。人が手で直してもよい。
++- 他人のことは、人物ノート(スキル `people`、[people.md](people.md))へ。プロフィールには書かない。
++
++## 置き場所と設定
++
++| もの | 場所 | Git |
++|---|---|---|
++| プロフィール | `%USERPROFILE%\.config\opencode\memory\profile.md`(会社の PC だけ) | 入れない(`.gitignore` の `/memory/`。会社の情報を個人の GitHub に入れないため) |
++| ひな形 | `templates/memory/profile.md` | 入れる |
++| 読み込みの設定 | 会社の `opencode.json` の `"instructions": ["~/.config/opencode/memory/*.md"]`(雛形は `sample_opencode.json`) | 雛形だけ |
++
++- `instructions` は、OpenCode の設定のキー(「追加の指示ファイル」)。V1 からある。
++- **v2.2.6(Mac)で、`~` と `*` が展開されることを確かめた**(2026-11-12。一時的なホームにダミーのプロフィールを置き、無料モデルに合言葉を答えさせた)。会社の Windows で `~` が効かなければ、`C:/Users/<ユーザー>/.config/opencode/memory/*.md` と書く。
++- `memory/` に置いた `.md` は全部読まれる。分けたいときは、ファイルを足してよい(合計の大きさに注意)。
++
++## 大きさ
++
++- **2,000 文字以内**(毎回読まれるため。窓は約 13 万トークン)。スキル `memory` は、超えるときに消す・まとめる案も出す。雛形の大きさはテストが検査する(会社のプロフィールは Git の外なので検査しない)。
++- 1 行 1 事実。経歴などの詳しいことは、`people` の自分の人物ノートに置く。
++
++## 書くこと・書かないこと
++
++- 書く: 環境(Windows 11、PowerShell、パスの形、ネット不可、`.venv`)、立場(所属、役割、担当、決められる範囲)、書き方の好み、よく使う場所。
++- 書かない: パスワード・API キー・トークン、私的な連絡先・住所、私生活のこと、他人のこと。
++
++## opencode-mem を採らなかった理由(2026-11-12)
++
++[opencode-mem](https://github.com/tickernelz/opencode-mem)(v2.42.0、MIT。OpenCode のプラグイン。V2・Windows 対応)を、README と package.json で調べた。よくできているが、会社の環境と次の点がぶつかる。
++
++1. 導入は npm 経由(`"plugins": ["opencode-mem@latest"]`)。会社は npm で取得できない。同梱するなら、ネイティブの部品(`onnxruntime-node`、`@tursodatabase/database`)の Windows 用を自宅で揃える必要がある。
++2. 埋め込みモデルを、初回に Hugging Face から取得する(オフラインでは動かない)。メモリを 0.5〜2 GB 使う。社内に埋め込みの API があるかは不明。
++3. 自動の記録(既定で有効)が、裏で LLM を呼び、構造化出力を要る。社内のモデルが対応するかは未確認。誤った記憶が、確認なしに溜まる。
++4. Web UI(127.0.0.1:4747)と自動更新がある。Windows では、複数のセッション(CLI・Desktop・Claudian)が同じデータベースを共有できない。
++5. 検索で関係しそうな記憶を出す方式なので、「いつも効かせたい事実」には、毎回読まれるファイルのほうが確実。
++
++**見直す条件:** 「過去の作業や会話を、大量に検索して思い出させたい」需要が出たとき。そのときは、オフラインで揃うか(埋め込みを社内の API にできるか)、自動の記録を止められるか、から確かめる。
++
++## 確かめていないこと
++
++- 会社の Windows で `instructions` が読まれるか(`~` の展開を含む)。
++- 子セッション(サブエージェント)にもプロフィールが読まれるか。読まれなくても、子への依頼文に要る事実を書く決まり(共通 `AGENTS.md`)で足りる。
++- myao-patch-bridge で反映したときに、Git の外の `memory/` が消えないか(`opencode.json` と同じ扱いのはず)。
++- 実際のモデルが、`/remember` で承認の前に書かないか。
++
++会社での確認は [company-checklist.md](company-checklist.md) の 22。
+diff --git a/docs/obsidian.md b/docs/obsidian.md
+index 152b5af99dc01535c5de488ab0251d98d3a3e91d..dec4ce67c251a35ce0658755cbbe2e424824a5aa 100644
+--- a/docs/obsidian.md
++++ b/docs/obsidian.md
+@@ -72,6 +72,7 @@
+ - **API キー:** 環境変数 `OBSIDIAN_API_KEY`。設定ファイルに書くと拒否する。画面にも出さない(テストで確認)。
+ - **TLS:** HTTPS のときは、Local REST API の CA 証明書(`/obsidian-local-rest-api.crt`)をダウンロードして `api.ca_file` に指定する。面倒なら、プラグインの設定で HTTP を有効にして、`api.url` を `http://127.0.0.1:27123` にする(自分の PC の中だけの通信)。`verify_tls: false` も使えるが、非推奨。
+ - **変化の検出:** 実行の前後で、`watch` のフォルダ(Vault からの相対)を比べる。最初の変化を `wait_sec`(既定 15 秒)まで待ち、出たあとは `settle_sec`(既定 2 秒)の間、変化が止まるまで待つ。ドットで始まる場所と一時ファイル(`~$`)は数えない。**変化が検出できなかったときは、成功と言わない**(ファイルを作らないコマンド、時間がかかる、結果が監視の外、のどれか)。
++- **ノートを開く(`open`、0.27.0):** `POST /open/<パス>`(Local REST API が `decodeURIComponent` して `workspace.openLinkText(パス, "/", newLeaf)` を呼ぶ。5.5.2 のソースで確認)で、Vault にあるノートを Obsidian の画面に開く。**この API は、無いパスを渡すと新しいノートを作る**ので、スクリプトが Vault を探して、実在するファイルが 1 つに決まったときだけ渡す(無い・候補が複数のときは通信しない)。ドットで始まる場所、Vault の外、シンボリックリンクの先、名前に `# ^ | [ ]` を含むもの(`openLinkText` が見出しや別名として読み、別のノートを作るおそれ)、表示できない種類(`.exe` など)は開かない。ファイルを変えないので、許可リストは要らず、メインから直接使う。API は開いた結果を返さない(エラーは Obsidian のコンソールに出るだけ)。
+ - **権限:** `obsidian` の `shell` は、`run` が確認つき(`ask`)、`--dry-run` と `list` `check` `commands` は確認なし。メインからは、`obsidian` に任せる(`/obsidian-run` は `obsidian` で動く)。実行の結果(大きなファイルなど)が、メインのコンテキストに入らないようにするため。
+ 
+ ## 6. 会社での準備(人間の作業)
+@@ -117,7 +118,7 @@
+ 
+ - (自宅で確認済み)実際の Local REST API の応答。会社の版が違う可能性があるので、会社でも `check` を行う。
+ - 会社の Vault で、使いたいプラグインが**コマンドとして一覧に出るか**。出なければ、このスキルでは実行できない(自宅では出た)。
+-- 「現在のノートを〜」のコマンドは、開いているノートに対して動く(自宅で確認済み)。対象のノートを API から開くことは、この版ではできない。人が先に開く。
++- 「現在のノートを〜」のコマンドは、開いているノートに対して動く(自宅で確認済み)。対象のノートは `open` で開ける(0.27.0)。ただし、本物の Obsidian での `open` の動作と、開いた直後にコマンドを実行して対象が合うかは未確認。
+ - 実行に時間がかかるコマンドで、`wait_sec` / `settle_sec` が足りるか(Pandoc の HTML 書き出しは 2.5 秒だった)。
+ - 画面に開くだけのコマンドや、ダイアログを出すコマンド(`workspace:export-pdf` など)は、自動実行に向かない。
+ - Windows での `run.bat` と、`shell` の許可のパターンの動作。
+@@ -136,4 +137,19 @@ Vault の自作の機能は、右クリックメニューやモーダルだけ
+ 
+ - 「この件を検討して、結論をノートにして保管して」 → `vault-notes`: `today` → 下書き → `new-note --dry-run` → 確認 → `new-note`(今日のフォルダーに作られる)
+ - 「〇〇のノートに、△△の修正を入れて」 → `vault-notes`: 読む → `backup` → 変更案(前後)を承認 → `edit`
++- 「〇〇のノートを開いて」 → `obsidian-run` の `open 〇〇`(メインから直接。返答には `[[〇〇]]` を書く)
+ - 「印刷用の HTML を作って」 → 許可リストにコマンドがあれば `obsidian`(この Vault では `export-html-human`。開いているノートが `temp/` に HTML になる)。**コマンドが無い場合は、Vault のスクリプトにコマンドを足す(9)か、LLM が HTML を直接書く方法もある**(印刷用のスタイル付きの `.html` を、`write` で作る)。プラグインの描画(Dataview の表、Excalidraw、Pandoc のテンプレートなど)が要るときだけ、プラグインのコマンドを使う。
++
++## 11. Claudian のチャットのリンク(0.27.0)
++
++Obsidian の中で動く Claudian(プラグイン `realclaudian`、2.3.39 で確認)は、チャットの返答を Obsidian の `MarkdownRenderer` で描画したあと、**`[[ノート名]]` をクリックで開けるリンクに置き換える**(本文の文字、インラインコードの中、`[表示](パス)` の内部リンク)。クリックすると、そのノートが既に開いていればそのタブへ、なければ新しいタブで開く(Ctrl・Cmd を押しながらなら、Obsidian の既定の開き方)。プラグインの側の作業は要らない。
++
++リンクになる条件(`main.js` で確認):
++
++- 先が Vault に**実在する**こと(`metadataCache.getFirstLinkpathDest` か、Vault のパス)。無いノートは、ただの文字のまま。
++- コードブロック(` ``` `)の中は、リンクにならない。
++- パスだけ(`01_data/2026/11/07/報告書.md`)は、リンクにならない。
++
++そのため、ハーネスの側で「返答でノートを示すときは `[[ノート名]]` で書く」を決まりにした(`templates/obsidian/AGENTS.md` の「作業のしかた」、`vault-notes` の報告、`obsidian-run` の `open` の出力の「リンク: `[[…]]`」)。同名のノートがあるときは、フォルダつき(`[[01_data/…/ノート名]]`)にする。表の中では `[[名前|別名]]` の `|` が表の区切りになるので、別名を使わない。
++
++**確認していないこと:** 実際の Claudian の画面で、モデルが `[[ ]]` を書いたときにクリックで開けること(コードを読んで判断した)。会社の Claudian の版で同じ作りか。
+diff --git a/run_tests.py b/run_tests.py
+index 57b66c88984f9b3dafe7080d8259a1c9778dc4e4..60809e29637a4653b26463390edae3f50691cbf0 100644
+--- a/run_tests.py
++++ b/run_tests.py
+@@ -4,6 +4,7 @@
+ 
+   - tests/            ハーネス全体の整合性テスト
+   - skills/*/tests/   スキルごとのテスト (偽の Outlook、偽のサーバーを使う)
++  - templates/ai_work/.opencode/skills/*/tests/   AI_work のひな形に入れたスキルのテスト
+ どれかが失敗したら、終了コード 1。ファイルを足す・直したら、運ぶ前に必ず通す。
+ """
+ from __future__ import annotations
+@@ -19,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
+ def main() -> int:
+     if hasattr(sys.stdout, "reconfigure"):
+         sys.stdout.reconfigure(encoding="utf-8")
+-    suites = [ROOT / "tests", *sorted(ROOT.glob("skills/*/tests"))]
++    suites = [ROOT / "tests", *sorted(ROOT.glob("skills/*/tests")), *sorted(ROOT.glob("templates/ai_work/.opencode/skills/*/tests"))]
+     failed = []
+     env = {**os.environ, "PYTHONUTF8": "1"}
+     for suite in suites:
+diff --git a/sample_opencode.json b/sample_opencode.json
+index ec2d9568a1826ec15d7541b73a5e3635eeab41b9..f8c872a4119cdad283fed21adb94294a41a7bc90 100644
+--- a/sample_opencode.json
++++ b/sample_opencode.json
+@@ -2,6 +2,7 @@
+   "$schema": "https://opencode.ai/config.json",
+   "update": "disable",
+   "share": "disabled",
++  "instructions": ["~/.config/opencode/memory/*.md"],
+   "permissions": [
+     {"action": "read", "resource": "*", "effect": "allow"},
+     {"action": "read", "resource": "*.env", "effect": "ask"},
+diff --git a/skills/memory/SKILL.md b/skills/memory/SKILL.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..013bc9e8182cfd2b6f8262986f76fabd32aff46c
+--- /dev/null
++++ b/skills/memory/SKILL.md
+@@ -0,0 +1,32 @@
++---
++name: memory
++description: 利用者の環境・立場・好みを、毎回読まれるプロフィールに覚える・忘れる手順。「覚えて」「忘れて」と言われたとき
++---
++
++## 前提
++
++- プロフィールは `~/.config/opencode/memory/profile.md`(Windows は `%USERPROFILE%\.config\opencode\memory\profile.md`)。設定の `instructions` で、すべてのセッションの最初に読み込まれる。
++- 無いときは、雛形 `~/.config/opencode/templates/memory/profile.md` をコピーして作る案を示す(作るのは承認の後)。
++- 中身は人が読んで直せる Markdown。節は「環境」「立場」「書き方の好み」「よく使う場所」。合う節が無いときだけ、節を足す。
++
++## 守ること
++
++- **書くのは、利用者が言ったことだけ。** 会話から推測したことを足さない。推測で候補を出すときは、そう明記する。
++- **書くのは、毎回前提にしたい短い事実だけ。** 1 行 1 事実。言い切りで書く。その場かぎりの作業や、ファイルを見れば分かることは書かない。
++- **書かない:** パスワード、API キー、トークン、私的な連絡先・住所、健康・家族など私生活のこと。**他人のこと**は人物ノート(スキル `people`)へ。言われても書かず、理由を伝える。
++- **保存は、承認の後。** 先に、どの節に、どの行を足す・直す・消すかを示す。
++- 同じ内容や食い違う行があれば、足さずに、古い行を直す案にする。
++- **2,000 文字以内に保つ**(毎回読まれるため)。文字数は、Python の `len()` で測る(バイト数で測らない)。超えるときは、消す・まとめる案もあわせて示す。
++
++## 覚える
++
++1. プロフィールを読む。
++2. 言われたことを、1 行 1 事実に書き直し、入れる節を決める。
++3. 足す行(直す行・消す行があれば、その前後)を示し、承認を得る。
++4. 承認の後に編集する。編集の後、文字数を測って報告する。
++5. 「次のセッションから効きます(いまの会話には、すでに伝わっています)」と伝える。
++
++## 忘れる
++
++1. プロフィールから、当てはまる行を探して示す。
++2. 承認の後に、その行を消す。消した行を報告する。
+diff --git a/skills/obsidian-run/SKILL.md b/skills/obsidian-run/SKILL.md
+index c5b40c8e3ecf2278cab5c7bfcdb76f283b89508f..27054ee31880274194f492f05df6d4fc005fcde4 100644
+--- a/skills/obsidian-run/SKILL.md
++++ b/skills/obsidian-run/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: obsidian-run
+-description: Obsidian のプラグインやコマンドを、許可リストにあるものだけ実行する手順(印刷用 HTML の書き出しなど)。実行後に、できたファイルを知らせる
++description: Obsidian でノートを開く手順と、プラグインやコマンドを許可リストにあるものだけ実行する手順(印刷用 HTML の書き出しなど)。実行後に、できたファイルを知らせる
+ ---
+ 
+ ## 前提
+@@ -12,6 +12,25 @@ description: Obsidian のプラグインやコマンドを、許可リストに
+   - 実行用: `<スキルのフォルダ>\run.bat`(Mac・Linux では `<スキルのフォルダ>/run.sh`。引数は同じ)
+   - 本体: `<スキルのフォルダ>\scripts\obsidian_cli.py`
+ - 実行は、必ず `run.bat` を通す。API キーは環境変数(`OBSIDIAN_API_KEY`)から読まれる。キーを聞いたり、書いたり、表示したりしない。
++- **ノートを開くだけ(`open`)なら、許可リストは要らない。メインから直接使ってよい**(子の `obsidian` に任せなくてよい)。ファイルは変えない。
++
++## ノートを開く
++
++「〇〇のノートを開いて」「さっき作ったノートを Obsidian で見せて」のとき。Vault に**既にある**ノートを、Obsidian の画面で開く。
++
++```
++run.bat open 報告書
++run.bat open "01_data/2026/11/07/報告書.md" --new-tab
++run.bat open "[[報告書]]" --dry-run
++```
++
++- 指定は、ノート名(拡張子なしでよい)、Vault からのパス(途中からでもよい。`07/報告書`)、`[[ノート名]]` のどれか。Vault の中の絶対パスも使える。`[[ノート名#見出し]]` の見出しは無視して、ノートの先頭を開く。
++- 既定は、いまのタブ。`--new-tab` で新しいタブ。`--dry-run` は、どのファイルを開くかだけ表示する(通信しない)。
++- 開けるのは、ノート(`.md`)、図(`.excalidraw.md`、`.drawio`)、`.canvas`、`.base`、PDF、画像、音声・動画。ドットで始まる場所(`.obsidian`、`.trash` など)と Vault の外は開かない。
++- **無いノートは作らない。** Local REST API は、無いパスを渡すとノートを作ってしまうので、このスクリプトは、実在を確かめたファイルだけを渡す。「Vault に見つかりません」と出たら、名前を確かめるか、探して(`vault-notes` の `related` や `grep`)、パスで指定し直す。ノートを作って開こうとしない。
++- 「候補が N 個あります」と出たら(同じ名前のノートが複数)、どれも開いていない。依頼に合う候補をパスで指定し直す。どれか決められなければ、候補を示して聞く。
++- 出力の「リンク: `[[…]]`」は、返答にそのまま書く(Claudian のチャットでは、クリックで開けるリンクになる)。
++- Obsidian は、画面に出たかどうかを返さない。「開きました」は、開く指示を送ったという意味。
+ 
+ ## 守ること
+ 
+@@ -72,7 +91,7 @@ Obsidian にあるコマンドの ID と名前の一覧。「許可済み」の
+ | 変化: 検出できませんでした | ファイルを作らないコマンド、時間がかかっている、結果が監視の外、対象のノートが開かれていない、のどれか | 成功と言わない。「未確認」に書く |
+ | 監視するフォルダが未設定 | 結果の場所が分からない | 結果の場所を人に確認する |
+ 
+-注意: エディタのコマンド(「現在のノートを〜」など)は、Obsidian で**いま開いているノート**に対して動く。どのノートが開かれているかは、このスキルでは操作できない(未確認)。そういうコマンドを実行するときは、人に、対象のノートを開いてもらってから実行する。
++注意: エディタのコマンド(「現在のノートを〜」など)は、Obsidian で**いま開いているノート**に対して動く。そういうコマンドを実行するときは、先に `open` で対象のノートを開いてから実行する(開く操作は待たずに返るので、開いた直後に実行して、対象が違うノートにならないかは未確認。確かめられないときは、人に、対象のノートが開かれているか見てもらう)。
+ 
+ ## うまくいかないとき
+ 
+diff --git a/skills/obsidian-run/scripts/obsidian_cli.py b/skills/obsidian-run/scripts/obsidian_cli.py
+index c64fd66e06cab2e59eb9e50d2e44fa9740f0dd58..5d71cbd73009662215032750a66118eec17f5d64 100644
+--- a/skills/obsidian-run/scripts/obsidian_cli.py
++++ b/skills/obsidian-run/scripts/obsidian_cli.py
+@@ -4,11 +4,13 @@
+   list     : 許可したコマンドの一覧 (設定ファイルの内容)
+   commands : Obsidian にある全コマンドの ID を探す (実行はできない。許可リストに足す ID を見つけるため)
+   run      : 許可したコマンドを 1 つ実行し、監視するフォルダの変化 (新規・更新・削除) を報告する
++  open     : Vault にある (既にある) ノートを、Obsidian の画面で開く。許可リストは要らない (開くだけで、ファイルは変えない)
+ 
+ Local REST API は、コマンドの実行結果を返さない (成功したかどうかだけ)。そのため、コマンドの前後で
+ Vault のフォルダを比べて、できたファイルを知らせる。結果の中身は、あとで人が (または別のエージェントが) ファイルとして読む。
+ 
+-使うのは GET / と GET /commands/ と POST /commands/<id>/ だけ。接続先は自分の PC (127.0.0.1 など) に限る。
++使うのは GET / と GET /commands/ と POST /commands/<id>/ と POST /open/<パス> だけ。接続先は自分の PC (127.0.0.1 など) に限る。
++POST /open/ は、無いパスを渡すと Obsidian が新しいノートを作る。そのため、ここで実在を確かめたファイルだけを渡す。
+ API キーは環境変数から読み、設定ファイルにも画面にも出さない。
+ """
+ from __future__ import annotations
+@@ -21,6 +23,7 @@ import re
+ import ssl
+ import sys
+ import time
++import unicodedata
+ import urllib.error
+ import urllib.parse
+ import urllib.request
+@@ -34,6 +37,15 @@ ALIAS_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")
+ COMMAND_ID_RE = re.compile(r"^[^\s/?#%]{1,200}$")
+ MAX_SNAPSHOT_FILES = 20000
+ SHOW_LIMIT = 30
++# open で開いてよい種類 (Obsidian の画面で表示できるもの)。それ以外は、外部のアプリで開かれることがあるので扱わない
++OPENABLE_SUFFIXES = {".md", ".canvas", ".base", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".bmp",
++                     ".mp3", ".wav", ".m4a", ".ogg", ".mp4", ".webm", ".mov", ".drawio"}
++# 探さないフォルダ (ドットで始まるものに加えて)
++SKIP_DIRS = {"node_modules", "__pycache__"}
++# Obsidian のリンクとして読まれる文字。パスに入っていると、別のノートを開いたり、作ったりするおそれがある
++LINK_SPECIAL = set("#^|[]")
++CANDIDATE_LIMIT = 10
++MAX_SCAN_FILES = 200000
+ 
+ 
+ class ConfigError(Exception):
+@@ -144,7 +156,7 @@ def is_within(path: Path, root: Path) -> bool:
+ # ---------------------------------------------------------------------------
+ 
+ class Api:
+-    """GET / と GET /commands/ と POST /commands/<id>/ だけを呼ぶ。"""
++    """GET / と GET /commands/ と POST /commands/<id>/ と POST /open/<パス> だけを呼ぶ。"""
+ 
+     def __init__(self, config: Config, key: str | None) -> None:
+         self.config = config
+@@ -209,6 +221,17 @@ class Api:
+             raise ApiError(f"コマンドの実行が {code} を返しました")
+         return code
+ 
++    def open_file(self, rel_path: str, new_tab: bool) -> int:
++        """rel_path は、resolve_note で実在を確かめた、Vault からの相対パス (/ 区切り)。"""
++        code, _ = self._call("POST", "/open/" + urllib.parse.quote(rel_path, safe="/") + ("?newLeaf=true" if new_tab else ""), auth=True)
++        if code in (401, 403):
++            raise ApiError("API キーが正しくありません (401/403)")
++        if code == 404:
++            raise ApiError("この版の Local REST API には、ノートを開く機能 (POST /open/) がありません")
++        if code not in (200, 204):
++            raise ApiError(f"ノートを開く操作が {code} を返しました")
++        return code
++
+ 
+ # ---------------------------------------------------------------------------
+ # 前後の比較
+@@ -370,6 +393,103 @@ def cmd_run(config: Config, api: Api, alias: str, dry_run: bool, out: TextIO, cl
+     return 0
+ 
+ 
++def _norm(text: str) -> str:
++    """比べるための形 (Mac のファイル名の濁点の分解、全角半角でない大文字小文字の違いをそろえる)。"""
++    return unicodedata.normalize("NFC", text).casefold()
++
++
++def iter_vault_files(vault: Path) -> list[str]:
++    """Vault のファイル (Vault からの相対、/ 区切り)。ドットで始まる場所、node_modules、シンボリックリンクは除く。"""
++    result: list[str] = []
++    for directory, dirnames, filenames in os.walk(vault, followlinks=False):
++        dirnames[:] = sorted(d for d in dirnames if not d.startswith(".") and d not in SKIP_DIRS and not (Path(directory) / d).is_symlink())
++        for name in sorted(filenames):
++            if name.startswith(".") or (Path(directory) / name).is_symlink():
++                continue
++            result.append((Path(directory) / name).relative_to(vault).as_posix())
++            if len(result) > MAX_SCAN_FILES:
++                raise ConfigError(f"Vault のファイルが {MAX_SCAN_FILES} 個を超えました。フォルダつきのパスで指定してください")
++    return result
++
++
++def clean_target(target: str, vault: Path) -> str:
++    """[[ノート名|別名]]、[[ノート名#見出し]]、\\ 区切り、Vault の中の絶対パスを、Vault からの相対の形にする。"""
++    text = target.strip().strip('"').strip("'").strip()
++    if text.startswith("![["):
++        text = text[1:]
++    if text.startswith("[[") and text.endswith("]]"):
++        text = text[2:-2]
++        text = re.split(r"[|#^]", text, maxsplit=1)[0]  # 別名・見出し・ブロックは捨てる (ノートの先頭を開く)
++    text = text.strip()
++    if not text:
++        raise ConfigError("開くノートを指定してください (ノート名、Vault からのパス、[[ノート名]] のどれか)")
++    path = Path(text)
++    if path.is_absolute() or re.match(r"^[A-Za-z]:", text):
++        root = vault.resolve()
++        resolved = path.resolve()
++        if not is_within(resolved, root):
++            raise ConfigError(f"Vault の外のファイルは開けません: {text}")
++        text = resolved.relative_to(root).as_posix()
++    parts = [p for p in text.replace("\\", "/").split("/") if p not in ("", ".")]
++    if ".." in parts:
++        raise ConfigError(f"'..' を含むパスは使えません: {text}")
++    if any(p.startswith(".") for p in parts):
++        raise ConfigError(f"ドットで始まる場所 (.obsidian など) は開けません: {text}")
++    if not parts:
++        raise ConfigError("開くノートを指定してください")
++    return "/".join(parts)
++
++
++def find_notes(files: list[str], key: str) -> list[str]:
++    """ノート名 (拡張子なしでもよい) か、Vault からのパス (途中からでもよい) に合うファイル。完全に合うものがあれば、それだけ。"""
++    wanted = {_norm(key), _norm(key + ".md")}
++    hits = [f for f in files if _norm(f) in wanted or any(_norm(f).endswith("/" + w) for w in wanted)]
++    exact = [f for f in hits if _norm(f) in wanted]
++    return exact or hits
++
++
++def link_form(rel: str, files: list[str]) -> str:
++    """Obsidian のリンクの形。同じ名前のファイルが他にもあれば、フォルダつきにする。"""
++    name = rel.rsplit("/", 1)[-1]
++    same = [f for f in files if _norm(f.rsplit("/", 1)[-1]) == _norm(name)]
++    text = rel if len(same) > 1 else name
++    if text.lower().endswith(".md"):
++        text = text[:-3]
++    return f"[[{text}]]"
++
++
++def cmd_open(config: Config, api: Api, target: str, new_tab: bool, dry_run: bool, out: TextIO) -> int:
++    key = clean_target(target, config.vault)
++    files = iter_vault_files(config.vault)
++    hits = find_notes(files, key)
++    if not hits:
++        raise ConfigError(f"Vault に見つかりません: {target}。開くだけなので、ノートは作りません。名前を確かめるか、探してから (vault-notes の related など)、パスで指定してください")
++    if len(hits) > 1:
++        out.write(f"候補が {len(hits)} 個あります。開いていません。どれかをパスで指定し直してください:\n")
++        for rel in hits[:CANDIDATE_LIMIT]:
++            out.write(f"  {rel}  {link_form(rel, files)}\n")
++        if len(hits) > CANDIDATE_LIMIT:
++            out.write(f"  … ほか {len(hits) - CANDIDATE_LIMIT} 個 (フォルダを足して絞る)\n")
++        return 2
++    rel = hits[0]
++    if Path(rel).suffix.lower() not in OPENABLE_SUFFIXES:
++        raise ConfigError(f"この種類のファイルは、Obsidian で開く対象にしていません: {rel}")
++    if LINK_SPECIAL & set(rel):
++        raise ConfigError(f"名前に # ^ | [ ] のどれかが入っていて、Obsidian が別のノートとして読むおそれがあるので、開きません: {rel}。人が Obsidian で開いてください")
++    resolved = (config.vault / rel).resolve()
++    if not (is_within(resolved, config.vault.resolve()) and resolved.is_file()):
++        raise ConfigError(f"Vault の中のファイルとして確かめられませんでした: {rel}")
++    link = link_form(rel, files)
++    where = "新しいタブ" if new_tab else "いまのタブ"
++    if dry_run:
++        out.write(f"[試行] 開くノート: {rel} ({where})\n  リンク: {link}\n実際には開いていません\n")
++        return 0
++    api.open_file(rel, new_tab)
++    out.write(f"開きました: {rel} ({where})\n  リンク: {link}\n")
++    out.write("  Obsidian は、画面に出たかどうかを返しません。出ていなければ、Obsidian の画面を確認してもらってください\n")
++    return 0
++
++
+ def build_parser() -> argparse.ArgumentParser:
+     parser = argparse.ArgumentParser(prog="obsidian_cli", description="Obsidian のコマンドを、許可リストにあるものだけ実行する")
+     sub = parser.add_subparsers(dest="command", required=True)
+@@ -381,6 +501,10 @@ def build_parser() -> argparse.ArgumentParser:
+     run = sub.add_parser("run", help="許可したコマンドを実行する")
+     run.add_argument("alias")
+     run.add_argument("--dry-run", action="store_true", help="実行せずに、何をするかだけ表示する")
++    open_ = sub.add_parser("open", help="Vault にあるノートを、Obsidian の画面で開く (無いノートは作らない)")
++    open_.add_argument("note", help="ノート名 (拡張子なしでよい)、Vault からのパス、または [[ノート名]]")
++    open_.add_argument("--new-tab", action="store_true", help="新しいタブで開く (既定は、いまのタブ)")
++    open_.add_argument("--dry-run", action="store_true", help="開かずに、どのファイルを開くかだけ表示する")
+     return parser
+ 
+ 
+@@ -399,6 +523,8 @@ def main(argv: list[str] | None = None, stdout: TextIO | None = None, stderr: Te
+             return cmd_list(config, out)
+         if args.command == "run" and args.dry_run:
+             return cmd_run(config, Api(config, None), args.alias, True, out, clock, sleep)
++        if args.command == "open":
++            return cmd_open(config, Api(config, None if args.dry_run else get_key(config)), args.note, args.new_tab, args.dry_run, out)
+         api = Api(config, get_key(config))
+         if args.command == "check":
+             return cmd_check(config, api, out)
+diff --git a/skills/obsidian-run/tests/test_obsidian.py b/skills/obsidian-run/tests/test_obsidian.py
+index 07b264d16a828596807ada6d50e5cc6b2e447347..5e2ed54462aa40f985b0399a677a44ea863b82ac 100644
+--- a/skills/obsidian-run/tests/test_obsidian.py
++++ b/skills/obsidian-run/tests/test_obsidian.py
+@@ -13,7 +13,9 @@ import socketserver
+ import sys
+ import tempfile
+ import threading
++import unicodedata
+ import unittest
++import urllib.parse
+ from pathlib import Path
+ from typing import Callable
+ from unittest.mock import patch
+@@ -33,6 +35,7 @@ class FakeObsidian:
+         self.requests: list[tuple[str, str, str | None]] = []
+         self.commands = [{"id": "editor:toggle-bold", "name": "Toggle bold"}, {"id": "my-plugin:export-html", "name": "My plugin: export html"}, {"id": "app:delete-file", "name": "Delete current file"}]
+         self.executed: list[str] = []
++        self.opened: list[tuple[str, bool]] = []  # (デコードしたパス, newLeaf)
+         self.on_execute: Callable[[str], None] | None = None
+         self.post_status = 204
+         owner = self
+@@ -73,6 +76,10 @@ class FakeObsidian:
+                     if owner.on_execute:
+                         owner.on_execute(command_id)
+                     return self._send(owner.post_status)
++                if self.path.startswith("/open/"):  # 本物と同じく、パスを decodeURIComponent して開く (無ければ作る)
++                    raw, _, query = self.path[len("/open/"):].partition("?")
++                    owner.opened.append((urllib.parse.unquote(raw), "newLeaf=true" in query))
++                    return self._send(200, {})
+                 self._send(404, {"message": "not found"})
+ 
+         class Server(http.server.HTTPServer):
+@@ -419,12 +426,116 @@ class OtherCommandTests(Base):
+             self.assertNotIn("SECRET", path)  # URL にも入れない
+ 
+ 
++class OpenTests(Base):
++    def setUp(self) -> None:
++        super().setUp()
++        self.make("01_data/2026/11/07/報告書.md")
++        self.make("01_data/2026/11/08/議事録.md")
++        self.make("01_data/2026/11/09/議事録.md")
++        self.make("01_data/2026/11/09/図_流れ.excalidraw.md")
++        self.make("Media/資料.pdf")
++        self.make("Media/tool.exe")
++        self.make("01_data/2026/11/09/a#b.md")
++        self.make(".obsidian/workspace.json", "{}")
++        self.make(".trash/消した.md")
++
++    def test_名前で開く_リンクの形も出す(self) -> None:
++        code, out, err = self.run_cli("open", "報告書")
++        self.assertEqual((code, err), (0, ""))
++        self.assertEqual(self.fake.opened, [("01_data/2026/11/07/報告書.md", False)])
++        self.assertIn("開きました: 01_data/2026/11/07/報告書.md (いまのタブ)", out)
++        self.assertIn("リンク: [[報告書]]", out)
++
++    def test_いろいろな指定の形(self) -> None:
++        for target in ("報告書.md", "[[報告書]]", "[[報告書|別名]]", "[[報告書#結論]]", "07/報告書", "01_data\\2026\\11\\07\\報告書.md", str(self.vault / "01_data/2026/11/07/報告書.md")):
++            self.fake.opened.clear()
++            code, _, err = self.run_cli("open", target)
++            self.assertEqual((code, err, self.fake.opened), (0, "", [("01_data/2026/11/07/報告書.md", False)]), target)
++
++    def test_新しいタブ(self) -> None:
++        self.run_cli("open", "報告書", "--new-tab")
++        self.assertEqual(self.fake.opened, [("01_data/2026/11/07/報告書.md", True)])
++
++    def test_Macの濁点の分解と大文字小文字をそろえる(self) -> None:
++        self.make("01_data/2026/11/10/" + unicodedata.normalize("NFD", "ガイド") + ".md")
++        self.make("01_data/2026/11/10/ReadMe.md")
++        self.assertEqual(self.run_cli("open", "ガイド")[0], 0)
++        self.assertEqual(self.run_cli("open", "readme")[0], 0)
++        self.assertEqual(len(self.fake.opened), 2)
++
++    def test_無いノートは開かない_作らない(self) -> None:
++        code, _, err = self.run_cli("open", "ない")
++        self.assertEqual(code, 2)
++        self.assertIn("ノートは作りません", err)
++        self.assertEqual([r for r in self.fake.requests if r[0] == "POST"], [])  # 本物は、無いパスを渡すと作ってしまう
++
++    def test_同名が複数なら候補を出して開かない(self) -> None:
++        code, out, _ = self.run_cli("open", "議事録")
++        self.assertEqual(code, 2)
++        self.assertIn("候補が 2 個", out)
++        self.assertIn("01_data/2026/11/08/議事録.md  [[01_data/2026/11/08/議事録]]", out)
++        self.assertEqual(self.fake.opened, [])
++        code, out, _ = self.run_cli("open", "09/議事録")
++        self.assertEqual(code, 0)
++        self.assertIn("リンク: [[01_data/2026/11/09/議事録]]", out)  # 同名があるのでフォルダつき
++
++    def test_図とPDFは開ける_ほかの種類は開かない(self) -> None:
++        self.assertEqual(self.run_cli("open", "図_流れ.excalidraw")[0], 0)
++        self.assertEqual(self.run_cli("open", "Media/資料.pdf")[0], 0)
++        code, _, err = self.run_cli("open", "tool.exe")
++        self.assertEqual(code, 2)
++        self.assertIn("この種類のファイル", err)
++        self.assertEqual([p for p, _ in self.fake.opened], ["01_data/2026/11/09/図_流れ.excalidraw.md", "Media/資料.pdf"])
++
++    def test_危ない指定は通信しない(self) -> None:
++        for target in ("../外.md", ".obsidian/workspace.json", ".trash/消した.md", "消した", "a#b", "", "[[]]", "/etc/hosts", str(self.tmp / "外.md")):
++            code, _, err = self.run_cli("open", target)
++            self.assertEqual(code, 2, target)
++            self.assertTrue(err, target)
++        self.assertEqual([r for r in self.fake.requests if r[0] == "POST"], [])
++
++    def test_シンボリックリンクの先は探さない(self) -> None:
++        outside = self.tmp / "outside"
++        outside.mkdir()
++        (outside / "外のノート.md").write_text("x", encoding="utf-8")
++        try:
++            (self.vault / "link").symlink_to(outside, target_is_directory=True)
++        except OSError:
++            self.skipTest("シンボリックリンクを作れない環境")
++        code, _, _ = self.run_cli("open", "外のノート")
++        self.assertEqual(code, 2)
++        self.assertEqual(self.fake.opened, [])
++
++    def test_dry_runは通信しない_キーも要らない(self) -> None:
++        os.environ.pop("OBSIDIAN_API_KEY", None)
++        code, out, _ = self.run_cli("open", "報告書", "--dry-run")
++        self.assertEqual(code, 0)
++        self.assertIn("[試行] 開くノート: 01_data/2026/11/07/報告書.md", out)
++        self.assertEqual(self.fake.requests, [])
++
++    def test_キーが無い_違うとき(self) -> None:
++        os.environ.pop("OBSIDIAN_API_KEY", None)
++        code, _, err = self.run_cli("open", "報告書")
++        self.assertEqual(code, 3)
++        self.assertIn("API キーがありません", err)
++        with patch.dict(os.environ, {"OBSIDIAN_API_KEY": "WRONG-" + API_KEY}):
++            code, out, err = self.run_cli("open", "報告書")
++        self.assertEqual(code, 3)
++        self.assertNotIn("WRONG-", out + err)
++        self.assertEqual(self.fake.opened, [])
++
++    def test_許可リストが空でも開ける(self) -> None:
++        code, _, _ = self.run_cli("open", "報告書", config=self.write_config(commands={}))
++        self.assertEqual(code, 0)
++        self.assertEqual(self.fake.executed, [])  # コマンドは実行しない
++
++
+ class SafetyTests(unittest.TestCase):
+-    def test_ソースが呼ぶのは_コマンドの一覧と実行だけ(self) -> None:
++    def test_ソースが呼ぶのは_コマンドの一覧と実行とノートを開くだけ(self) -> None:
+         source = (SKILL_DIR / "scripts" / "obsidian_cli.py").read_text(encoding="utf-8")
+         self.assertEqual(source.count("urlopen("), 1)
+-        self.assertEqual(sorted(set(re.findall(r'_call\("([A-Z]+)", "([^"]*)"', source))), [("GET", "/"), ("GET", "/commands/"), ("POST", "/commands/")])
+-        for needle in ("/vault", "/active", "/open", "/search", "/periodic", '"DELETE"', '"PUT"', '"PATCH"', "subprocess", "os.system", "eval(", "exec(", ".unlink(", "rmtree", "write_text", "write_bytes", "shutil"):
++        self.assertEqual(sorted(set(re.findall(r'_call\("([A-Z]+)", "([^"]*)"', source))), [("GET", "/"), ("GET", "/commands/"), ("POST", "/commands/"), ("POST", "/open/")])
++        for needle in ("/vault", "/active", "/search", "/periodic", '"DELETE"', '"PUT"', '"PATCH"', "subprocess", "os.system", "eval(", "exec(", ".unlink(", "rmtree", "write_text", "write_bytes", "shutil"):
+             self.assertNotIn(needle, source, f"obsidian_cli.py に {needle} があります")
+ 
+     def test_サンプル設定にAPIキーの値が無い(self) -> None:
+diff --git a/skills/vault-notes/SKILL.md b/skills/vault-notes/SKILL.md
+index 66976358c9e492abba1f4d8d799b661f0c8cef73..09bc3abe12d849c6472eb61808a6e4ed07ab1948 100644
+--- a/skills/vault-notes/SKILL.md
++++ b/skills/vault-notes/SKILL.md
+@@ -63,7 +63,7 @@ description: Obsidian の Vault にノートを保存する(今日のフォル
+    run.bat new-note --title "題名" --body-file .handoff/draft_話題.md --tags タグ1,タグ2
+    ```
+ 
+-9. 作られたノートのパスを報告する。同名があったときは `_2` が付く(上書きはしない)。あわせて、**リンクしたノート**(関連が見つからなかったときは、探した語)と、**付けたタグ**(新しいタグは、その理由)を書く。
++9. 作られたノートを、`[[ノート名]]` のリンク(Claudian のチャットでは、クリックで開ける)とパスで報告する。同名があったときは `_2` が付く(上書きはしない)。あわせて、**リンクしたノート**(関連が見つからなかったときは、探した語)と、**付けたタグ**(新しいタグは、その理由)を書く。
+ 
+ **ガントのタスクとつなぐノートは、`--gantt-id タスクID` を付ける**(名前が `題名【ID】.md` になる。ガントの決まりと同じ)。タスク側は、スキル `app-ecosystem` の `task-link` で、このノートを指すようにする。タスクがまだ無いなら、先に `task-add` で作って ID を得る。
+ 
+diff --git a/templates/ai_work/.gitignore b/templates/ai_work/.gitignore
+new file mode 100644
+index 0000000000000000000000000000000000000000..95d135d8e42e1515cfff22554592332818868b73
+--- /dev/null
++++ b/templates/ai_work/.gitignore
+@@ -0,0 +1,16 @@
++# --- 個人の設定 (人が書く。パスワードは書かないが、社員番号や URL が入る) ---
++config.local.json
++
++# --- Python の仮想環境 ---
++.venv/
++__pycache__/
++
++# --- 作業中の一時ファイル (ブラウザの段階ごとのスクリプト、取り込み途中のデータ) ---
++.handoff/
++
++# --- 自動化が作ったファイル (残したいものは、別の場所へ写す) ---
++output/
++
++# --- OS ---
++.DS_Store
++Thumbs.db
+diff --git a/templates/ai_work/.opencode/commands/auto-fix.md b/templates/ai_work/.opencode/commands/auto-fix.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..736d9601320e50e6718dfd69d1eb7ab3750186ca
+--- /dev/null
++++ b/templates/ai_work/.opencode/commands/auto-fix.md
+@@ -0,0 +1,5 @@
++---
++description: AI_work の自動化を直す(使い方 /auto-fix kintai-input 申請の画面で止まる)
++---
++
++AI_work の自動化を直してください。スキル `automation-builder` を読み込み、「直す」の手順で進めてください。直す前に、何をどう変えるかを示してください。対象と症状: $ARGUMENTS
+diff --git a/templates/ai_work/.opencode/commands/auto-new.md b/templates/ai_work/.opencode/commands/auto-new.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..4fcb38f2d6b76262c860a541350ed19cdb7bb92b
+--- /dev/null
++++ b/templates/ai_work/.opencode/commands/auto-new.md
+@@ -0,0 +1,5 @@
++---
++description: AI_work に新しい自動化を AI と作る(使い方 /auto-new 勤怠システムに出勤と退勤を入れたい)
++---
++
++AI_work に新しい自動化を作ります。スキル `automation-builder` を読み込み、「作る」の手順で進めてください。まず聞き取りをして、名前・種類・入力・取り消せない操作の案を示し、承認を得てからファイルを置いてください。作りたいもの: $ARGUMENTS
+diff --git a/templates/ai_work/.opencode/commands/auto.md b/templates/ai_work/.opencode/commands/auto.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..39b36955c28b138a052d9fa9ddb6624679613458
+--- /dev/null
++++ b/templates/ai_work/.opencode/commands/auto.md
+@@ -0,0 +1,5 @@
++---
++description: AI_work の自動化を、日本語の指示で実行する(使い方 /auto 明日 10 時から設計レビューを予定に入れて)
++---
++
++AI_work の自動化を実行してください。指示に合う自動化のスキルを読み込み(迷ったらスキル `automation-builder` の「使う」)、その「手順」どおりに進めてください。取り消せない操作の前では止まって、私の返事を待ってください。指示: $ARGUMENTS
+diff --git a/templates/ai_work/.opencode/skills/automation-builder/SKILL.md b/templates/ai_work/.opencode/skills/automation-builder/SKILL.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..1c1b9bbf54ea300599e40dc0553a02f053a31baf
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/automation-builder/SKILL.md
+@@ -0,0 +1,66 @@
++---
++name: automation-builder
++description: AI_work に自動化(スキル + Python)を作る・直す・一覧にする手順。「〜を自動化したい」「自動化が動かない」と頼まれたとき、どの自動化を使うか迷うときに使う
++---
++
++## 前提
++
++- 自動化 1 つ = スキル 1 つ(`.opencode/skills/<名前>/`)。ひな形を置くのと一覧は、このスキルのスクリプトで行う。作業フォルダ(AI_work)で実行する。
++  - 実行用: `<このスキルのフォルダ>\run.bat`(Mac・Linux は `run.sh`。引数は同じ)
++  - 本体: `<このスキルのフォルダ>\scripts\new_automation.py`(標準ライブラリだけ。上書き・削除をしない)
++- 種類は 3 つ。迷ったら、画面を操作するなら `browser`、Outlook なら `outlook`、それ以外は `python`。
++
++| 種類 | 向いているもの | 置かれるもの |
++|---|---|---|
++| `python` | ファイル・表の処理、計算、文書や報告の作成 | `scripts/main.py`、`tests/test_main.py` |
++| `browser` | Web の画面の操作(勤怠、社内システムへの入力・取り込み) | `scripts/flow.py`(スキル `browser-session` の `run` の中で動く) |
++| `outlook` | Outlook の予定の作成、メールからの取り出し | `scripts/main.py`(予定の案を作る)。作成はスキル `outlook-mail` |
++
++どれにも `SKILL.md`、`run.bat`、`run.sh`、`config.sample.json` が付く。
++
++## 使う(どの自動化か迷うとき)
++
++1. `run.bat list` で、自動化の一覧と説明を見る。
++2. 合うものを `skill` で読み込み、その「手順」どおりに動かす。
++3. 合うものが無ければ「自動化はまだ無い」と答え、今回だけ手で行うか、自動化を作るかを聞く。
++
++## 作る
++
++1. **聞き取る。** 何を(入力 → 結果)、どこで(サイト・アプリ・ファイル)、どれくらいの頻度で、**取り消せない操作はどれか**、うまくいったことをどう確かめるか、入力が無いときの既定値。人に、いまの手作業を 1 回、順に説明してもらうのが早い。決まらないときは、スキル `interview`。
++2. **案を示して、承認を得る。** 名前(英小文字・数字・ハイフン。例: `kintai-input`)、種類、入力の表、手順、取り消せない操作、ランチャーのコマンド名(短い英字。例: `kintai`)。
++3. **ひな形を置く。**
++
++   ```
++   run.bat new kintai-input --title 勤怠入力 --kind browser --dry-run
++   run.bat new kintai-input --title 勤怠入力 --kind browser
++   ```
++
++4. **中身を書く。**
++   - `python`・`outlook`: Python を書く前に、スキル `python-coding` を読み込む。`build_plan`(何をするかを返すだけで、何も変えない)のテストを先に書き、実装する。日付は `date.today()` で取り、引数で渡す(テストで固定できるように)。テストは AI_work で `python -m unittest discover -s .opencode\skills\<名前>\tests`。
++   - `browser`: スキル `browser-session` を読み込み、その手順で、`.handoff/browser/` に段階ごとのスクリプトを書いて試す(`start` → `open` → `snapshot` → 段階を `run`)。通しで動いたら `scripts/flow.py` にまとめる。**flow.py は、送信の直前まで進めて、何を送るかを print して終わる形にする**(送信のボタンは、承認の後に `--allow-submit` で押す)。
++   - 取り消せない操作(送信、申請、予定の作成)を、自分のスクリプトで直接行わない(Outlook の COM、`requests` の POST、`sync_playwright()`)。ハーネスのスキルの道具を通す。
++   - 設定が要るなら、`config.sample.json` に項目を足し、人に `config.local.json` を作ってもらう。パスワードは項目にしない。
++5. **`SKILL.md` の【 】を埋める。** `description` は「いつ使うか」が分かる 1 文にする(モデルは、これを見て自動化を選ぶ)。入力の表の「無いとき」を必ず埋める(ランチャーから 1 回で動かすため)。
++6. **通しで確かめる。** dry-run(browser は送信の直前まで)→ 人の承認 → 本番を 1 回。結果を `SKILL.md` の「確かめたこと」に書く。確かめられなかったことは「未確認」と書く。
++7. **一覧を直す。** `自動化一覧.md` に 1 行足す。`run.bat list` で「要確認」が残っていないかを見る(`config.local.json` が無いのは、人が作るまで残ってよい)。
++8. **ランチャーのコマンドを示す。** 出た JSON の名前・説明・プロンプトを、人がランチャーの「/ コマンド」で登録する(自分では登録しない)。
++
++   ```
++   run.bat slash kintai-input --command kintai --description 勤怠を入力
++   ```
++
++9. **報告する。** 置いたファイル、確かめたこと、確かめていないこと、人に頼むこと(`config.local.json`、ランチャーへの登録、ログイン)。Git で管理していれば、コミットを提案する。
++
++## 直す
++
++1. 症状を確かめる: どのコマンドで、どんなエラーが、どこまで進んで出たか。dry-run で再現する。
++2. `browser` なら、`snapshot` で、画面が変わっていないか(ボタンの文字、入力欄の名前)を先に見る。社内システムの画面の変更が、止まる原因として多い。
++3. 直す前に、何をどう変えるかを示す。テストがあれば、症状を再現するテストを先に足す。
++4. 直したら、dry-run → 必要なら本番を 1 回。`SKILL.md` の「確かめたこと」と、`自動化一覧.md` の「最後に確かめた日」を直す。
++
++## 守ること
++
++- `new` は既存のフォルダに書かない。直すときは、ファイルを直接直す。
++- 自動化を消すのは、人が行う(消したいと言われたら、消すフォルダと `自動化一覧.md` の行を示す)。
++- ランチャーへの登録、`config.local.json` の作成、ログインは、人が行う。
++- `.bat` には日本語を書かない(ASCII だけ)。
+diff --git a/templates/ai_work/.opencode/skills/automation-builder/run.bat b/templates/ai_work/.opencode/skills/automation-builder/run.bat
+new file mode 100644
+index 0000000000000000000000000000000000000000..f612cb3ff1b7dd52df676dd85e9d52583b87872b
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/automation-builder/run.bat
+@@ -0,0 +1,9 @@
++@echo off
++rem Run new_automation.py (scaffold and list the automations in AI_work). Standard library only.
++rem Uses the AI_work .venv when it exists, otherwise python.
++rem This file must stay ASCII only (cmd.exe on Japanese Windows may misread other characters).
++setlocal
++set "PY=%~dp0..\..\..\.venv\Scripts\python.exe"
++if not exist "%PY%" set "PY=python"
++"%PY%" "%~dp0scripts\new_automation.py" %*
++exit /b %ERRORLEVEL%
+diff --git a/templates/ai_work/.opencode/skills/automation-builder/run.sh b/templates/ai_work/.opencode/skills/automation-builder/run.sh
+new file mode 100644
+index 0000000000000000000000000000000000000000..fcdaaa137a9642ba2ba8dc8043b1275abbba48fd
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/automation-builder/run.sh
+@@ -0,0 +1,10 @@
++#!/bin/sh
++# Run new_automation.py (Mac / Linux). The Windows version is run.bat. Same arguments.
++# This file must stay ASCII only, with LF line endings.
++here=$(cd "$(dirname "$0")" && pwd -P)
++PY="$here/../../../.venv/bin/python"
++if [ ! -x "$PY" ]; then
++  PY=python3
++  command -v "$PY" >/dev/null 2>&1 || PY=python
++fi
++exec "$PY" "$here/scripts/new_automation.py" "$@"
+diff --git a/templates/ai_work/.opencode/skills/automation-builder/scripts/new_automation.py b/templates/ai_work/.opencode/skills/automation-builder/scripts/new_automation.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..d4f6521b02568b734c50606132ce4a2a6a679d6b
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/automation-builder/scripts/new_automation.py
+@@ -0,0 +1,495 @@
++"""AI_work の自動化 (1 つ = .opencode/skills/<名前>/ のスキル) のひな形を置く・一覧にする (スキル automation-builder から呼ぶ)。
++
++  new   <名前> --title 題名 --kind python|browser|outlook [--dry-run] : ひな形を置く (既にあれば何も書かずにエラー)
++  list                                                               : 自動化の一覧と、足りないもの (一覧への記載、テスト、設定) を表示する
++  slash <名前> --command コマンド名 [--description 説明]              : ランチャーに登録するスラッシュコマンド (JSON 1 件) を表示する
++
++共通の引数: --root AI_work のフォルダ (既定: このスクリプトから 4 つ上)
++            --harness ハーネスのフォルダ (既定: ~/.config/opencode。同じ名前のスキルを作らないための確認に使う)
++
++守ること: 既存のファイルを上書きしない。削除しない。AI_work の外に書かない。ネットワークを使わない。
++他のプログラムを起動しない。標準ライブラリだけ。ランチャーへの登録は人が行う (このスクリプトは表示するだけ)。
++終了コード: 0 成功、2 入力の誤り・既にある・見つからない
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import re
++import sys
++from pathlib import Path
++from typing import TextIO
++
++# OpenCode のスキル名の決まり: 英小文字と数字を、1 つのハイフンでつなぐ。64 文字まで。フォルダ名と同じにする
++NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
++KINDS = ("python", "browser", "outlook")
++BUILDER = "automation-builder"
++INDEX_FILE = "自動化一覧.md"
++DEFAULT_ROOT = Path(__file__).resolve().parents[4]  # AI_work/.opencode/skills/automation-builder/scripts/
++DEFAULT_HARNESS = Path.home() / ".config" / "opencode"
++
++
++class CliError(Exception):
++    """入力の誤り。メッセージを表示して、終了コード 2 で終わる。"""
++
++
++# ---------------------------------------------------------------- ひな形の中身
++
++def skill_md(name: str, title: str, kind: str) -> str:
++    """SKILL.md のひな形。【 】は、エージェントが聞き取りの結果で埋める。"""
++    run = f"<このスキルのフォルダ>\\run.bat"
++    steps = {
++        "python": f"""1. 指示から入力を読み取る。足りない項目は、上の表の「無いとき」を使う。表に無い曖昧さがあるときだけ、1 回にまとめて聞く。
++2. 確認の実行(何も変えない)。何をするかが表示される。
++
++   ```
++   {run} 【引数】 --dry-run
++   ```
++
++3. 【取り消せない操作があるときだけ: 2 の結果を示し、「実行して」と返事をもらってから進む。無ければ、この行を消す】
++4. 実行する。
++
++   ```
++   {run} 【引数】
++   ```
++
++5. 報告する: したこと、しなかったこと、出力したファイル。""",
++        "outlook": f"""1. 指示から入力を読み取る。足りない項目は、上の表の「無いとき」を使う。表に無い曖昧さがあるときだけ、1 回にまとめて聞く。
++2. 予定の案を作る(何も変えない)。件名・開始・長さ・場所が表示される。
++
++   ```
++   {run} 【引数】 --dry-run
++   ```
++
++3. スキル `outlook-mail` を読み込み、案の 1 件ずつを `cal-create … --dry-run` で確かめる。
++4. 案の一覧を示し、「実行して」と返事をもらう。**返事の前に、予定を作らない。**
++5. `cal-create`(`--dry-run` なし)で作る。
++6. 報告する: 作った予定、作らなかった予定と理由。""",
++        "browser": f"""1. 指示から入力を読み取る。足りない項目は、上の表の「無いとき」を使う。表に無い曖昧さがあるときだけ、1 回にまとめて聞く。
++2. ブラウザを用意する。スキル `browser-session` を読み込み、`start`(起動済みなら `status`)。ログインが要る画面なら、人にログインしてもらう(パスワードは入力しない)。
++3. 送信の直前まで進める(何も確定しない)。最後に、何を送るかが表示される。
++
++   ```
++   {run} 【引数(先頭に - を付けない)】
++   ```
++
++4. 表示された内容を示し、「実行して」と返事をもらう。**返事の前に、送信しない。**
++5. 送信する。`browser-session` の run.bat を直接、`--allow-submit` を付けて実行する(承認はこの 1 回だけ)。
++
++   ```
++   <browser-session のフォルダ>\\run.bat run .opencode\\skills\\{name}\\scripts\\flow.py --allow-submit 【引数】
++   ```
++
++6. 報告する: したこと、しなかったこと、画面に出た結果(`text` で読む)。""",
++    }[kind]
++    unsafe = {
++        "python": "【無し / 有り(何を、どのスキルで行うか)】",
++        "outlook": "予定の作成(`outlook-mail` の `cal-create`)。出席者を付けても招待は送られない。【ほかにあれば書く】",
++        "browser": "【送信・申請・確定のボタン(名前を書く)】。`browser-session` の見張りが止める。押すのは、人の承認の後に `--allow-submit` で。",
++    }[kind]
++    return f"""---
++name: {name}
++description: {title}。【いつ使うかと、何が起きるかを 1 文で。モデルはこの文で自動化を選ぶ。例: 勤怠を入れてと頼まれたときに使う。勤怠システムに出勤と退勤を入力する】
++---
++
++# {title}
++
++<!-- automation-builder が置いたひな形({kind})。【 】を埋め、使わない行は消す。このコメントも消す -->
++
++## 何をするか
++
++【入力 → 結果を 1〜3 行で】
++
++## 入力(ランチャーの `/コマンド` の後ろに書く日本語)
++
++| 項目 | 例 | 無いとき |
++|---|---|---|
++| 【日付】 | 今日、11/12 | 今日 |
++
++## 手順
++
++{steps}
++
++## 取り消せない操作
++
++{unsafe}
++
++## 設定
++
++このフォルダの `config.local.json`(`config.sample.json` を写して、人が書く。Git に入れない)。パスワードは書かない。
++
++## 確かめたこと
++
++| 日付 | 内容 | 結果 |
++|---|---|---|
++| 【YYYY-MM-DD】 | 【dry-run / 本番 1 回】 | 【】 |
++"""
++
++
++def run_bat(kind: str) -> str:
++    """run.bat (ASCII だけ。日本語の Windows の cmd.exe が誤読しないため)。"""
++    if kind == "browser":
++        return "\r\n".join([
++            "@echo off",
++            "rem Run scripts\\flow.py in the working browser tab through the harness skill browser-session.",
++            "rem --allow-submit is refused here. After the user approves, call browser-session run.bat directly.",
++            "rem This file must stay ASCII only (cmd.exe on Japanese Windows may misread other characters).",
++            "setlocal",
++            'set "BS=%USERPROFILE%\\.config\\opencode\\skills\\browser-session\\run.bat"',
++            'if not exist "%BS%" (',
++            "  echo browser-session not found: %BS% 1>&2",
++            "  exit /b 2",
++            ")",
++            'echo %* | findstr /i /c:"--allow-submit" >nul',
++            "if not errorlevel 1 (",
++            "  echo Refused: after approval, run browser-session run.bat directly with --allow-submit. 1>&2",
++            "  exit /b 2",
++            ")",
++            'call "%BS%" run "%~dp0scripts\\flow.py" %*',
++            "exit /b %ERRORLEVEL%",
++            "",
++        ])
++    return "\r\n".join([
++        "@echo off",
++        "rem Run scripts\\main.py with the AI_work .venv (or python when there is no .venv).",
++        "rem This file must stay ASCII only (cmd.exe on Japanese Windows may misread other characters).",
++        "setlocal",
++        'set "PY=%~dp0..\\..\\..\\.venv\\Scripts\\python.exe"',
++        'if not exist "%PY%" set "PY=python"',
++        '"%PY%" "%~dp0scripts\\main.py" %*',
++        "exit /b %ERRORLEVEL%",
++        "",
++    ])
++
++
++def run_sh(kind: str) -> str:
++    """run.sh (Mac・Linux。ASCII、LF)。"""
++    if kind == "browser":
++        return "\n".join([
++            "#!/bin/sh",
++            "# Run scripts/flow.py through the harness skill browser-session (Mac / Linux). Same arguments as run.bat.",
++            "# --allow-submit is refused here. After the user approves, call browser-session run.sh directly.",
++            "# This file must stay ASCII only, with LF line endings.",
++            'here=$(cd "$(dirname "$0")" && pwd -P)',
++            'BS="$HOME/.config/opencode/skills/browser-session/run.sh"',
++            '[ -f "$BS" ] || { echo "browser-session not found: $BS" >&2; exit 2; }',
++            'for a in "$@"; do',
++            '  [ "$a" = "--allow-submit" ] && { echo "Refused: after approval, run browser-session run.sh directly with --allow-submit." >&2; exit 2; }',
++            "done",
++            'exec sh "$BS" run "$here/scripts/flow.py" "$@"',
++            "",
++        ])
++    return "\n".join([
++        "#!/bin/sh",
++        "# Run scripts/main.py with the AI_work .venv (Mac / Linux). Same arguments as run.bat.",
++        "# This file must stay ASCII only, with LF line endings.",
++        'here=$(cd "$(dirname "$0")" && pwd -P)',
++        'PY="$here/../../../.venv/bin/python"',
++        'if [ ! -x "$PY" ]; then',
++        "  PY=python3",
++        '  command -v "$PY" >/dev/null 2>&1 || PY=python',
++        "fi",
++        'exec "$PY" "$here/scripts/main.py" "$@"',
++        "",
++    ])
++
++
++def main_py(title: str, kind: str) -> str:
++    """scripts/main.py (python・outlook)。計算 (build_plan) と実行 (execute) を分け、計算をテストする。"""
++    output = "予定の案 (件名・開始・長さ・場所) を JSON で表示する。予定は作らない (作るのは outlook-mail)" if kind == "outlook" else "【標準出力に結果。ファイルを作るなら AI_work の output/ の下】"
++    return f'''"""{title}。
++
++使い方: run.bat 【引数】 [--dry-run]
++入力:   【引数の意味と単位】
++出力:   {output}
++--dry-run: 何をするかを表示するだけで、何も変えない。
++設定:   このスキルのフォルダの config.local.json (無ければ config.sample.json)。パスワードは書かない。
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import sys
++from datetime import date
++from pathlib import Path
++
++SKILL_DIR = Path(__file__).resolve().parents[1]
++AI_WORK = SKILL_DIR.parents[2]
++OUTPUT_DIR = AI_WORK / "output"
++
++
++def load_config() -> dict:
++    """config.local.json を読む。無ければ config.sample.json、それも無ければ空。"""
++    for name in ("config.local.json", "config.sample.json"):
++        path = SKILL_DIR / name
++        if path.is_file():
++            return json.loads(path.read_text(encoding="utf-8-sig"))
++    return {{}}
++
++
++def build_plan(target: str, config: dict, today: date) -> list[dict]:
++    """何をするかの一覧を返す。ファイルも画面も変えない (テストはここを確かめる)。
++
++    target: 指示から読み取った引数。today: 今日の日付 (テストで固定できるように、引数で受け取る)。
++    """
++    return [{{"する内容": f"【】 {{target}}", "日付": today.isoformat()}}]
++
++
++def execute(plan: list[dict]) -> None:
++    """一覧のとおりに実行する。【取り消せない操作は、ここに書かない。ハーネスのスキルの道具で行う】"""
++    for step in plan:
++        print("実行:", json.dumps(step, ensure_ascii=False))
++
++
++def main(argv: list[str] | None = None) -> int:
++    if hasattr(sys.stdout, "reconfigure"):
++        sys.stdout.reconfigure(encoding="utf-8")
++    parser = argparse.ArgumentParser(description="{title}")
++    parser.add_argument("target", nargs="?", default="", help="【引数の説明】")
++    parser.add_argument("--dry-run", action="store_true", help="何をするかを表示するだけ")
++    args = parser.parse_args(argv)
++    plan = build_plan(args.target, load_config(), date.today())
++    if args.dry_run:
++        print(json.dumps(plan, ensure_ascii=False, indent=2))
++        return 0
++    execute(plan)
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
++'''
++
++
++def test_py(name: str) -> str:
++    """tests/test_main.py。build_plan を、日付を固定して確かめる。"""
++    return f'''"""scripts/main.py のテスト。AI_work で実行する:
++    python -m unittest discover -s .opencode/skills/{name}/tests
++"""
++from __future__ import annotations
++
++import importlib.util
++import unittest
++from datetime import date
++from pathlib import Path
++
++SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "main.py"
++spec = importlib.util.spec_from_file_location("{name.replace("-", "_")}_main", SCRIPT)
++main = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(main)
++
++
++class BuildPlanTests(unittest.TestCase):
++    def test_今日の日付で案を作る(self) -> None:
++        plan = main.build_plan("例", {{}}, date(2026, 1, 5))
++        self.assertEqual(plan[0]["日付"], "2026-01-05")
++
++    # 【入力の解釈・計算の例を足す。「明日」「9:00-18:00」のような指示の読み取りは、ここで確かめる】
++
++
++if __name__ == "__main__":
++    unittest.main()
++'''
++
++
++def flow_py(title: str) -> str:
++    """scripts/flow.py (browser)。browser-session の run の中で動き、page と args が渡される。"""
++    return f'''"""{title} (browser-session の run で、作業中のタブで動く。page と args が渡される)。
++
++入力:   args (run.bat の後ろに書いた引数。先頭に - を付けない)
++出力:   最後に、何を送るかを print する。【取り込んだデータは page.save_json(..., "名前.json") で .handoff/browser/ へ】
++送信:   このスクリプトの送信のボタンは、見張りが止める。人の承認の後に、browser-session の run.bat を
++        --allow-submit 付きで直接実行したときだけ押される。
++書き方: スキル browser-session の「page でできること」。作るときは .handoff/browser/ に段階ごとのスクリプトを書いて試し、
++        通しで動くようになったら、ここへまとめる。
++"""
++import json
++from pathlib import Path
++
++SKILL_DIR = Path(__file__).resolve().parents[1]
++config = {{}}
++for name in ("config.local.json", "config.sample.json"):
++    if (SKILL_DIR / name).is_file():
++        config = json.loads((SKILL_DIR / name).read_text(encoding="utf-8-sig"))
++        break
++
++page.goto(config.get("url") or "【開始のページの URL】")  # noqa: F821 (page は run から渡される)
++page.wait_for(text="【画面に必ず出る文字】")  # noqa: F821
++print(page.snapshot())  # noqa: F821  【画面を調べ終えたら消す】
++
++# 【入力する】 page.fill("#date", args[0]) など
++# 【送信】 page.click(text="【送信のボタンの文字】")  ← 承認の前は、見張りが止める (終了コード 4)
++print("送る内容:", args)  # noqa: F821
++'''
++
++
++def config_sample(kind: str) -> str:
++    data: dict[str, str] = {"_説明": "config.local.json に写して、人が書き換える。パスワードは書かない。Git に入れない"}
++    if kind == "browser":
++        data["url"] = ""
++    return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
++
++
++def scaffold(name: str, title: str, kind: str) -> dict[str, str]:
++    """置くファイル (スキルのフォルダからの相対パス → 中身)。"""
++    files = {
++        "SKILL.md": skill_md(name, title, kind),
++        "run.bat": run_bat(kind),
++        "run.sh": run_sh(kind),
++        "config.sample.json": config_sample(kind),
++    }
++    if kind == "browser":
++        files["scripts/flow.py"] = flow_py(title)
++    else:
++        files["scripts/main.py"] = main_py(title, kind)
++        files["tests/test_main.py"] = test_py(name)
++    return files
++
++
++# ---------------------------------------------------------------- コマンド
++
++def skills_dir(root: Path) -> Path:
++    return root / ".opencode" / "skills"
++
++
++def check_name(name: str, root: Path, harness: Path) -> None:
++    """名前の決まりと、既存のスキル (AI_work とハーネス) との重複を確かめる。"""
++    if not NAME_RE.match(name) or len(name) > 64:
++        raise CliError(f"名前は、英小文字・数字をハイフンでつなぐ (例: kintai-input。64 文字まで): {name}")
++    if (skills_dir(root) / name).exists():
++        raise CliError(f"既にあります: .opencode/skills/{name}/ (直すときは、ファイルを直接直す。new は上書きしない)")
++    if (harness / "skills" / name).exists():
++        raise CliError(f"ハーネスに同じ名前のスキルがあります: {name}。別の名前にする")
++
++
++def cmd_new(name: str, title: str, kind: str, dry_run: bool, root: Path, harness: Path, out: TextIO) -> int:
++    if not title.strip():
++        raise CliError("--title (日本語の題名) が空です")
++    check_name(name, root, harness)
++    target = skills_dir(root) / name
++    files = scaffold(name, title.strip(), kind)
++    for rel in files:
++        out.write(f"{'置く予定' if dry_run else '置いた'}: .opencode/skills/{name}/{rel}\n")
++    if dry_run:
++        out.write("(--dry-run: 何も書いていません)\n")
++        return 0
++    for rel, text in files.items():
++        path = target / rel
++        path.parent.mkdir(parents=True, exist_ok=True)
++        with path.open("x", encoding="utf-8", newline="") as fh:  # "x": 既にあれば失敗する (上書きしない)
++            fh.write(text)
++    out.write(f"次: SKILL.md の【 】を埋める → 中身を書く → {INDEX_FILE} に 1 行足す → slash でランチャーのコマンドを示す\n")
++    return 0
++
++
++def read_frontmatter(path: Path) -> dict[str, str]:
++    """SKILL.md の先頭の --- で囲まれた部分から、`キー: 値` を読む (1 行の値だけ)。"""
++    text = path.read_text(encoding="utf-8-sig")
++    if not text.startswith("---"):
++        return {}
++    head = text.split("\n---", 1)[0]
++    pairs = (line.split(":", 1) for line in head.splitlines()[1:] if ":" in line)
++    return {key.strip(): value.strip() for key, value in pairs}
++
++
++def automations(root: Path) -> list[Path]:
++    """自動化のフォルダ (automation-builder を除く、SKILL.md のあるもの)。名前順。"""
++    base = skills_dir(root)
++    if not base.is_dir():
++        return []
++    return sorted(p for p in base.iterdir() if p.is_dir() and p.name != BUILDER and (p / "SKILL.md").is_file())
++
++
++def problems_of(folder: Path, index_text: str) -> list[str]:
++    """1 つの自動化について、足りないものを返す。"""
++    meta = read_frontmatter(folder / "SKILL.md")
++    found = []
++    if meta.get("name") != folder.name:
++        found.append(f"SKILL.md の name がフォルダ名と違う ({meta.get('name')})")
++    if not meta.get("description") or "【" in meta.get("description", ""):
++        found.append("description が空か、【 】が残っている")
++    if "【" in (folder / "SKILL.md").read_text(encoding="utf-8-sig"):
++        found.append("SKILL.md に【 】が残っている")
++    if not (folder / "run.bat").is_file():
++        found.append("run.bat が無い")
++    if (folder / "scripts" / "main.py").is_file() and not any((folder / "tests").glob("test_*.py")):
++        found.append("tests/ にテストが無い")
++    if (folder / "config.sample.json").is_file() and not (folder / "config.local.json").is_file():
++        found.append("config.local.json が無い (人が config.sample.json から作る。要らなければ無視)")
++    if f"`{folder.name}`" not in index_text:
++        found.append(f"{INDEX_FILE} に載っていない")
++    return found
++
++
++def cmd_list(root: Path, out: TextIO) -> int:
++    index = root / INDEX_FILE
++    index_text = index.read_text(encoding="utf-8-sig") if index.is_file() else ""
++    items = automations(root)
++    if not items:
++        out.write("自動化はまだありません (.opencode/skills/ に、automation-builder のほかのスキルが無い)\n")
++        return 0
++    for folder in items:
++        meta = read_frontmatter(folder / "SKILL.md")
++        out.write(f"- {folder.name}: {meta.get('description', '(説明なし)')}\n")
++        for problem in problems_of(folder, index_text):
++            out.write(f"    要確認: {problem}\n")
++    return 0
++
++
++def cmd_slash(name: str, command: str, description: str, root: Path, out: TextIO) -> int:
++    if not (skills_dir(root) / name / "SKILL.md").is_file():
++        raise CliError(f"自動化が見つかりません: .opencode/skills/{name}/SKILL.md")
++    command = command.strip().lstrip("/")
++    if not command or re.search(r"[\s/]", command):
++        raise CliError("コマンド名に空白と / は使えない (ランチャーの決まり)")
++    if not description.strip():
++        description = read_frontmatter(skills_dir(root) / name / "SKILL.md").get("description", "").split("。")[0]
++    entry = {
++        "name": command,
++        "description": description.strip(),
++        "prompt": f"スキル `{name}` を読み込み、その「手順」どおりに実行してください。取り消せない操作の前では止まって、私の返事を待ってください。指示: $ARGUMENTS",
++    }
++    out.write(json.dumps(entry, ensure_ascii=False, indent=2) + "\n")
++    out.write(f"(ランチャーの「/ コマンド」で、名前 {command}・説明・プロンプトを登録する。登録は人が行う)\n")
++    return 0
++
++
++def build_parser() -> argparse.ArgumentParser:
++    parser = argparse.ArgumentParser(description="AI_work の自動化のひな形と一覧")
++    parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="AI_work のフォルダ")
++    parser.add_argument("--harness", type=Path, default=DEFAULT_HARNESS, help="ハーネスのフォルダ (~/.config/opencode)")
++    sub = parser.add_subparsers(dest="command", required=True)
++    new = sub.add_parser("new", help="ひな形を置く")
++    new.add_argument("name")
++    new.add_argument("--title", required=True, help="日本語の題名 (例: 勤怠入力)")
++    new.add_argument("--kind", choices=KINDS, required=True)
++    new.add_argument("--dry-run", action="store_true")
++    sub.add_parser("list", help="自動化の一覧と、足りないもの")
++    slash = sub.add_parser("slash", help="ランチャーに登録するコマンドを表示する")
++    slash.add_argument("name")
++    slash.add_argument("--command", dest="slash_command", required=True, help="ランチャーのコマンド名 (先頭の / は不要)")
++    slash.add_argument("--description", default="", help="候補に出る説明 (省略すると SKILL.md の description の最初の文)")
++    return parser
++
++
++def main(argv: list[str] | None = None, stdout: TextIO | None = None, stderr: TextIO | None = None) -> int:
++    out = stdout or sys.stdout
++    err = stderr or sys.stderr
++    for stream in (out, err):
++        if hasattr(stream, "reconfigure"):
++            stream.reconfigure(encoding="utf-8")
++    args = build_parser().parse_args(argv)
++    root = args.root.resolve()
++    try:
++        if args.command == "new":
++            return cmd_new(args.name, args.title, args.kind, args.dry_run, root, args.harness, out)
++        if args.command == "list":
++            return cmd_list(root, out)
++        return cmd_slash(args.name, args.slash_command, args.description, root, out)
++    except CliError as exc:
++        err.write(f"エラー: {exc}\n")
++        return 2
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/templates/ai_work/.opencode/skills/automation-builder/tests/test_new_automation.py b/templates/ai_work/.opencode/skills/automation-builder/tests/test_new_automation.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..1048e0d8a93d15360ce760b1d65e8ed3ee6a61a7
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/automation-builder/tests/test_new_automation.py
+@@ -0,0 +1,141 @@
++"""new_automation.py (自動化のひな形・一覧・ランチャーのコマンド) のテスト。AI_work で実行する:
++    python -m unittest discover -s .opencode/skills/automation-builder/tests
++
++【仕様】
++- new: 名前の決まり (英小文字・数字・ハイフン) を守り、AI_work とハーネスの既存のスキルと重ならないときだけ置く。上書きしない。
++  --dry-run は何も書かない。置いたひな形の main.py とテストは、そのまま動く。.bat は ASCII と CRLF。
++- list: 一覧と、足りないもの (【 】の残り、一覧への記載、テスト、設定) を出す。
++- slash: ランチャーの決まり (名前に空白・/ を含まない) に合う JSON を出す。登録はしない。
++"""
++from __future__ import annotations
++
++import importlib.util
++import io
++import json
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "new_automation.py"
++spec = importlib.util.spec_from_file_location("new_automation", SCRIPT)
++na = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(na)
++
++
++class Base(unittest.TestCase):
++    def setUp(self) -> None:
++        tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp.cleanup)
++        self.root = Path(tmp.name) / "AI_work"
++        self.harness = Path(tmp.name) / "harness"
++        (self.root / ".opencode" / "skills" / "automation-builder").mkdir(parents=True)
++        (self.harness / "skills" / "browser-session").mkdir(parents=True)
++
++    def run_cli(self, *argv: str) -> tuple[int, str, str]:
++        out, err = io.StringIO(), io.StringIO()
++        code = na.main(["--root", str(self.root), "--harness", str(self.harness), *argv], stdout=out, stderr=err)
++        return code, out.getvalue(), err.getvalue()
++
++    def skill(self, name: str) -> Path:
++        return self.root / ".opencode" / "skills" / name
++
++
++class NewTests(Base):
++    def test_種類ごとのファイルを置く(self) -> None:
++        for name, kind, extra in (("calc-a", "python", "tests/test_main.py"), ("yotei-b", "outlook", "scripts/main.py"), ("kintai-c", "browser", "scripts/flow.py")):
++            code, out, _ = self.run_cli("new", name, "--title", "題名", "--kind", kind)
++            self.assertEqual(code, 0)
++            for rel in ("SKILL.md", "run.bat", "run.sh", "config.sample.json", extra):
++                self.assertTrue((self.skill(name) / rel).is_file(), f"{name}/{rel}")
++            meta = na.read_frontmatter(self.skill(name) / "SKILL.md")
++            self.assertEqual(meta["name"], name)
++            bat = (self.skill(name) / "run.bat").read_bytes()
++            bat.decode("ascii")
++            self.assertIn(b"\r\n", bat)
++            self.assertNotIn(b"\r", (self.skill(name) / "run.sh").read_bytes())
++        self.assertFalse((self.skill("kintai-c") / "tests").exists())
++        self.assertIn("--allow-submit", (self.skill("kintai-c") / "SKILL.md").read_text(encoding="utf-8"))
++
++    def test_dry_runは何も書かない(self) -> None:
++        code, out, _ = self.run_cli("new", "calc-a", "--title", "題名", "--kind", "python", "--dry-run")
++        self.assertEqual(code, 0)
++        self.assertIn("置く予定", out)
++        self.assertFalse(self.skill("calc-a").exists())
++
++    def test_名前の誤りと重複は書かずにエラー(self) -> None:
++        for bad in ("Kintai", "kintai_input", "a-", "a--b", "勤怠", "a" * 65):
++            code, _, err = self.run_cli("new", bad, "--title", "題名", "--kind", "python")
++            self.assertEqual(code, 2, bad)
++            self.assertIn("名前は", err)
++        code, _, err = self.run_cli("new", "browser-session", "--title", "題名", "--kind", "python")
++        self.assertEqual(code, 2)
++        self.assertIn("ハーネス", err)
++        self.assertFalse(self.skill("browser-session").exists())
++        (self.skill("calc-a")).mkdir()
++        (self.skill("calc-a") / "SKILL.md").write_text("元のまま", encoding="utf-8")
++        code, _, err = self.run_cli("new", "calc-a", "--title", "題名", "--kind", "python")
++        self.assertEqual(code, 2)
++        self.assertEqual((self.skill("calc-a") / "SKILL.md").read_text(encoding="utf-8"), "元のまま")
++
++    def test_ひな形のmainとテストがそのまま動く(self) -> None:
++        self.run_cli("new", "calc-a", "--title", "題名", "--kind", "python")
++        main_py = self.skill("calc-a") / "scripts" / "main.py"
++        result = subprocess.run([sys.executable, "-B", str(main_py), "例", "--dry-run"], capture_output=True, text=True, encoding="utf-8")
++        self.assertEqual(result.returncode, 0, result.stderr)
++        self.assertIn("日付", json.loads(result.stdout)[0])
++        tests = subprocess.run([sys.executable, "-B", "-m", "unittest", "discover", "-s", str(self.skill("calc-a") / "tests")], capture_output=True, text=True, encoding="utf-8")
++        self.assertEqual(tests.returncode, 0, tests.stderr)
++
++    def test_flowは構文として正しい(self) -> None:
++        self.run_cli("new", "kintai-c", "--title", "題名", "--kind", "browser")
++        compile((self.skill("kintai-c") / "scripts" / "flow.py").read_text(encoding="utf-8"), "flow.py", "exec")
++
++
++class ListTests(Base):
++    def test_足りないものを出す(self) -> None:
++        self.run_cli("new", "calc-a", "--title", "題名", "--kind", "python")
++        code, out, _ = self.run_cli("list")
++        self.assertEqual(code, 0)
++        self.assertIn("- calc-a:", out)
++        self.assertIn("【 】が残っている", out)
++        self.assertIn("自動化一覧.md に載っていない", out)
++        self.assertNotIn("automation-builder", out)
++
++    def test_埋めて一覧に載せれば要確認は設定だけ(self) -> None:
++        self.run_cli("new", "calc-a", "--title", "題名", "--kind", "python")
++        skill_md = self.skill("calc-a") / "SKILL.md"
++        skill_md.write_text("---\nname: calc-a\ndescription: 表を計算するときに使う\n---\n本文\n", encoding="utf-8")
++        (self.root / "自動化一覧.md").write_text("| `calc-a` | 表の計算 |\n", encoding="utf-8")
++        _, out, _ = self.run_cli("list")
++        self.assertEqual(out.count("要確認"), 1, out)
++        self.assertIn("config.local.json", out)
++
++    def test_自動化が無いとき(self) -> None:
++        _, out, _ = self.run_cli("list")
++        self.assertIn("まだありません", out)
++
++
++class SlashTests(Base):
++    def test_ランチャーの形のJSONを出す(self) -> None:
++        self.run_cli("new", "kintai-c", "--title", "勤怠入力", "--kind", "browser")
++        code, out, _ = self.run_cli("slash", "kintai-c", "--command", "/kintai", "--description", "勤怠を入力")
++        self.assertEqual(code, 0)
++        entry = json.loads(out.split("\n(", 1)[0])
++        self.assertEqual(entry["name"], "kintai")
++        self.assertEqual(entry["description"], "勤怠を入力")
++        self.assertIn("`kintai-c`", entry["prompt"])
++        self.assertIn("$ARGUMENTS", entry["prompt"])
++
++    def test_誤りはエラー(self) -> None:
++        code, _, err = self.run_cli("slash", "none", "--command", "x")
++        self.assertEqual(code, 2)
++        self.run_cli("new", "kintai-c", "--title", "勤怠入力", "--kind", "browser")
++        for bad in ("two words", "a/b", " "):
++            code, _, _ = self.run_cli("slash", "kintai-c", "--command", bad)
++            self.assertEqual(code, 2, bad)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/templates/ai_work/.opencode/skills/env-check/SKILL.md b/templates/ai_work/.opencode/skills/env-check/SKILL.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..5a4718901e85e8a60ee8a2c118c6593afc375015
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/env-check/SKILL.md
+@@ -0,0 +1,38 @@
++---
++name: env-check
++description: AI_work の動作確認と、今日の日付・曜日を出す。「動作確認」「/env-check」と頼まれたとき、自動化に渡す「今日」「明日」を日付にするときに使う。何も変えない
++---
++
++# 動作確認と今日の日付
++
++## 何をするか
++
++今日の日付・曜日・時刻、AI_work の場所、Python と `.venv`、ハーネスのスキル(`browser-session`・`outlook-mail` など)の有無、自動化の数を表示する。読むだけで、何も変えない。自動化の見本も兼ねる(作りは `automation-builder` の `python` のひな形と同じ)。
++
++## 入力
++
++無し。`--json` を付けると JSON で出る。
++
++## 手順
++
++1. 実行する。
++
++   ```
++   <このスキルのフォルダ>\run.bat
++   ```
++
++2. 結果をそのまま示す。「なし」の項目があれば、次を添える。
++   - `AGENTS.md` なし: AI_work に、テンプレートの `AGENTS.md` がコピーされていない
++   - ハーネスのスキルなし: `%USERPROFILE%\.config\opencode\skills\` にハーネスが置かれていない
++   - `.venv` なし: 標準ライブラリだけの自動化は動く。パッケージが要る自動化は、スキル `python-env` で作る
++3. 「今日」「明日」「来週の月曜」を日付にするときは、ここの「今日」を基準にする。暗算せず、日付の計算はスクリプトで行う。
++
++## 取り消せない操作
++
++無し。
++
++## 確かめたこと
++
++| 日付 | 内容 | 結果 |
++|---|---|---|
++| 2026-11-12 | 自宅の Mac で `run.sh` とテスト | 動いた。会社の Windows・ランチャーからは未確認 |
+diff --git a/templates/ai_work/.opencode/skills/env-check/run.bat b/templates/ai_work/.opencode/skills/env-check/run.bat
+new file mode 100644
+index 0000000000000000000000000000000000000000..cf52ee0d003b175a4a326ca62d0b8a2792b98f36
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/env-check/run.bat
+@@ -0,0 +1,8 @@
++@echo off
++rem Run scripts\main.py (check AI_work and print today's date) with the AI_work .venv, or python.
++rem This file must stay ASCII only (cmd.exe on Japanese Windows may misread other characters).
++setlocal
++set "PY=%~dp0..\..\..\.venv\Scripts\python.exe"
++if not exist "%PY%" set "PY=python"
++"%PY%" "%~dp0scripts\main.py" %*
++exit /b %ERRORLEVEL%
+diff --git a/templates/ai_work/.opencode/skills/env-check/run.sh b/templates/ai_work/.opencode/skills/env-check/run.sh
+new file mode 100644
+index 0000000000000000000000000000000000000000..db709eb0347d4d9dcd801a9451ab5b2fac472c69
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/env-check/run.sh
+@@ -0,0 +1,10 @@
++#!/bin/sh
++# Run scripts/main.py (Mac / Linux). The Windows version is run.bat. Same arguments.
++# This file must stay ASCII only, with LF line endings.
++here=$(cd "$(dirname "$0")" && pwd -P)
++PY="$here/../../../.venv/bin/python"
++if [ ! -x "$PY" ]; then
++  PY=python3
++  command -v "$PY" >/dev/null 2>&1 || PY=python
++fi
++exec "$PY" "$here/scripts/main.py" "$@"
+diff --git a/templates/ai_work/.opencode/skills/env-check/scripts/main.py b/templates/ai_work/.opencode/skills/env-check/scripts/main.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..01486687fa57ada56b02371c0a763d28b9d2f602
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/env-check/scripts/main.py
+@@ -0,0 +1,67 @@
++"""AI_work の動作確認と、今日の日付 (自動化の見本を兼ねる)。
++
++使い方: run.bat [--json]
++出力:   今日の日付・曜日・時刻、AI_work の場所、Python と .venv、ハーネスのスキル (browser-session・outlook-mail) の有無、
++        自動化の数。何も変えない (読むだけ)。
++用途:   ランチャー → opencode → スキル → Python の流れが通るかの確認。エージェントが「今日」「明日」を日付にするときの基準。
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import platform
++import sys
++from datetime import datetime
++from pathlib import Path
++
++SKILL_DIR = Path(__file__).resolve().parents[1]
++AI_WORK = SKILL_DIR.parents[2]
++WEEKDAYS = "月火水木金土日"
++HARNESS_SKILLS = ("browser-session", "outlook-mail", "calc-check", "doc-convert")
++
++
++def collect(now: datetime, ai_work: Path, harness: Path) -> dict:
++    """確認の結果を辞書で返す (表示とテストで共通)。now・ai_work・harness は、テストで差し替えられるように引数にする。"""
++    skills = ai_work / ".opencode" / "skills"
++    automations = sorted(p.name for p in skills.iterdir() if p.is_dir() and (p / "SKILL.md").is_file()) if skills.is_dir() else []
++    return {
++        "今日": now.strftime("%Y-%m-%d"),
++        "曜日": WEEKDAYS[now.weekday()],
++        "時刻": now.strftime("%H:%M"),
++        "AI_work": str(ai_work),
++        "AGENTS.md": (ai_work / "AGENTS.md").is_file(),
++        "Python": f"{platform.python_version()} ({sys.executable})",
++        ".venv": (ai_work / ".venv").is_dir(),
++        "ハーネス": str(harness),
++        "ハーネスのスキル": {name: (harness / "skills" / name / "SKILL.md").is_file() for name in HARNESS_SKILLS},
++        "自動化": [name for name in automations if name not in ("automation-builder", "env-check")],
++    }
++
++
++def render(info: dict) -> str:
++    """人が読む形にする。"""
++    mark = lambda ok: "あり" if ok else "なし"  # noqa: E731
++    lines = [
++        f"今日: {info['今日']} ({info['曜日']}) {info['時刻']}",
++        f"AI_work: {info['AI_work']} (AGENTS.md {mark(info['AGENTS.md'])})",
++        f"Python: {info['Python']} / .venv {mark(info['.venv'])}",
++        f"ハーネス: {info['ハーネス']}",
++        *[f"  - {name}: {mark(ok)}" for name, ok in info["ハーネスのスキル"].items()],
++        f"自動化: {len(info['自動化'])} 個 {' '.join(info['自動化'])}".rstrip(),
++    ]
++    return "\n".join(lines) + "\n"
++
++
++def main(argv: list[str] | None = None) -> int:
++    if hasattr(sys.stdout, "reconfigure"):
++        sys.stdout.reconfigure(encoding="utf-8")
++    parser = argparse.ArgumentParser(description="AI_work の動作確認と、今日の日付")
++    parser.add_argument("--json", action="store_true", help="JSON で出す")
++    args = parser.parse_args(argv)
++    info = collect(datetime.now(), AI_WORK, Path.home() / ".config" / "opencode")
++    sys.stdout.write(json.dumps(info, ensure_ascii=False, indent=2) + "\n" if args.json else render(info))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/templates/ai_work/.opencode/skills/env-check/tests/test_main.py b/templates/ai_work/.opencode/skills/env-check/tests/test_main.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..6859bf3e9a357d3662b66e8b93bb788df0597c68
+--- /dev/null
++++ b/templates/ai_work/.opencode/skills/env-check/tests/test_main.py
+@@ -0,0 +1,43 @@
++"""env-check の scripts/main.py のテスト。AI_work で実行する:
++    python -m unittest discover -s .opencode/skills/env-check/tests
++"""
++from __future__ import annotations
++
++import importlib.util
++import tempfile
++import unittest
++from datetime import datetime
++from pathlib import Path
++
++SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "main.py"
++spec = importlib.util.spec_from_file_location("env_check_main", SCRIPT)
++main = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(main)
++
++
++class CollectTests(unittest.TestCase):
++    def test_日付と曜日_ハーネスと自動化の有無(self) -> None:
++        with tempfile.TemporaryDirectory() as tmp:
++            ai_work, harness = Path(tmp) / "AI_work", Path(tmp) / "harness"
++            for name in ("automation-builder", "env-check", "kintai-input"):
++                (ai_work / ".opencode" / "skills" / name).mkdir(parents=True)
++                (ai_work / ".opencode" / "skills" / name / "SKILL.md").write_text("---\n", encoding="utf-8")
++            (harness / "skills" / "browser-session").mkdir(parents=True)
++            (harness / "skills" / "browser-session" / "SKILL.md").write_text("---\n", encoding="utf-8")
++
++            info = main.collect(datetime(2026, 11, 12, 9, 5), ai_work, harness)
++
++        self.assertEqual((info["今日"], info["曜日"], info["時刻"]), ("2026-11-12", "木", "09:05"))
++        self.assertTrue(info["ハーネスのスキル"]["browser-session"])
++        self.assertFalse(info["ハーネスのスキル"]["outlook-mail"])
++        self.assertEqual(info["自動化"], ["kintai-input"])
++        self.assertIn("今日: 2026-11-12 (木) 09:05", main.render(info))
++
++    def test_skillsが無くても止まらない(self) -> None:
++        with tempfile.TemporaryDirectory() as tmp:
++            info = main.collect(datetime(2026, 1, 1), Path(tmp), Path(tmp))
++        self.assertEqual(info["自動化"], [])
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/templates/ai_work/AGENTS.md b/templates/ai_work/AGENTS.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..779d45b6497f7d390f66a5dda0b9a66c13ee85b5
+--- /dev/null
++++ b/templates/ai_work/AGENTS.md
+@@ -0,0 +1,73 @@
++<!--
++  AI_work 用テンプレート。人間が、このテンプレートのフォルダの中身ごと AI_work(ランチャーの「opencode 実行フォルダ」。
++  既定はホームの 000_work\AI_work)にコピーして使う。手順は、同じフォルダの README.md。
++  このコメントは、コピーしたあとで消してよい。
++  共通ルール(~/.config/opencode/AGENTS.md)も同時に読まれるので、ここには書き足すものだけを書く。
++-->
++
++# AI_work(自動化の置き場)
++
++このフォルダには、毎日の手作業を自動化したもの(Outlook の予定の作成、Web の勤怠入力など)を集める。1 つの自動化は、スキル 1 つ(`.opencode/skills/<名前>/`)と、その中の Python のスクリプトでできている。人は、Local-fulltext-search のランチャー(OpenCode ペイン)から `/コマンド 日本語の指示` で動かす。
++
++依頼は 2 種類ある。最初に、どちらかを見分ける。
++
++| 依頼 | 例 | 進め方 |
++|---|---|---|
++| **使う**(実行する) | `/kintai 今日 9:00-18:00`、「明日 10 時から設計レビューを予定に入れて」 | 合う自動化のスキルを読み込み、その「手順」どおりに動かす。迷ったら `automation-builder` の「使う」 |
++| **作る・直す** | 「勤怠の入力を自動化したい」「/kintai が途中で止まる」 | スキル `automation-builder` を読み込み、その手順で進める |
++
++合う自動化が無い「使う」依頼は、「自動化はまだ無い」と答え、今回だけ手で行うか、自動化を作るかを聞く。
++
++## フォルダの構成
++
++| 場所 | 役割 | 触り方 |
++|---|---|---|
++| `.opencode/skills/<名前>/` | 自動化 1 つ(`SKILL.md`、`run.bat`・`run.sh`、`scripts/`、`tests/`、`config.sample.json`) | 作る・直すときだけ変更する |
++| `.opencode/skills/<名前>/config.local.json` | その自動化の個人の設定(URL、社員番号など) | 人が書く。AI は読むだけ。Git に入れない |
++| `.opencode/skills/automation-builder/` | 自動化を作る手順とひな形 | 触らない |
++| `.opencode/skills/env-check/` | 動作確認と今日の日付(自動化の見本) | 触らない |
++| `.opencode/commands/` | OpenCode の画面(TUI)で使うコマンド | 触らない |
++| `自動化一覧.md` | 自動化の目次(人が見る) | 自動化を作る・直すたびに直す |
++| `launcher_slash_commands.sample.json` | ランチャーに登録するコマンドの例 | 触らない |
++| `output/` | 自動化が作ったファイル(取り込んだ表、報告など) | 自動化が書く。消さない |
++| `.handoff/` | 作業中の一時ファイル(ブラウザの段階ごとのスクリプトも) | 中身が残る前提にしない |
++| `.venv/` | このフォルダの Python | スキル `python-env` の手順で |
++
++## 使うとき(実行)
++
++- ランチャーから 1 回の指示で動かす前提。指示から入力を読み取り、自動化の「入力」の表の「無いとき」で補って、**聞き返さずに進める**。聞くのは、結果が大きく変わる曖昧さがあるときだけ(1 回にまとめる)。
++- 日付は推測しない。「今日」「明日」は `env-check` の「今日」を基準にし、日付の計算はスクリプトで行う。
++- **取り消せない操作(送信、申請、確定、予定の作成、メールの移動)の前で、必ず止まる。** 何をするか(相手、日時、件数、値)を示し、ユーザーが「実行して」と返事をしてから実行する。ランチャーからの実行には許可の確認画面が無く、自動承認のこともあるので、この確認が歯止めになる。
++- 自動化の手順に無い操作をしない。手順どおりに動かないときは、その場で作り直さず、何が起きたか(コマンド、エラー、どこまで進んだか)を報告し、`/auto-fix` で直せると添える。
++- 報告: したこと、しなかったこと(止めた操作と理由)、出力したファイルのパス。
++
++## 作るとき・直すとき
++
++手順はスキル `automation-builder`。守ることだけを、ここに書く。
++
++- 1 つの自動化 = 1 つのスキル。名前は英小文字・数字・ハイフン(例: `kintai-input`)。ハーネスのスキルと同じ名前にしない。
++- 入力の解釈、計算、データの組み立ては Python のスクリプトにして、テスト(`tests/`)を書く。
++- **画面の操作と取り消せない操作は、ハーネスのスキルの道具を通す**(Web は `browser-session`、Outlook は `outlook-mail`)。自分のスクリプトで、Outlook の COM、`requests` の POST、`sync_playwright()` を使って直接行わない。ハーネスの道具には、取り消せない操作を止める見張りと、許可の決まりがあるため。
++- どの自動化にも、何も変えない確認の実行(`--dry-run`。ブラウザは送信の直前まで)を持たせる。
++- パスワード・認証の情報を、スクリプトにも設定にも書かない。ログインは、人がブラウザで行う。
++- 個人の設定は `config.local.json`(Git に入れない)。ひな形は `config.sample.json`。
++- 作った・直したら、`自動化一覧.md` を直し、ランチャーに登録するコマンドを示す。**ランチャーへの登録は人が行う。**
++
++## 使うハーネスのスキル
++
++| 用途 | 使うもの |
++|---|---|
++| Web の画面の操作(勤怠、社内システムへの入力・取り込み) | `browser-session` |
++| Outlook の予定の作成 / メールや予定を読むだけ | `outlook-mail` / `outlook` |
++| 計算・単位の換算 | `calc-check` |
++| Word・Excel・PDF を読む / ファイルを探す | `doc-convert` / `finder` |
++| タスク・ガント | `app-ecosystem` |
++| 何を自動化するかが決まらない | `interview` |
++| Python を書く / パッケージを足す | `python-coding` / `python-env` |
++
++## 会社の PC で
++
++- `.bat` は ASCII だけで書く(日本語を入れない)。
++- Python は、このフォルダの `.venv`(無ければ `python`)。パッケージは、スキル `python-env` の手順で `requirements.in` に書いてから入れる。標準ライブラリで足りるなら使わない。
++- Node.js の `npm install`・`npx` は使えない。
++- Git で管理しているなら、作る・直すの区切りでコミットを提案する(コミットは頼まれたときだけ)。
+diff --git a/templates/ai_work/README.md b/templates/ai_work/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..c39a6ddc0c8975ffe830c262a8d8940db9d0da02
+--- /dev/null
++++ b/templates/ai_work/README.md
+@@ -0,0 +1,66 @@
++# AI_work のテンプレート
++
++Local-fulltext-search のランチャー(OpenCode ペイン)から、日本語の指示で自動化を動かすためのフォルダ `AI_work` のひな形。自動化(Outlook の予定の作成、Web の勤怠入力など)は、ここで AI と一緒に作り、`/コマンド 指示` で動かす。
++
++- 1 つの自動化 = `.opencode/skills/<名前>/` のスキル 1 つ(手順の `SKILL.md` + Python のスクリプト + テスト)
++- Web の操作はハーネスの `browser-session`、Outlook は `outlook-mail` を通す(送信・申請などは、見張りが止め、人の返事の後に実行する)
++- ランチャーのコマンドは、プロンプトの定型。中身は「このスキルを読み込んで、その手順で実行して。指示: …」
++
++## 入っているもの
++
++| ファイル | 役割 |
++|---|---|
++| `AGENTS.md` | AI_work で AI が守ること(使う・作るの見分け、取り消せない操作の前で止まる、など) |
++| `自動化一覧.md` | 自動化の目次と、作りたいものの候補 |
++| `launcher_slash_commands.sample.json` | ランチャーに登録するコマンド 5 つ(`/auto`、`/auto-new`、`/auto-fix`、`/auto-list`、`/env-check`) |
++| `.opencode/skills/automation-builder/` | 自動化を作る・直す手順と、ひな形を置くスクリプト(`new`・`list`・`slash`) |
++| `.opencode/skills/env-check/` | 動作確認と今日の日付。自動化の見本 |
++| `.opencode/commands/` | OpenCode の画面(TUI)で使う `/auto`・`/auto-new`・`/auto-fix` |
++| `.gitignore` | `config.local.json`、`.venv/`、`.handoff/`、`output/` を Git に入れない |
++| `requirements.in` | 自動化で使う Python のパッケージ(最初は空) |
++| `README.md` | このファイル |
++
++## 置き方(会社の Windows。人が行う)
++
++1. AI_work の場所を確かめる。ランチャーの OpenCode ペインの ☰ メニュー、または設定の「opencode 実行フォルダ」。既定は `%USERPROFILE%\000_work\AI_work`。
++2. テンプレートを写す。**既にあるファイルは上書きしない**ように、robocopy で新しいファイルだけを写す(終了コード 0〜3 は成功)。
++
++   ```powershell
++   $src = "$env:USERPROFILE\.config\opencode\templates\ai_work"
++   $dst = "$env:USERPROFILE\000_work\AI_work"
++   robocopy $src $dst /E /XC /XN /XO
++   ```
++
++   AI_work に `AGENTS.md` が既にあるときは写されない。中身を見比べて、手で足す。
++3. `AGENTS.md` の先頭のコメント(`<!-- … -->`)を消す(残しても動く)。
++4. ランチャーにコマンドを登録する。どちらか。
++   - 画面で: OpenCode ペインの「/ コマンド」で、`launcher_slash_commands.sample.json` の 1 件ずつ(名前・説明・プロンプト)を登録する。
++   - ファイルで: Local-fulltext-search の `backend\data\launcher_slash_commands.json` が**無いときだけ**、sample をその名前で写す(あると、登録済みのコマンド(`/pass` など)が消える)。ランチャーは、表示のたびに読み直す。
++5. ランチャーで `/env-check` を送る。今日の日付と、`AGENTS.md あり`、`browser-session: あり`、`outlook-mail: あり` が出れば、流れが通っている。
++6. (勧める)AI_work を Git で管理する。自動化を直したときに、前の形へ戻せる。
++
++   ```powershell
++   cd $dst
++   git init
++   git add .
++   git commit -m "AI_work のテンプレートを置いた"
++   ```
++
++## 使い方
++
++| したいこと | ランチャーで |
++|---|---|
++| 新しい自動化を作る | `/auto-new 勤怠システムに出勤と退勤を入れたい`(聞き取り → 案 → 承認 → ひな形 → 中身 → 確認) |
++| 自動化を動かす | `/auto 明日 10 時から設計レビューを予定に入れて`、または作った自動化のコマンド(`/kintai 今日 9:00-18:00`) |
++| 直す | `/auto-fix kintai-input 申請の画面で止まる` |
++| 一覧 | `/auto-list` |
++
++- 自動化を作り終えると、AI がランチャーに登録するコマンド(名前・説明・プロンプト)を示す。**登録は人が「/ コマンド」で行う。**
++- 自動化ごとの個人の設定(URL、社員番号など)は、`.opencode\skills\<名前>\config.local.json` に人が書く(`config.sample.json` を写す)。パスワードは書かない。ログインは、自動化用のブラウザで人が行う。
++- 送信・申請・予定の作成の前で、AI は止まって内容を示す。「実行して」と返事をすると進む。
++
++## 前提と、確かめていないこと
++
++- ハーネス(`%USERPROFILE%\.config\opencode`)が置かれ、`browser-session`・`outlook-mail` が動くこと。
++- OpenCode は、作業フォルダの `.opencode/skills/` と `.opencode/commands/` を読む(公式の説明による)。**会社の Windows で、ランチャーから `.opencode/skills/` のスキルが読まれるかは、確かめていない**(`/env-check` で確かめる)。
++- ランチャーの「自動承認」を切っているとき、`opencode run` で許可が要る操作(`outlook-mail` の `cal-create` など)がどう扱われるかは、確かめていない。止まるなら、AI の確認(「実行して」の返事)の後に、自動承認を入れて送り直す。
+diff --git a/templates/ai_work/launcher_slash_commands.sample.json b/templates/ai_work/launcher_slash_commands.sample.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..2c6280635ad25e3d088138b156a7a9386349db8a
+--- /dev/null
++++ b/templates/ai_work/launcher_slash_commands.sample.json
+@@ -0,0 +1,27 @@
++[
++  {
++    "name": "auto",
++    "description": "自動化を日本語の指示で実行する",
++    "prompt": "AI_work の自動化を実行してください。指示に合う自動化のスキルを読み込み(迷ったらスキル `automation-builder` の「使う」)、その「手順」どおりに進めてください。取り消せない操作の前では止まって、私の返事を待ってください。指示: $ARGUMENTS"
++  },
++  {
++    "name": "auto-fix",
++    "description": "自動化を直す(止まる・結果が違う)",
++    "prompt": "AI_work の自動化を直してください。スキル `automation-builder` を読み込み、「直す」の手順で進めてください。直す前に、何をどう変えるかを示してください。対象と症状: $ARGUMENTS"
++  },
++  {
++    "name": "auto-list",
++    "description": "自動化の一覧と、足りないもの",
++    "prompt": "スキル `automation-builder` を読み込み、`list` で AI_work の自動化の一覧を示してください。「要確認」があれば、直し方も添えてください。$ARGUMENTS"
++  },
++  {
++    "name": "auto-new",
++    "description": "新しい自動化を AI と作る",
++    "prompt": "AI_work に新しい自動化を作ります。スキル `automation-builder` を読み込み、「作る」の手順で進めてください。まず聞き取りをして、名前・種類・入力・取り消せない操作の案を示し、承認を得てからファイルを置いてください。作りたいもの: $ARGUMENTS"
++  },
++  {
++    "name": "env-check",
++    "description": "AI_work の動作確認と今日の日付",
++    "prompt": "スキル `env-check` を読み込み、その手順で実行して、結果を示してください。$ARGUMENTS"
++  }
++]
+diff --git a/templates/ai_work/requirements.in b/templates/ai_work/requirements.in
+new file mode 100644
+index 0000000000000000000000000000000000000000..31a25ffe56e8a6beb4242b211ab89921010cce99
+--- /dev/null
++++ b/templates/ai_work/requirements.in
+@@ -0,0 +1,3 @@
++# AI_work の自動化で使う Python のパッケージ (名前==バージョン を 1 行ずつ)。
++# 入れるのは、スキル python-env の手順で (名前とバージョンを示して、承認の後に .venv へ)。
++# 標準ライブラリで足りるなら、足さない。Web の操作は、ハーネスの browser-session (ハーネスの .venv の Playwright) を使うので、ここには要らない。
+diff --git "a/templates/ai_work/\350\207\252\345\213\225\345\214\226\344\270\200\350\246\247.md" "b/templates/ai_work/\350\207\252\345\213\225\345\214\226\344\270\200\350\246\247.md"
+new file mode 100644
+index 0000000000000000000000000000000000000000..752de6277d9bb6ce9f3dc4425fde0614db4c86c1
+--- /dev/null
++++ "b/templates/ai_work/\350\207\252\345\213\225\345\214\226\344\270\200\350\246\247.md"
+@@ -0,0 +1,15 @@
++# 自動化一覧
++
++AI_work にある自動化の目次。自動化を作る・直すと、AI(スキル `automation-builder`)がこの表を直す。抜けは `automation-builder` の `list` で分かる。
++
++| 自動化(スキル) | 何をするか | ランチャーのコマンド | 取り消せない操作 | 状態 | 最後に確かめた日 |
++|---|---|---|---|---|---|
++| `env-check` | 動作確認と、今日の日付・曜日 | `/env-check` | 無し | 使える(見本) | 【会社で確かめた日】 |
++
++## 作りたいもの(候補)
++
++作るときは、ランチャーで `/auto-new` の後ろに、ここの行をそのまま書く。作ったら、上の表へ移す。
++
++- 勤怠入力: Web の勤怠システムに、出勤・退勤・休憩を入力する(申請のボタンは、確認の後に押す)
++- 予定の作成: メールや指示から、Outlook に予定を作る(出席者の招待は送らない)
++- 【ほかに自動化したい手作業】
+diff --git a/templates/memory/profile.md b/templates/memory/profile.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..35846a17dbe62c93a929ef85417363545bcb02ea
+--- /dev/null
++++ b/templates/memory/profile.md
+@@ -0,0 +1,24 @@
++# 利用者のプロフィール
++
++毎回読み込まれる。いつも前提にすること。2,000 文字以内。【 】を書き換え、要らない行は消す。
++追記・削除は `/remember`(スキル `memory`)で行う。他人のことは書かない(人物ノート `people` へ)。
++
++## 環境
++
++- PC は Windows 11(64bit)。シェルは PowerShell。パスは `C:\Users\…` の形で、区切りは `\`。
++- コマンドは PowerShell の書き方で示す(`ls -la`・`rm -rf`・`/tmp` のような Mac・Linux の書き方は使わない)。
++- インターネットには直接つながらない。Python はプロジェクトごとの `.venv\Scripts\python` を使う。
++
++## 立場
++
++- 所属: 【部署】。役割: 【例: 〇〇の設計担当】。
++- 担当: 【例: 〇〇の設計計算、△△の手順書】。
++- 決められること・決められないこと: 【例: 仕様の変更は課長の承認が要る】。
++
++## 書き方の好み
++
++- 【例: 社内向けの文は、です・ます調。表を多めに】
++
++## よく使う場所
++
++- 【例: 案件のフォルダ `D:\projects\`】
+diff --git a/templates/obsidian/AGENTS.md b/templates/obsidian/AGENTS.md
+index 4dc1ce6a5bbf798057a357aa6769a2f100c8e7d5..225a67b6f95967cee3748d98c0ab453cd271dc09 100644
+--- a/templates/obsidian/AGENTS.md
++++ b/templates/obsidian/AGENTS.md
+@@ -24,6 +24,7 @@
+ | 手順書・マニュアル・長い資料を書く / 依頼が曖昧 | `doc-writing` / `interview` |
+ | 書いた文を整える | `yomiyasu`(長い文書は `polish`) |
+ | ノートに保存する・直す / 議事録 | `vault-notes` / `meeting-notes` |
++| ノートを Obsidian の画面で開く | `obsidian-run` の open(メインから直接。許可リストは要らない) |
+ | 図を作る / 図を読む | `diagram` / `diagram-reader` |
+ | タスク・期限、Git の差分、自作のアプリ | `app-ecosystem` |
+ | メール・予定 | `outlook`(受信と送信のキャッシュから探すので、期間や条件を聞き返さずに任せる) |
+@@ -81,6 +82,7 @@
+   - 日付と時刻は、推測せず、そのスキルの `today` で取る。新しいノートは、今日のフォルダー(`01_data/年/月/日/`)に作る。
+   - 既存のノートの修正は、修正の前にバックアップを取り、変更前と変更後を示して、承認を得てから、最小の変更だけを入れる。
+ - Obsidian のプラグインやコマンドの実行は、サブエージェント `obsidian` に任せる。実行できるのは、人間が許可リストに書いたものだけ。
++- 「ノートを開いて」と頼まれたら、スキル `obsidian-run` の `open` で、Obsidian の画面に開く(メインから直接。無いノートは作らない)。
+ - 複数のノートを探して読む作業は、`researcher` に任せる。
+ 
+ ## 図(Excalidraw・draw.io)
+@@ -105,7 +107,8 @@
+ 
+ ## 作業のしかた
+ 
+-- 「探して」と頼まれたら、見つかったノートのパスと、該当する部分を示す。見つからなかったときは、見つからなかったと答える。推測で補わない。
++- **返答でノートを示すときは、`[[ノート名]]` の形で書く**(Claudian のチャットでは、クリックで開けるリンクになる。パスだけでは開けない)。同じ名前のノートが複数あるときは、フォルダつき(`[[01_data/2026/11/07/ノート名]]`)にする。図は `[[図_話題.excalidraw]]` のように `.md` を除いた名前。Vault に実在するノートだけをリンクにする(無いノートはリンクにならない)。コードブロック(` ``` `)の中と、表の中の `[[名前|別名]]` は使わない(リンクにならない・表が崩れる)。
++- 「探して」と頼まれたら、見つかったノートのリンク(とパス)と、該当する部分を示す。見つからなかったときは、見つからなかったと答える。推測で補わない。
+ - 要約や整理は、ノートに書かれていないことを足さない。出典(どのノートの内容か)を示す。
+ - 要約や整理の結果は、元のノートを上書きせず、別のノートとして作る。上書きしてよいのは、依頼されたときだけ。
+ - 複数のノートを一度に変更するときは、変更する前に、対象の一覧を示して確認する。
+diff --git a/tests/test_harness.py b/tests/test_harness.py
+index 4b51d3f8df231c32922ad050e56ec92b3bfa7c16..46fc85a1f75fda7a1c37872cff8650bd0c901b60 100644
+--- a/tests/test_harness.py
++++ b/tests/test_harness.py
+@@ -17,8 +17,8 @@ HANDOFF_BLOCK = (ROOT / "skills" / "create-subagent" / "handoff-block.md").read_
+ 
+ # 常に読み込まれる量の上限 (トークンの節約のため、増やすときは意識して変える)
+ AGENTS_MD_MAX_CHARS = 2550  # 現在は 2,515 文字 (0.26.0 で、個人情報の行に「人物ノートの業務の項目は除く」を足し、2,500 から上げた。0.21.0 で「読んでよいか聞かない」を足した)。0.20.0 で、対応表などをプロジェクトのテンプレートへ移して小さくした (共通は、すべての作業に共通することだけ)。日本語のトークン数は、文字数の 1〜2 倍が目安
+-DESCRIPTIONS_MAX_CHARS = 2980  # エージェント・スキル・コマンドの description の合計 (メインで拒否したスキルは除く。現在は 2,951 文字。0.26.0 の people と /people で 2,980 に上げた。0.20.0 の python-coding で 2,850 に上げた。約 2,800 トークンで、窓 13 万の 2% 程度)
+-SAMPLE_CONFIG_ALLOWED_KEYS = {"$schema", "update", "share", "permissions", "mcp"}  # OpenCode V2 の書き方。増やすときは公式ドキュメントで確かめる
++DESCRIPTIONS_MAX_CHARS = 3080  # エージェント・スキル・コマンドの description の合計 (メインで拒否したスキルは除く。現在は 3,057 文字。0.28.0 の memory と /remember で 3,080 に上げた。0.26.0 の people と /people で 2,980 に上げた。0.20.0 の python-coding で 2,850 に上げた。約 2,800 トークンで、窓 13 万の 2% 程度)
++SAMPLE_CONFIG_ALLOWED_KEYS = {"$schema", "update", "share", "instructions", "permissions", "mcp"}  # OpenCode V2 の書き方。増やすときは公式ドキュメントで確かめる (instructions は 0.28.0。v2.2.6 で ~ と * の展開を確かめた)
+ V1_ONLY_KEYS = {"permission", "autoupdate", "agent", "command", "provider", "plugin"}  # V1 の旧名 (V2 の設定に混ぜない)
+ RESERVED = {"CON", "PRN", "AUX", "NUL"} | {f"COM{i}" for i in range(1, 10)} | {f"LPT{i}" for i in range(1, 10)}
+ 
+@@ -233,6 +233,15 @@ class ConfigTests(unittest.TestCase):
+         first_deny = min(i for i, (_, effect) in enumerate(shells) if effect == "deny")
+         self.assertLess(last_allow, first_deny, "shell の許可が、拒否の後ろにあります (拒否が効かなくなる)")
+ 
++    def test_プロフィールは毎回読まれ_Gitに入らない(self) -> None:
++        # 0.28.0: memory/profile.md (会社の PC にだけ置く) を instructions で毎回読ませる
++        sample = json.loads(read(ROOT / "sample_opencode.json"))
++        self.assertIn("~/.config/opencode/memory/*.md", sample.get("instructions", []))
++        self.assertIn("/memory/", read(ROOT / ".gitignore").splitlines(), ".gitignore に /memory/ がありません (個人の情報を Git に入れない)")
++        template = read(ROOT / "templates" / "memory" / "profile.md")
++        self.assertLessEqual(len(template), 2000, f"プロフィールの雛形が {len(template)} 文字です (上限 2,000。毎回読まれるため)")
++        self.assertIn("2,000", read(ROOT / "skills" / "memory" / "SKILL.md"), "スキル memory に上限の文字数がありません")
++
+     def test_雛形に秘密の値やプロバイダの設定が無い(self) -> None:
+         text = read(ROOT / "sample_opencode.json")
+         self.assertNotRegex(text, r"(?i)apikey|api_key|password|secret|token|sk-[A-Za-z0-9]{10,}")
+@@ -748,5 +757,55 @@ class DocumentTests(unittest.TestCase):
+         self.assertRegex(read(ROOT / "CHANGELOG.md"), r"(?m)^## \d+\.\d+\.\d+")
+ 
+ 
++class AiWorkTemplateTests(unittest.TestCase):
++    """templates/ai_work/ (ランチャーの AI_work 用のひな形)。人がコピーするので、名前が古くなると、置いた先で迷う。"""
++
++    AI_WORK = ROOT / "templates" / "ai_work"
++
++    def local_skills(self) -> list[Path]:
++        return sorted(p for p in (self.AI_WORK / ".opencode" / "skills").iterdir() if p.is_dir())
++
++    def known_names(self) -> set[str]:
++        return {p.stem for p in agent_files()} | {d.name for d in skill_dirs()} | {d.name for d in self.local_skills()}
++
++    def test_スキルの名前はフォルダ名と同じで_OpenCodeの決まりに合う(self) -> None:
++        harness = {d.name for d in skill_dirs()}
++        for folder in self.local_skills():
++            head = read(folder / "SKILL.md").split("\n---", 1)[0]
++            self.assertIn(f"\nname: {folder.name}\n", head, folder)
++            self.assertRegex(head, r"\ndescription: \S")
++            self.assertRegex(folder.name, r"^[a-z0-9]+(-[a-z0-9]+)*$")
++            self.assertNotIn(folder.name, harness, f"{folder.name} がハーネスのスキルと同じ名前です")
++            self.assertTrue((folder / "run.bat").is_file() and (folder / "run.sh").is_file(), folder)
++
++    def test_AGENTS_mdの表は実在のスキルとエージェントを指す(self) -> None:
++        text = read(self.AI_WORK / "AGENTS.md")
++        section = text.split("## 使うハーネスのスキル", 1)[1].split("\n## ", 1)[0]
++        for name in re.findall(r"`([a-z][a-z-]+)`", section):
++            self.assertIn(name, self.known_names(), f"templates/ai_work/AGENTS.md の {name} が見つかりません")
++
++    def test_ランチャーのコマンドの例はランチャーの決まりに合い_実在のスキルを指す(self) -> None:
++        commands = json.loads(read(self.AI_WORK / "launcher_slash_commands.sample.json"))
++        names = [c["name"] for c in commands]
++        self.assertEqual(len(names), len({n.lower() for n in names}), "名前が重複しています (大文字小文字は区別しない)")
++        for command in commands:
++            self.assertEqual(set(command), {"name", "description", "prompt"})
++            self.assertRegex(command["name"], r"^[^\s/]+$")
++            self.assertTrue(command["prompt"].strip())
++            for skill in re.findall(r"スキル `([a-z][a-z-]+)`", command["prompt"]):
++                self.assertIn(skill, self.known_names(), f"/{command['name']} の {skill}")
++        for path in (self.AI_WORK / ".opencode" / "commands").glob("*.md"):
++            self.assertIn(path.stem, names, f".opencode/commands/{path.name} が、ランチャーの例にありません")
++        readme = read(self.AI_WORK / "README.md")
++        for name in names:
++            self.assertIn(f"/{name}", readme, f"README.md に /{name} がありません")
++
++    def test_一覧に見本の自動化が載っている(self) -> None:
++        index = read(self.AI_WORK / "自動化一覧.md")
++        for folder in self.local_skills():
++            if folder.name != "automation-builder":
++                self.assertIn(f"`{folder.name}`", index)
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git "a/\343\202\257\343\202\244\343\203\203\343\202\257\343\202\271\343\202\277\343\203\274\343\203\210.md" "b/\343\202\257\343\202\244\343\203\203\343\202\257\343\202\271\343\202\277\343\203\274\343\203\210.md"
+new file mode 100644
+index 0000000000000000000000000000000000000000..2591aad196135e8432bdd39771ae304caf297b20
+--- /dev/null
++++ "b/\343\202\257\343\202\244\343\203\203\343\202\257\343\202\271\343\202\277\343\203\274\343\203\210.md"
+@@ -0,0 +1,129 @@
++# クイックスタート(会社の Windows PC)
++
++会社の PC で、ハーネスを使えるようにするために**人が行うこと**だけを、順にまとめたもの。1 項目ずつの確認と、うまくいかないときの直し方は [docs/company-checklist.md](docs/company-checklist.md)、まとめて確かめるコマンドは [README.md](README.md) の「4. 会社への持ち込みと反映」。
++
++以下の `<ユーザー名>` は Windows のユーザー名、`$cfg` は `$env:USERPROFILE\.config\opencode`(ハーネスのフォルダ)。PowerShell で行う。
++
++## 0. 用意されていること(確かめるだけ)
++
++- OpenCode CLI **V2**(V1 では動かない)。`opencode --version`
++- `python --version` と `node --version` が出る(Node.js は `npm install`・`npx` ができなくてよい)
++- Microsoft Edge、**クラシック版** Outlook
++- Everything(HTTP サーバーを有効)と Local-fulltext-search が起動している
++- 社内LLMの、モデル名・コンテキスト長・出力の上限が分かっている(3 の `limit` に使う)
++
++## 1. ファイルを置く
++
++- myao-patch-bridge で、パッチを `$cfg` に適用する(`company_repo_paths` に `.config\opencode` を対応付けてある)。
++- 別のフォルダにリポジトリを置く場合は、`$cfg` に部品ごとのジャンクションを張る(README の「手順 1」の B。リポジトリ全体をリンクしない)。
++- `$cfg` に、`AGENTS.md`、`agents\`、`commands\`、`skills\`、`templates\`、`mcp\playwright\node_modules\` が届いたかを見る。
++
++## 2. Python の環境(`.venv`)
++
++```powershell
++cd $env:USERPROFILE\.config\opencode
++python -m venv .venv
++.\.venv\Scripts\python.exe -m pip install --require-hashes -r requirements.lock
++.\.venv\Scripts\python.exe -c "import win32com.client, pypdf, playwright; print('OK')"
++```
++
++`pip` の接続先を社内のミラーにするときは、コマンドで指定せず、`%APPDATA%\pip\pip.ini` か環境変数 `PIP_INDEX_URL` で決める(5)。
++
++## 3. `opencode.json` を作る・直す(自分で書く)
++
++`$cfg\opencode.json` は**リポジトリに入っていない**(社内の URL やモデルを書くため)。パッチでも上書きされない。`sample_opencode.json` と見比べて、手で反映する。
++
++| 項目 | すること |
++|---|---|
++| `providers`・`model` | 社内LLMの接続先とモデルを書く(会社で決まっている値) |
++| モデルの `limit` | **必ず書く。** `"limit": { "context": 130000, "output": 32000 }` の形で、実際の窓以下の値。省略すると 20 万と仮定され、窓を超える([docs/operations.md](docs/operations.md) の 5.4) |
++| `update`・`share` | 雛形のまま(`disable`・`disabled`) |
++| `instructions` | `["~/.config/opencode/memory/*.md"]`(プロフィールを毎回読ませる。6 で置く) |
++| `permissions` | 雛形の配列を写す(会社側に古い行が残っていれば消す) |
++| `mcp.servers.playwright` | `command` の中の `<ユーザー名>` を実際の名前に変える。使うときは `"disabled": false` |
++
++書いたら、`opencode debug config` と `opencode debug agents` で読まれたかを見る(自作のエージェント 8 つが `subagent` で出る)。
++
++## 4. スキルの設定ファイル(`config.local.json`)
++
++各スキルのフォルダで、`config.sample.json` を `config.local.json` にコピーして書き換える。`*.local.json` は Git に入らない。**パスワードやキーは書かない**(5 の環境変数に置く)。
++
++| スキル | 要否 | 自分で変える項目 |
++|---|---|---|
++| `file-finder` | **必須**(無いと止まる) | `roots`(検索してよいフォルダ)、`everything.url`・`user`、`fulltext.url`・`folders` |
++| `doc-convert` | 任意(無ければ `file-finder` の `roots`) | `roots`(読んでよいフォルダ) |
++| `obsidian-run` | Obsidian 連携を使うなら必須 | `api.url`、`api.ca_file`(HTTPS のとき)、`vault`、`commands`(実行を許すコマンド) |
++| `people` | Obsidian を使うなら | `vault`、`people_dir` |
++| `vault-notes` | 任意 | `daily_dir`(今日のフォルダの形) |
++| `app-ecosystem` | 任意(ポートが既定と違うとき) | `apps` の URL |
++| `browser-session` | 任意(Edge が見つからないとき) | `executable`、`browser`、`port`、`profile_dir` |
++
++```powershell
++$s = "$env:USERPROFILE\.config\opencode\skills"
++Copy-Item "$s\file-finder\config.sample.json" "$s\file-finder\config.local.json"
++notepad "$s\file-finder\config.local.json"
++```
++
++## 5. 環境変数
++
++ユーザーの環境変数として設定し、OpenCode・Obsidian・ランチャーを**起動し直す**。キーやパスワードは、ファイルにもチャットにも書かない。
++
++```powershell
++[Environment]::SetEnvironmentVariable("OBSIDIAN_API_KEY", "<Local REST API のキー>", "User")
++```
++
++| 変数 | いつ要るか | 値 |
++|---|---|---|
++| `OBSIDIAN_API_KEY` | Obsidian 連携(`obsidian-run`)を使うとき | Obsidian の Local REST API の設定画面のキー |
++| `EVERYTHING_PASSWORD` | Everything の HTTP サーバーにパスワードを付けたとき | そのパスワード(名前は `file-finder` の `password_env` で変えられる) |
++| `OPENCODE_OUTLOOK_DATE_FORMAT` | 「予定の絞り込みに失敗しました」と出たとき | 日本語の環境では `%Y/%m/%d %H:%M` のことが多い |
++| `PIP_INDEX_URL` | `pip` を社内のミラーにするとき(`pip.ini` でもよい) | ミラーの URL |
++| `OPENCODE_VAULT` | 任意。`people` に Vault の場所を固定で教えるとき | Vault のフォルダ |
++| `OPENCODE_OUTLOOK_MAILCACHE` | 任意。メールのキャッシュの場所を変えるとき(既定は `%LOCALAPPDATA%\opencode-harness\`。共有・同期されるフォルダにしない) | SQLite のファイルのパス |
++| `SEARCH_APP_OPENCODE_DEFAULT_WORKING_DIR` | 任意(ランチャーの側)。AI_work を既定(`%USERPROFILE%\000_work\AI_work`)以外にするとき。ランチャーの ☰ メニューで選んでもよい | AI_work のフォルダ |
++
++## 6. ひな形をコピーする
++
++| 何を | どこへ | そのあと |
++|---|---|---|
++| `$cfg\templates\memory\profile.md` | `$cfg\memory\profile.md` | 【 】を自分の環境・立場に書き換える(2,000 文字以内。Git に入らない) |
++| `$cfg\templates\obsidian\AGENTS.md` | Vault のルート(`.obsidian` のあるフォルダ)の `AGENTS.md` | フォルダの構成表を会社の Vault に合わせる。`.handoff/` を Vault の `.gitignore` に足す |
++| `$cfg\templates\ai_work\` の中身 | AI_work(ランチャーの「opencode 実行フォルダ」) | 手順は `templates\ai_work\README.md`(既存は上書きしない。ランチャーにコマンドを 5 つ登録する) |
++| Obsidian の CA 証明書(`obsidian-local-rest-api.crt`) | `$cfg\skills\obsidian-run\` | HTTPS で使うときだけ。`api.ca_file` にその場所を書く(HTTP にするなら要らない) |
++| プロジェクトの `AGENTS.md` | 各プロジェクトのルート | コピーせず、OpenCode で `/init-project <フォルダ>` を使う |
++
++```powershell
++$cfg = "$env:USERPROFILE\.config\opencode"
++New-Item -ItemType Directory "$cfg\memory" -Force | Out-Null
++Copy-Item "$cfg\templates\memory\profile.md" "$cfg\memory\profile.md"   # 既にあれば、上書きしないように先に確かめる
++robocopy "$cfg\templates\ai_work" "$env:USERPROFILE\000_work\AI_work" /E /XC /XN /XO
++```
++
++## 7. 動くかを確かめる
++
++```powershell
++cd $env:USERPROFILE\.config\opencode
++opencode debug agents
++& .\skills\file-finder\run.bat check
++& .\skills\outlook-mail\run.bat check
++& .\skills\doc-convert\run.bat check
++& .\skills\obsidian-run\run.bat check        # Obsidian 連携を使うとき
++& .\.venv\Scripts\python.exe .\mcp\playwright\smoke_test.py msedge
++& .\.venv\Scripts\python.exe run_tests.py
++```
++
++- ランチャーの OpenCode ペインで `/env-check` を送り、`AGENTS.md あり`、`browser-session: あり`、`outlook-mail: あり` が出るかを見る。
++- 残りは [docs/company-checklist.md](docs/company-checklist.md) を上から。結果は、その表の `[ ]` に書く。
++
++## 8. 更新(パッチ)を当てたとき
++
++1. [CHANGELOG.md](CHANGELOG.md) の、前回より新しい版の「**会社で手で行うこと**」を全部行う。
++2. `sample_opencode.json` と `opencode.json` を見比べる(`permissions` と `mcp` が増えていることがある)。
++3. `requirements.lock` が変わっていたら、2 の `pip install` をもう一度。
++4. 新しいスキルに `config.sample.json` があれば、4 と同じように `config.local.json` を作る。
++5. OpenCode・Obsidian・ランチャーを起動し直し、7 の確認をする。
++
++## 確かめていないこと
++
++- このファイルの手順を、会社の PC で通しで行ったことはない(自宅の Mac で書いた)。
++- `[Environment]::SetEnvironmentVariable` で設定した変数が、起動中のランチャーや Obsidian から起動した OpenCode に渡るか(起動し直しが要る前提で書いた)。

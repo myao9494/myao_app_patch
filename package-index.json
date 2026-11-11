@@ -3,15 +3,10 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "gantt_react_myao",
-      "sequence": 5,
-      "manifest_path": "packages/gantt_react_myao/000005/manifest.json"
-    },
-    {
       "repo_id": "opencode",
-      "sequence": 2,
-      "manifest_path": "packages/opencode/000002/manifest.json"
+      "sequence": 3,
+      "manifest_path": "packages/opencode/000003/manifest.json"
     }
   ],
-  "signature": "cb044b5fc208f94c7d524702ee6caca4f8321dcccec35d6730a951db363fb7fc"
+  "signature": "0665f83b9566612eedca5c76b818a410eedcbcff30effe801ac5cb307c0cda09"
 }
