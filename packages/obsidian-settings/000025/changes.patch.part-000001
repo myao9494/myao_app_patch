@@ -1,0 +1,212 @@
+diff --git a/.obsidian/plugins/hearth/data.json b/.obsidian/plugins/hearth/data.json
+index 24e354d51970c0085d53f69c667081e4f539c5d6..5af9c321a6a47f54d52524babbe96f92b300601c 100644
+--- a/.obsidian/plugins/hearth/data.json
++++ b/.obsidian/plugins/hearth/data.json
+@@ -113,24 +113,11 @@
+           "y": 3,
+           "w": 7,
+           "h": 6,
+-          "fx": 0.6309840425531915,
+-          "fw": 0.3690159574468085,
++          "fx": 0.6312709030100334,
++          "fw": 0.36872909698996653,
+           "fy": 0,
+           "fh": 512
+         },
+-        {
+-          "id": "card-calendar",
+-          "kind": "calendar",
+-          "title": "Calendar",
+-          "x": 7,
+-          "y": 3,
+-          "w": 5,
+-          "h": 6,
+-          "fx": 0,
+-          "fw": 0.2845744680851064,
+-          "fy": 159,
+-          "fh": 353
+-        },
+         {
+           "id": "card-recent",
+           "kind": "recent",
+@@ -159,14 +146,9 @@
+           "fh": 133
+         }
+       ]
+-    },
+-    {
+-      "id": "dash-mw5j9crw-199",
+-      "name": "Dashboard 2",
+-      "cards": []
+     }
+   ],
+-  "activeDashboardId": "dash-mw5j9crw-199",
++  "activeDashboardId": "dash-mw5j5x2c-474",
+   "pinnedCards": [],
+   "gridColumns": 12,
+   "rowHeight": 92,
+diff --git a/.obsidian/plugins/various-complements/histories.json b/.obsidian/plugins/various-complements/histories.json
+index 768af3483f4c0eed7bc114c07d1d45e5ba198b9f..fe5d8b883a96a1b1ee3c4a4a0a8517ff0955941e 100644
+--- a/.obsidian/plugins/various-complements/histories.json
++++ b/.obsidian/plugins/various-complements/histories.json
+@@ -1 +1 @@
+-{"Hp":{"Hp":{"customDictionary":{"count":1,"lastUpdated":1791765661543}}},"メアド":{"メアド":{"currentFile":{"count":2,"lastUpdated":1791765671393}}},"2026年4月":{"2026年4月":{"internalLink":{"count":1,"lastUpdated":1791765720790}}},"もっちゅりん":{"もっちゅりん":{"internalLink":{"count":1,"lastUpdated":1791765914878}}},"見積":{"見積":{"currentFile":{"count":1,"lastUpdated":1791765917061}}},"車検_":{"車検_":{"internalLink":{"count":1,"lastUpdated":1791765919117}}},"de":{"de":{"customDictionary":{"count":1,"lastUpdated":1791766517887}}},"番号":{"番号":{"currentFile":{"count":1,"lastUpdated":1792807132598}}},"Agent":{"Agent":{"customDictionary":{"count":1,"lastUpdated":1792812493655}}},"gnu":{"gnu":{"customDictionary":{"count":1,"lastUpdated":1792844750304}}},"msgstr":{"msgstr":{"customDictionary":{"count":1,"lastUpdated":1792873331662}}},"test":{"test":{"customDictionary":{"count":2,"lastUpdated":1792873425778}}},"link":{"link":{"customDictionary":{"count":1,"lastUpdated":1792873434899}}},"text":{"text":{"customDictionary":{"count":1,"lastUpdated":1792874463301}}},"ma":{"ma":{"customDictionary":{"count":1,"lastUpdated":1792874471201}}},"human":{"human":{"customDictionary":{"count":1,"lastUpdated":1792874482310}}},"that":{"that":{"customDictionary":{"count":1,"lastUpdated":1792874484376}}},"aye":{"aye":{"customDictionary":{"count":1,"lastUpdated":1792874504505}}},"ファイル名":{"ファイル名":{"internalLink":{"count":1,"lastUpdated":1793591062642}}}}
+\ No newline at end of file
++{"Hp":{"Hp":{"customDictionary":{"count":1,"lastUpdated":1791765661543}}},"メアド":{"メアド":{"currentFile":{"count":2,"lastUpdated":1791765671393}}},"2026年4月":{"2026年4月":{"internalLink":{"count":1,"lastUpdated":1791765720790}}},"もっちゅりん":{"もっちゅりん":{"internalLink":{"count":1,"lastUpdated":1791765914878}}},"見積":{"見積":{"currentFile":{"count":1,"lastUpdated":1791765917061}}},"車検_":{"車検_":{"internalLink":{"count":1,"lastUpdated":1791765919117}}},"de":{"de":{"customDictionary":{"count":1,"lastUpdated":1791766517887}}},"番号":{"番号":{"currentFile":{"count":1,"lastUpdated":1792807132598}}},"Agent":{"Agent":{"customDictionary":{"count":1,"lastUpdated":1792812493655}}},"gnu":{"gnu":{"customDictionary":{"count":1,"lastUpdated":1792844750304}}},"msgstr":{"msgstr":{"customDictionary":{"count":1,"lastUpdated":1792873331662}}},"test":{"test":{"customDictionary":{"count":2,"lastUpdated":1792873425778}}},"link":{"link":{"customDictionary":{"count":1,"lastUpdated":1792873434899}}},"text":{"text":{"customDictionary":{"count":1,"lastUpdated":1792874463301}}},"ma":{"ma":{"customDictionary":{"count":1,"lastUpdated":1792874471201}}},"human":{"human":{"customDictionary":{"count":1,"lastUpdated":1792874482310}}},"that":{"that":{"customDictionary":{"count":1,"lastUpdated":1792874484376}}},"aye":{"aye":{"customDictionary":{"count":1,"lastUpdated":1792874504505}}},"ファイル名":{"ファイル名":{"internalLink":{"count":1,"lastUpdated":1793591062642}}},"Id":{"Id":{"customDictionary":{"count":1,"lastUpdated":1794225708663}}}}
+\ No newline at end of file
+diff --git "a/03_Dataview/AI\346\234\252\343\203\254\343\203\223\343\203\245\343\203\274\343\201\256\343\203\216\343\203\274\343\203\210\344\270\200\350\246\247.md" "b/03_Dataview/AI\346\234\252\343\203\254\343\203\223\343\203\245\343\203\274\343\201\256\343\203\216\343\203\274\343\203\210\344\270\200\350\246\247.md"
+new file mode 100644
+index 0000000000000000000000000000000000000000..367248895814241e7070ab7f114dc1284d8bffb3
+--- /dev/null
++++ "b/03_Dataview/AI\346\234\252\343\203\254\343\203\223\343\203\245\343\203\274\343\201\256\343\203\216\343\203\274\343\203\210\344\270\200\350\246\247.md"
+@@ -0,0 +1,99 @@
++<!--
++仕様:
++1. AI が作った・編集したノートのうち、人がまだレビューしていないもの（プロパティ `ai_reviewed` が true でないもの）を一覧表示する。
++2. 対象は、プロパティに `ai_generated` / `ai_edited` / `ai_reviewed` のいずれかを持つ Markdown（`*.excalidraw.md` を含む）。AI に関係ないノートは出さない。
++   - `ai_reviewed: false`、`ai_reviewed:` が空、`ai_reviewed` が無い（`ai_generated` / `ai_edited` だけがある）ものは未レビューとして扱う。
++   - `ai_reviewed: true`（文字列 "true" も可）だけをレビュー済みとして除外する。
++3. 03_Dataview 配下は対象外。
++4. 更新日時の新しい順に並べる。ノート名で絞り込める。
++5. ファイル名のクリックで開く（Ctrl/Cmd+クリックで新しいタブ）。
++-->
++
++# AI 未レビューのノート一覧
++
++```dataviewjs
++/**
++ * ai_reviewed が true でない AI 関連ノートを一覧表示する。
++ * プロパティ（YAML フロントマター）は metadataCache から読む。
++ **/
++
++// プロパティ値が「チェック済み」かどうか（真偽値 true、または文字列 "true"）
++function isChecked(value) {
++    if (value === true) return true;
++    return typeof value === "string" && value.trim().toLowerCase() === "true";
++}
++
++// 表示用に、プロパティ値を短い文字列へ変換する（空・未設定は空文字）
++function propText(value) {
++    if (value == null || value === false) return "";
++    if (Array.isArray(value)) return value.map(String).join(", ");
++    return String(value);
++}
++
++function hasKey(frontmatter, key) {
++    return Object.prototype.hasOwnProperty.call(frontmatter, key);
++}
++
++const files = app.vault.getMarkdownFiles()
++    .filter(file => !file.path.startsWith("03_Dataview/"))
++    .map(file => ({ file, fm: app.metadataCache.getFileCache(file)?.frontmatter }))
++    .filter(({ fm }) => fm && (hasKey(fm, "ai_generated") || hasKey(fm, "ai_edited") || hasKey(fm, "ai_reviewed")))
++    .filter(({ fm }) => !isChecked(fm.ai_reviewed))
++    .sort((a, b) => b.file.stat.mtime - a.file.stat.mtime);
++
++const rootEl = this.container.createEl("div");
++
++const searchInput = rootEl.createEl("input", {
++    type: "search",
++    attr: { placeholder: "ノート名で検索…", "aria-label": "ノート名で検索" },
++});
++searchInput.style.marginBottom = "0.75em";
++searchInput.style.width = "min(100%, 28em)";
++
++const countEl = rootEl.createEl("div", { attr: { style: "margin-bottom: 0.5em; color: var(--text-muted);" } });
++
++if (files.length === 0) {
++    countEl.setText("未レビューのノートはありません。");
++} else {
++    const table = rootEl.createEl("table");
++    const headRow = table.createEl("thead").createEl("tr");
++    ["ファイル名", "フォルダ", "ai_generated", "ai_edited", "作成日時", "更新日時"]
++        .forEach(text => headRow.createEl("th", { text }));
++    const tbody = table.createEl("tbody");
++
++    const rows = files.map(({ file, fm }) => {
++        const tr = tbody.createEl("tr");
++        tr.dataset.fileName = file.basename;
++
++        // クリックは自前で処理する（Ctrl/Cmd+クリックで新しいタブ）
++        const nameCell = tr.createEl("td");
++        const link = nameCell.createEl("a", { text: file.basename, cls: "internal-link" });
++        link.addEventListener("click", (ev) => {
++            ev.preventDefault();
++            ev.stopPropagation();
++            app.workspace.getLeaf(ev.ctrlKey || ev.metaKey ? "tab" : false).openFile(file);
++        });
++
++        tr.createEl("td", { text: file.parent?.path ?? "" });
++        tr.createEl("td", { text: propText(fm.ai_generated) });
++        tr.createEl("td", { text: propText(fm.ai_edited) });
++        tr.createEl("td", { text: moment(file.stat.ctime).format("YYYY-MM-DD HH:mm") });
++        tr.createEl("td", { text: moment(file.stat.mtime).format("YYYY-MM-DD HH:mm") });
++        return tr;
++    });
++
++    const updateCount = () => {
++        const shown = rows.filter(row => row.style.display !== "none").length;
++        countEl.setText(`未レビュー: ${shown} 件（全 ${rows.length} 件）`);
++    };
++    updateCount();
++
++    searchInput.addEventListener("input", () => {
++        const query = searchInput.value.trim().toLocaleLowerCase();
++        rows.forEach(row => {
++            row.style.display = row.dataset.fileName.toLocaleLowerCase().includes(query) ? "" : "none";
++        });
++        updateCount();
++    });
++}
++```
+diff --git a/docs/README.md b/docs/README.md
+index 191e04942356b01163a248592f541a49fed7bcc2..f28646877aa281f4f3858dc538118ee1e9551f05 100644
+--- a/docs/README.md
++++ b/docs/README.md
+@@ -112,6 +112,7 @@
+ - [copy_settings_sync.md](copy_settings_sync.md) — 設定の完全ミラー同期（`80_script/copy_settings.py`）
+ - [git_sync_scripts.md](git_sync_scripts.md) — Git の強制同期（`90_batch/`）
+ - [view_maintenance_tools.md](view_maintenance_tools.md) — 重複ファイル・空フォルダーの管理
++- [ai_unreviewed_notes_list.md](ai_unreviewed_notes_list.md) — `ai_reviewed` が未チェックのノート一覧（データビュー）
+ - [claude.md](claude.md) — ターミナルプラグインの設定、macOS の localhost リンク書き換え、サイドバーのショートカットに関するメモ
+ - [twohop_links_plus_fix.md](twohop_links_plus_fix.md) — 2hop-links-plus の自動非表示バグの修正
+ - [windows_boot_troubleshooting.md](windows_boot_troubleshooting.md) — Windows の起動遅延の調査手順
+diff --git a/docs/ai_unreviewed_notes_list.md b/docs/ai_unreviewed_notes_list.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..00c1a04bb2bb9187599ec5b16341d55e09cd17fd
+--- /dev/null
++++ b/docs/ai_unreviewed_notes_list.md
+@@ -0,0 +1,33 @@
++<!--
++仕様:
++1. 03_Dataview/AI未レビューのノート一覧.md の仕様（対象の判定、表示項目、操作）を説明する。
++-->
++
++# AI 未レビューのノート一覧
++
++AI が作った・編集したノートのうち、人がまだ確認していないものを `03_Dataview/AI未レビューのノート一覧.md`（DataviewJS）で一覧にする。
++
++## 前提となるプロパティ
++
++| プロパティ | 意味 |
++|---|---|
++| `ai_generated` | AI が作ったノート（値は作ったツール名。例: `opencode`） |
++| `ai_edited` | AI が編集した日時 |
++| `ai_reviewed` | 人がレビューしたらチェック（`true`）を入れる |
++
++## 対象の判定
++
++- `ai_generated` / `ai_edited` / `ai_reviewed` のいずれかをプロパティに持つ Markdown（`*.excalidraw.md` を含む）だけが候補。AI に関係ないノートは出ない。
++- 候補のうち、`ai_reviewed` が `true`（真偽値、または文字列 `"true"`）**でないもの**を未レビューとして出す。`ai_reviewed: false`、空、`ai_reviewed` が無い（`ai_generated` / `ai_edited` だけがある）ものが該当する。
++- `03_Dataview/` 配下は対象外。プロパティは `app.metadataCache` のフロントマターから読む。
++
++## 表示と操作
++
++- 列: ファイル名、フォルダ、`ai_generated`、`ai_edited`、作成日時、更新日時。更新日時の新しい順。
++- 上部の検索ボックスでノート名を絞り込める。件数（絞り込み後 / 全体）を表の上に出す。
++- ファイル名のクリックで開く。Ctrl/Cmd+クリックは新しいタブ。
++- レビューを終えたらノートの `ai_reviewed` にチェックを入れる。一覧を開き直す（再描画する）と消える。
++
++## 動作確認
++
++Obsidian で `03_Dataview/AI未レビューのノート一覧.md` を開き、`ai_reviewed: false` のノート（例: `01_data/2026/11/07/マネゲの要点まとめ.md`）が出ること、`ai_reviewed` を `true` にすると再描画後に消えることを確認する。

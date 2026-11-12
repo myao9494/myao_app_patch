@@ -3,10 +3,10 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "opencode",
-      "sequence": 3,
-      "manifest_path": "packages/opencode/000003/manifest.json"
+      "repo_id": "obsidian-settings",
+      "sequence": 25,
+      "manifest_path": "packages/obsidian-settings/000025/manifest.json"
     }
   ],
-  "signature": "0665f83b9566612eedca5c76b818a410eedcbcff30effe801ac5cb307c0cda09"
+  "signature": "8149af3eaa72db7b0db4e90289df3981809882d7355df3b513463cdb56301c30"
 }
