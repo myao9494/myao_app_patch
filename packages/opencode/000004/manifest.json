@@ -1,0 +1,1809 @@
+{
+  "schema_version": 1,
+  "repo_id": "opencode",
+  "display_name": "opencode",
+  "kind": "app",
+  "sequence": 4,
+  "created_at": "2026-11-16T22:26:17.825579+00:00",
+  "source_branch": "main",
+  "source_from_commit": "b45101e0b2e56b714a38c8c6f34166ac25965c5f",
+  "source_to_commit": "29b48b20c3fd949c9f771196747a847ec25f95a3",
+  "patch_size": 18898399,
+  "patch_sha256": "e39c168d2e0a9fa1888b2c47bdedc49d62681180add80658303df65bbb5e175e",
+  "chunks": [
+    {
+      "name": "changes.patch.part-000001",
+      "size": 18898399,
+      "sha256": "e39c168d2e0a9fa1888b2c47bdedc49d62681180add80658303df65bbb5e175e"
+    }
+  ],
+  "changed_paths": [
+    ".gitignore",
+    "CHANGELOG.md",
+    "README.md",
+    "agents/browser.md",
+    "docs/company-checklist.md",
+    "docs/mcp.md",
+    "docs/operations.md",
+    "mcp/playwright/node_modules/.package-lock.json",
+    "mcp/playwright/node_modules/@playwright/mcp/LICENSE",
+    "mcp/playwright/node_modules/@playwright/mcp/README.md",
+    "mcp/playwright/node_modules/@playwright/mcp/cli.js",
+    "mcp/playwright/node_modules/@playwright/mcp/config.d.ts",
+    "mcp/playwright/node_modules/@playwright/mcp/index.d.ts",
+    "mcp/playwright/node_modules/@playwright/mcp/index.js",
+    "mcp/playwright/node_modules/@playwright/mcp/package.json",
+    "mcp/playwright/node_modules/playwright-core/LICENSE",
+    "mcp/playwright/node_modules/playwright-core/NOTICE",
+    "mcp/playwright/node_modules/playwright-core/README.md",
+    "mcp/playwright/node_modules/playwright-core/ThirdPartyNotices.txt",
+    "mcp/playwright/node_modules/playwright-core/bin/install_media_pack.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/install_webkit_wsl.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_beta_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_beta_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_beta_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_stable_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_stable_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_stable_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_beta_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_beta_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_beta_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_dev_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_dev_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_dev_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_stable_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_stable_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_stable_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/browsers.json",
+    "mcp/playwright/node_modules/playwright-core/cli.js",
+    "mcp/playwright/node_modules/playwright-core/index.d.ts",
+    "mcp/playwright/node_modules/playwright-core/index.js",
+    "mcp/playwright/node_modules/playwright-core/index.mjs",
+    "mcp/playwright/node_modules/playwright-core/lib/bootstrap.js",
+    "mcp/playwright/node_modules/playwright-core/lib/coreBundle.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/cliDaemon.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/dashboardApp.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/mcp.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/oopBrowserDownload.js",
+    "mcp/playwright/node_modules/playwright-core/lib/package.js",
+    "mcp/playwright/node_modules/playwright-core/lib/server/chromium/appIcon.png",
+    "mcp/playwright/node_modules/playwright-core/lib/server/electron/loader.js",
+    "mcp/playwright/node_modules/playwright-core/lib/serverRegistry.js",
+    "mcp/playwright/node_modules/playwright-core/lib/serverRegistry.js.LICENSE",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/channelSessions.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/cli.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/help.json",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/minimist.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/output.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/program.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/registry.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/session.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/dashboard/appIcon.png",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/SKILL.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/element-attributes.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/playwright-tests.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/pr-attachments.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/request-mocking.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/running-code.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/session-management.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/storage-state.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/test-generation.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/tracing.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/video-recording.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/SKILL.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/gallery-spec.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/migration.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/react.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/typing.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/vue.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-trace/SKILL.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/utils/extension.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/utils/socketConnection.js",
+    "mcp/playwright/node_modules/playwright-core/lib/utilsBundle.js",
+    "mcp/playwright/node_modules/playwright-core/lib/utilsBundle.js.LICENSE",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/codeMirrorModule--QdMvsKi.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/codeMirrorModule-CQ8RZGBm.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/codicon-DCmgc-ay.ttf",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/firefox-1bWoP6pv.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/firefox-beta-k3eOH_eK.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/firefox-nightly-Cp5nfeDT.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/index-AwgwcYie.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/index-hRvO4yU2.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/safari-na3_-uQk.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/playwright-logo.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/htmlReport/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/htmlReport/report.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/htmlReport/report.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/codeMirrorModule--QdMvsKi.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/codeMirrorModule-DK72OMRi.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/codicon-DCmgc-ay.ttf",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/index-BZpYJZ-P.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/index-Cn0mmDuv.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/playwright-logo.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/codeMirrorModule-CvGugYRj.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/defaultSettingsView-Q1daMRpG.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/urlMatch-L3liM589.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/xtermModule-BRMEnLTX.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/codeMirrorModule.-QdMvsKi.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/codicon.DCmgc-ay.ttf",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/defaultSettingsView.C8BeHuxd.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/index.B_TqY17P.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/index.D66TeX8E.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/manifest.webmanifest",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/playwright-logo.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/snapshot.B_Jk1wbt.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/snapshot.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/sw.bundle.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/uiMode.B1pSYCuG.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/uiMode.CyMfwkXJ.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/uiMode.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/xtermModule.kHJ-D0s7.css",
+    "mcp/playwright/node_modules/playwright-core/lib/webp_codec.LICENSE",
+    "mcp/playwright/node_modules/playwright-core/lib/webp_codec.wasm",
+    "mcp/playwright/node_modules/playwright-core/lib/xdg-open",
+    "mcp/playwright/node_modules/playwright-core/package.json",
+    "mcp/playwright/node_modules/playwright-core/types/protocol.d.ts",
+    "mcp/playwright/node_modules/playwright-core/types/structs.d.ts",
+    "mcp/playwright/node_modules/playwright-core/types/types.d.ts",
+    "mcp/playwright/node_modules/playwright/LICENSE",
+    "mcp/playwright/node_modules/playwright/NOTICE",
+    "mcp/playwright/node_modules/playwright/README.md",
+    "mcp/playwright/node_modules/playwright/ThirdPartyNotices.txt",
+    "mcp/playwright/node_modules/playwright/cli.js",
+    "mcp/playwright/node_modules/playwright/index.d.ts",
+    "mcp/playwright/node_modules/playwright/index.js",
+    "mcp/playwright/node_modules/playwright/index.mjs",
+    "mcp/playwright/node_modules/playwright/lib/agents/agentParser.js",
+    "mcp/playwright/node_modules/playwright/lib/agents/copilot-setup-steps.yml",
+    "mcp/playwright/node_modules/playwright/lib/agents/generateAgents.js",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-coverage.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-generate.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-generator.agent.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-heal.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-healer.agent.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-plan.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-planner.agent.md",
+    "mcp/playwright/node_modules/playwright/lib/cli/reportActions.js",
+    "mcp/playwright/node_modules/playwright/lib/cli/testActions.js",
+    "mcp/playwright/node_modules/playwright/lib/common/index.js",
+    "mcp/playwright/node_modules/playwright/lib/common/index.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/errorContext.js",
+    "mcp/playwright/node_modules/playwright/lib/globals.js",
+    "mcp/playwright/node_modules/playwright/lib/index.js",
+    "mcp/playwright/node_modules/playwright/lib/isomorphic.js",
+    "mcp/playwright/node_modules/playwright/lib/isomorphic.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/loader/loaderProcessEntry.js",
+    "mcp/playwright/node_modules/playwright/lib/loader/loaderProcessEntry.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/matchers/expect.js",
+    "mcp/playwright/node_modules/playwright/lib/matchers/expect.js.LICENSE",
+    "mcp/playwright/node_modules/playwright/lib/matchers/expect.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/browserBackend.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/generatorTools.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/plannerTools.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/seed.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/streams.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testBackend.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testContext.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testTool.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testTools.js",
+    "mcp/playwright/node_modules/playwright/lib/package.js",
+    "mcp/playwright/node_modules/playwright/lib/program.js",
+    "mcp/playwright/node_modules/playwright/lib/runner/index.js",
+    "mcp/playwright/node_modules/playwright/lib/runner/index.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/transform/babelBundle.js",
+    "mcp/playwright/node_modules/playwright/lib/transform/babelBundle.js.LICENSE",
+    "mcp/playwright/node_modules/playwright/lib/transform/babelBundle.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/transform/esmLoader.js",
+    "mcp/playwright/node_modules/playwright/lib/transform/esmLoader.js.LICENSE",
+    "mcp/playwright/node_modules/playwright/lib/transform/esmLoader.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/util.js",
+    "mcp/playwright/node_modules/playwright/lib/worker/workerProcessEntry.js",
+    "mcp/playwright/node_modules/playwright/lib/worker/workerProcessEntry.js.txt",
+    "mcp/playwright/node_modules/playwright/package.json",
+    "mcp/playwright/node_modules/playwright/test.d.ts",
+    "mcp/playwright/node_modules/playwright/test.js",
+    "mcp/playwright/node_modules/playwright/test.mjs",
+    "mcp/playwright/node_modules/playwright/types/test.d.ts",
+    "mcp/playwright/node_modules/playwright/types/testReporter.d.ts",
+    "mcp/playwright/package-lock.json",
+    "mcp/playwright/package.json",
+    "mcp/playwright/smoke_test.py",
+    "mcp/scan_vendor.py",
+    "sample_opencode.json",
+    "skills/create-subagent/SKILL.md",
+    "tests/test_harness.py",
+    "クイックスタート.md"
+  ],
+  "added_files": [
+    {
+      "path": ".gitignore",
+      "size": 593,
+      "sha256": "45985c76b937610a0bbf59c5119a5d251023d0202b8f6e7380737e6bcbcde4b8"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "size": 127766,
+      "sha256": "27fb43f132e25cc8e61406dcf62ade071869d605bf25faba61f198ceab8b8ad9"
+    },
+    {
+      "path": "README.md",
+      "size": 119295,
+      "sha256": "0a44a822a7a9674a1ea2424727c89fe866cd07147c128bc2dfda73cb2c6437a4"
+    },
+    {
+      "path": "agents/browser.md",
+      "size": 7054,
+      "sha256": "7b350aee7a4123a6d5fd72ca81fa1de9d8c51718da201b5ebda25fd3f3763d74"
+    },
+    {
+      "path": "docs/company-checklist.md",
+      "size": 45397,
+      "sha256": "d2812644abe51f28ee34e4e4de055daea2a8c08c56bd661043ab0c48aa41fc9f"
+    },
+    {
+      "path": "docs/operations.md",
+      "size": 43322,
+      "sha256": "28684bd003f00daf99f6d6903b1e80861fd7579aa686fc81615f0a7e1a1e69a1"
+    },
+    {
+      "path": "sample_opencode.json",
+      "size": 8901,
+      "sha256": "e7585bff3f13a55bea95fcb1bb1f64e8c416f86c9fd50eae9d267463f2f571bf"
+    },
+    {
+      "path": "skills/create-subagent/SKILL.md",
+      "size": 7006,
+      "sha256": "dafa395b4c445c1a1e920235d484297988baada7a3b61338cbdf435e51ea2fef"
+    },
+    {
+      "path": "tests/test_harness.py",
+      "size": 59205,
+      "sha256": "c866fd09de87b7ceaf32fda8bd98d0a0f8a2cf69f5cb012b57246bfe9837041c"
+    },
+    {
+      "path": "クイックスタート.md",
+      "size": 9221,
+      "sha256": "62d4ae28eb9a6c8cb560b3b685efc5f6ce7fd4d2e0490ac37c3d9e8dd50e26f2"
+    }
+  ],
+  "deleted_files": [
+    "docs/mcp.md",
+    "mcp/playwright/node_modules/.package-lock.json",
+    "mcp/playwright/node_modules/@playwright/mcp/LICENSE",
+    "mcp/playwright/node_modules/@playwright/mcp/README.md",
+    "mcp/playwright/node_modules/@playwright/mcp/cli.js",
+    "mcp/playwright/node_modules/@playwright/mcp/config.d.ts",
+    "mcp/playwright/node_modules/@playwright/mcp/index.d.ts",
+    "mcp/playwright/node_modules/@playwright/mcp/index.js",
+    "mcp/playwright/node_modules/@playwright/mcp/package.json",
+    "mcp/playwright/node_modules/playwright-core/LICENSE",
+    "mcp/playwright/node_modules/playwright-core/NOTICE",
+    "mcp/playwright/node_modules/playwright-core/README.md",
+    "mcp/playwright/node_modules/playwright-core/ThirdPartyNotices.txt",
+    "mcp/playwright/node_modules/playwright-core/bin/install_media_pack.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/install_webkit_wsl.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_beta_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_beta_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_beta_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_stable_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_stable_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_chrome_stable_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_beta_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_beta_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_beta_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_dev_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_dev_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_dev_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_stable_linux.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_stable_mac.sh",
+    "mcp/playwright/node_modules/playwright-core/bin/reinstall_msedge_stable_win.ps1",
+    "mcp/playwright/node_modules/playwright-core/browsers.json",
+    "mcp/playwright/node_modules/playwright-core/cli.js",
+    "mcp/playwright/node_modules/playwright-core/index.d.ts",
+    "mcp/playwright/node_modules/playwright-core/index.js",
+    "mcp/playwright/node_modules/playwright-core/index.mjs",
+    "mcp/playwright/node_modules/playwright-core/lib/bootstrap.js",
+    "mcp/playwright/node_modules/playwright-core/lib/coreBundle.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/cliDaemon.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/dashboardApp.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/mcp.js",
+    "mcp/playwright/node_modules/playwright-core/lib/entry/oopBrowserDownload.js",
+    "mcp/playwright/node_modules/playwright-core/lib/package.js",
+    "mcp/playwright/node_modules/playwright-core/lib/server/chromium/appIcon.png",
+    "mcp/playwright/node_modules/playwright-core/lib/server/electron/loader.js",
+    "mcp/playwright/node_modules/playwright-core/lib/serverRegistry.js",
+    "mcp/playwright/node_modules/playwright-core/lib/serverRegistry.js.LICENSE",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/channelSessions.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/cli.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/help.json",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/minimist.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/output.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/program.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/registry.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/cli-client/session.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/dashboard/appIcon.png",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/SKILL.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/element-attributes.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/playwright-tests.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/pr-attachments.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/request-mocking.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/running-code.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/session-management.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/storage-state.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/test-generation.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/tracing.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-cli/references/video-recording.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/SKILL.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/gallery-spec.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/migration.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/react.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/typing.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-component-testing/references/vue.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/skills/playwright-trace/SKILL.md",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/utils/extension.js",
+    "mcp/playwright/node_modules/playwright-core/lib/tools/utils/socketConnection.js",
+    "mcp/playwright/node_modules/playwright-core/lib/utilsBundle.js",
+    "mcp/playwright/node_modules/playwright-core/lib/utilsBundle.js.LICENSE",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/codeMirrorModule--QdMvsKi.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/codeMirrorModule-CQ8RZGBm.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/codicon-DCmgc-ay.ttf",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/firefox-1bWoP6pv.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/firefox-beta-k3eOH_eK.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/firefox-nightly-Cp5nfeDT.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/index-AwgwcYie.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/index-hRvO4yU2.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/assets/safari-na3_-uQk.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/dashboard/playwright-logo.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/htmlReport/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/htmlReport/report.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/htmlReport/report.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/codeMirrorModule--QdMvsKi.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/codeMirrorModule-DK72OMRi.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/codicon-DCmgc-ay.ttf",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/index-BZpYJZ-P.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/assets/index-Cn0mmDuv.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/recorder/playwright-logo.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/codeMirrorModule-CvGugYRj.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/defaultSettingsView-Q1daMRpG.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/urlMatch-L3liM589.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/assets/xtermModule-BRMEnLTX.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/codeMirrorModule.-QdMvsKi.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/codicon.DCmgc-ay.ttf",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/defaultSettingsView.C8BeHuxd.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/index.B_TqY17P.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/index.D66TeX8E.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/index.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/manifest.webmanifest",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/playwright-logo.svg",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/snapshot.B_Jk1wbt.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/snapshot.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/sw.bundle.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/uiMode.B1pSYCuG.js",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/uiMode.CyMfwkXJ.css",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/uiMode.html",
+    "mcp/playwright/node_modules/playwright-core/lib/vite/traceViewer/xtermModule.kHJ-D0s7.css",
+    "mcp/playwright/node_modules/playwright-core/lib/webp_codec.LICENSE",
+    "mcp/playwright/node_modules/playwright-core/lib/webp_codec.wasm",
+    "mcp/playwright/node_modules/playwright-core/lib/xdg-open",
+    "mcp/playwright/node_modules/playwright-core/package.json",
+    "mcp/playwright/node_modules/playwright-core/types/protocol.d.ts",
+    "mcp/playwright/node_modules/playwright-core/types/structs.d.ts",
+    "mcp/playwright/node_modules/playwright-core/types/types.d.ts",
+    "mcp/playwright/node_modules/playwright/LICENSE",
+    "mcp/playwright/node_modules/playwright/NOTICE",
+    "mcp/playwright/node_modules/playwright/README.md",
+    "mcp/playwright/node_modules/playwright/ThirdPartyNotices.txt",
+    "mcp/playwright/node_modules/playwright/cli.js",
+    "mcp/playwright/node_modules/playwright/index.d.ts",
+    "mcp/playwright/node_modules/playwright/index.js",
+    "mcp/playwright/node_modules/playwright/index.mjs",
+    "mcp/playwright/node_modules/playwright/lib/agents/agentParser.js",
+    "mcp/playwright/node_modules/playwright/lib/agents/copilot-setup-steps.yml",
+    "mcp/playwright/node_modules/playwright/lib/agents/generateAgents.js",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-coverage.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-generate.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-generator.agent.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-heal.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-healer.agent.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-plan.prompt.md",
+    "mcp/playwright/node_modules/playwright/lib/agents/playwright-test-planner.agent.md",
+    "mcp/playwright/node_modules/playwright/lib/cli/reportActions.js",
+    "mcp/playwright/node_modules/playwright/lib/cli/testActions.js",
+    "mcp/playwright/node_modules/playwright/lib/common/index.js",
+    "mcp/playwright/node_modules/playwright/lib/common/index.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/errorContext.js",
+    "mcp/playwright/node_modules/playwright/lib/globals.js",
+    "mcp/playwright/node_modules/playwright/lib/index.js",
+    "mcp/playwright/node_modules/playwright/lib/isomorphic.js",
+    "mcp/playwright/node_modules/playwright/lib/isomorphic.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/loader/loaderProcessEntry.js",
+    "mcp/playwright/node_modules/playwright/lib/loader/loaderProcessEntry.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/matchers/expect.js",
+    "mcp/playwright/node_modules/playwright/lib/matchers/expect.js.LICENSE",
+    "mcp/playwright/node_modules/playwright/lib/matchers/expect.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/browserBackend.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/generatorTools.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/plannerTools.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/seed.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/streams.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testBackend.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testContext.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testTool.js",
+    "mcp/playwright/node_modules/playwright/lib/mcp/test/testTools.js",
+    "mcp/playwright/node_modules/playwright/lib/package.js",
+    "mcp/playwright/node_modules/playwright/lib/program.js",
+    "mcp/playwright/node_modules/playwright/lib/runner/index.js",
+    "mcp/playwright/node_modules/playwright/lib/runner/index.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/transform/babelBundle.js",
+    "mcp/playwright/node_modules/playwright/lib/transform/babelBundle.js.LICENSE",
+    "mcp/playwright/node_modules/playwright/lib/transform/babelBundle.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/transform/esmLoader.js",
+    "mcp/playwright/node_modules/playwright/lib/transform/esmLoader.js.LICENSE",
+    "mcp/playwright/node_modules/playwright/lib/transform/esmLoader.js.txt",
+    "mcp/playwright/node_modules/playwright/lib/util.js",
+    "mcp/playwright/node_modules/playwright/lib/worker/workerProcessEntry.js",
+    "mcp/playwright/node_modules/playwright/lib/worker/workerProcessEntry.js.txt",
+    "mcp/playwright/node_modules/playwright/package.json",
+    "mcp/playwright/node_modules/playwright/test.d.ts",
+    "mcp/playwright/node_modules/playwright/test.js",
+    "mcp/playwright/node_modules/playwright/test.mjs",
+    "mcp/playwright/node_modules/playwright/types/test.d.ts",
+    "mcp/playwright/node_modules/playwright/types/testReporter.d.ts",
+    "mcp/playwright/package-lock.json",
+    "mcp/playwright/package.json",
+    "mcp/playwright/smoke_test.py",
+    "mcp/scan_vendor.py"
+  ],
+  "target_files": [
+    {
+      "path": ".gitattributes",
+      "blob": "7a80ec0aba0d41ccd7988e4cac6a8875194b4ce7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": ".gitignore",
+      "blob": "fe198d14be662b2f81dfc7c29fe026d110f276ee",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "AGENTS.md",
+      "blob": "b943ba1ea113842b9288dbf691acace2d71085a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "blob": "4ca86d1a1838e0166de4c5a5bc3d1d0a7b3baa91",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "README.md",
+      "blob": "82311dbfd4845a2f1db2996dc0357b4bb4a4ff2c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/browser.md",
+      "blob": "2fc0172b5650853af9d94767f92780d512bd9297",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/diagram.md",
+      "blob": "8d7afc590f2dbf8a8af841f891cda48cc2833298",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/finder.md",
+      "blob": "1518b42bf01d3a7e8443dd865251c45cf19c16c9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/obsidian.md",
+      "blob": "bf36ead9e14ec09c30c198e14b677ac0712855b6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/outlook.md",
+      "blob": "54130a5701e98c07bde87bcbfa349bc9b6a26484",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/polish.md",
+      "blob": "d6283fcad49fe827a97143329c46c02d3ac2d35b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/researcher.md",
+      "blob": "f3fd45bd57255781f2051a00b832d86c84cbf676",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "agents/reviewer.md",
+      "blob": "f47abec100e9ee046c464cada347d43dfb8bcf6f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/apps.md",
+      "blob": "7afc993c847df05cefd591a205ea458f653f92f0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/convert-doc.md",
+      "blob": "6e966e480e8c3e1bfd6f167f033e02038d63592b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/create-subagent.md",
+      "blob": "d93c0cbb04b287675d00621c997cac30dbeff217",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/diagram.md",
+      "blob": "68af85a9730ade1c6ab72866a93be5e0035bc601",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/fix-note.md",
+      "blob": "de5d9f03f1e2c747473f2a5e9f7fc20e4027a16e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/grill-me.md",
+      "blob": "43c783fdb79dea1ed4950a44846e9b183ac3f0f8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/handoff-clean.md",
+      "blob": "cab55a88d168f4ad94e378c7e0d94eac7ae2fb50",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/init-project.md",
+      "blob": "4a100904a66ddcb6a77387bdf14fc979bb96ba88",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/meeting-notes.md",
+      "blob": "b2307fe5fad3551c1aa84cc8ad8fb0ae2649bdc0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/obsidian-run.md",
+      "blob": "e78d606bad3e8bbe87e4a51696b19eafe431727e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/people.md",
+      "blob": "d1918ac46a01e037e6cfa13e5ce1da126aa48a0c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/polish.md",
+      "blob": "1110de09ec3e8d97e86f2e48d2ea6fbfa2884d5f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/read-diagram.md",
+      "blob": "2ed308fd854f7bd0a30542c8f4cf37e88d11a38e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/remember.md",
+      "blob": "aa7a6f70a1f53500e28e7d6bec19223ee560006d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/save-note.md",
+      "blob": "cdc968936678c4591e1a57ffe1131f90f55ead03",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "commands/summarize.md",
+      "blob": "930f8f28257b518aa2ba224655041d6b2162f487",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/apps.md",
+      "blob": "cb8e8f67167895f7660f0be340d31f3032aade99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/company-checklist.md",
+      "blob": "7c8bcc1e84f4e3a7d8e4e5c49a55d39bbbc019ac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/convert.md",
+      "blob": "0d07f655e9544f4c0b5d96c12fecefd4407892f9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/diagram-reader.md",
+      "blob": "ec3317e697869143f2c25f37cca194239ebae8be",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/excalidraw.md",
+      "blob": "a58302f64caad3a1219c262644bd530808354af4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/memory.md",
+      "blob": "423dd90b8cb38462db1667d1b1752a4a5c7e6f50",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/obsidian.md",
+      "blob": "dec4ce67c251a35ce0658755cbbe2e424824a5aa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/operations.md",
+      "blob": "b8c139fd0b7c97c1164ae4a65dc70bdc95bd8758",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/outlook.md",
+      "blob": "64dd2e39dd17287dbacbfdfeedd9de3344b224e4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/people.md",
+      "blob": "520560c3e56ece8f41720f6641566e0b423f0d12",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/project-init.md",
+      "blob": "ece6acf9193138d4bb461266a31c6e47eb110390",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "docs/search.md",
+      "blob": "61c5c0c1d80a487a348c12048cfbb5d4a19dd657",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "requirements.in",
+      "blob": "eb1cd77f4aa20ba69b3f2060d4325471f1af1fd9",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "requirements.lock",
+      "blob": "4be141b6218dcba094853c0949ec496d41657dbf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "run_tests.py",
+      "blob": "60809e29637a4653b26463390edae3f50691cbf0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "sample_opencode.json",
+      "blob": "7bc338d5ccb0b7ca3c31b1f43f17242b133b9403",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/SKILL.md",
+      "blob": "7327570995b2c67f5c5178e6c18f227376ab2330",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/config.sample.json",
+      "blob": "96d17864e345cc7baf797f8e33d707eb74049217",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/run.bat",
+      "blob": "abe5119c38409fc9feee9c38dc012f435e6194ea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/run.sh",
+      "blob": "ad707b079cb34d7bf9a1ae27e6b5e6c82a34bc9b",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/scripts/apps_cli.py",
+      "blob": "d112a69b61f892f8ee2b89661e07d5ba5fc75d02",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/scripts/apps_core.py",
+      "blob": "f5ee0e4f764ad321dad7bc51567f000efcca7dff",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/app-ecosystem/tests/test_apps.py",
+      "blob": "3fc0c1d1f6364b2f007ce08e6726471598a9d0e2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/SKILL.md",
+      "blob": "ed89492ec8bccc767cf54ba3d65393155cfcecf5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/config.sample.json",
+      "blob": "dd43a5902da398cea6ed0296c643d03a870e3b18",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/run.bat",
+      "blob": "b1a4ae44573f33003f59c27badfd5e11cd6ef5c2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/run.sh",
+      "blob": "30880db67ec0c413d0e21a5c0889626d421d1ffa",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/scripts/browser_cli.py",
+      "blob": "f7b90eafd8548921f3c8a327cc1a6911b7b1297e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/scripts/browser_lib.py",
+      "blob": "1c855d0cc85887b1695bc3688202c60e3511fac8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/scripts/cdp.py",
+      "blob": "a357c6ab49ad35578acd5a3d6bbcc3b25e9be782",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/browser-session/tests/test_browser.py",
+      "blob": "5503f6e72d8103ef55fcd7f20281400205b102eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/calc-check/SKILL.md",
+      "blob": "7d998b253be8224bb8bfe0316a656d85e2b3ccf7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/calc-check/run.bat",
+      "blob": "f99879323ae4c8e057f6aed0db2e6f99ad390e55",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/calc-check/run.sh",
+      "blob": "959550c5811a04ccff3e398452e1fd72d2ea2cf8",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/calc-check/scripts/calc_cli.py",
+      "blob": "a925ff403656d2004a97a632333dfbceb096ebd5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/calc-check/scripts/units.py",
+      "blob": "2fb81f2ded69425a9b1ab62ee594807fbcb4654f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/calc-check/tests/test_calc.py",
+      "blob": "5d9cb1d97520aee3d1fe025ea148677f3871e066",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/create-subagent/SKILL.md",
+      "blob": "e179a7f0c3d2871c14da03ff85d2af4f44164345",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/create-subagent/handoff-block.md",
+      "blob": "8fbec6de8515c0b3974016d1323ff208940100b2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/SKILL.md",
+      "blob": "1a7df84c093453dcf5c7784f1eb50afe8c19c18b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/run.bat",
+      "blob": "2b007a705727748c8f604ba5107cf056d5e04052",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/run.sh",
+      "blob": "59e7095d380f3679e3d6732628b774f113918cf2",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/scripts/diagram_cli.py",
+      "blob": "9f8f8365f247cd1cc0e49e72071fae00b54a822e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/scripts/diagram_model.py",
+      "blob": "bb596447cf610cba386cdfaa505a6ba3cbc208f3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/scripts/load_drawio.py",
+      "blob": "8328ca76ae189369c767532ff6de7cc108a9dd8f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/scripts/load_excalidraw.py",
+      "blob": "93bd7bface7df48486ded5b020c0e1a4156e07e0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/scripts/lzstring.py",
+      "blob": "542efffae6ba051347f4208426f245f81ee85c3c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/tests/fixtures/compressed_samples.json",
+      "blob": "3d1b6ced496a81f2b2ab5c0df358719d801ea96d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/diagram-reader/tests/test_diagram_reader.py",
+      "blob": "bc5cd481fe7ac5ef7cbb624fbda3346f872973fb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/SKILL.md",
+      "blob": "8737154dd09c9631f55f1ac2d94ced8dc4809a3e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/config.sample.json",
+      "blob": "bf77267cce6bad1496d0bd73e59edf60910ceb79",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/run.bat",
+      "blob": "58d97cd2d62dbcf9ff5fd3580becb1e85c09cc09",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/run.sh",
+      "blob": "5e0fe76d3326f312844a4c08cbd3054a0580f623",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/scripts/convert_cli.py",
+      "blob": "b4c465a4c2403e932330621410da2fe55a9dd01f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/scripts/convert_core.py",
+      "blob": "8693019a097f6894c8ffb1d0d2f6aed1b62f0eeb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-convert/tests/test_convert.py",
+      "blob": "5d5e7d68c000955e5b0e94c79738b50350b6ee2d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-writing/SKILL.md",
+      "blob": "8bd85d552ac825203923f72efea1614ddb9284fe",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-writing/run.bat",
+      "blob": "4d579fe5b96e3198946b796613ab56dd3b4015be",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-writing/run.sh",
+      "blob": "2823730cf3b01569fbccdf5e51099c9908f2de50",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-writing/scripts/doc_cli.py",
+      "blob": "41a980681f3eea2ae05bd593183f2eae0a2f2a43",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/doc-writing/tests/test_doc.py",
+      "blob": "9f2f9c1f8d14f9b3123fc1ca7062518e2a23f228",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/LICENSE-axton-obsidian-visual-skills.txt",
+      "blob": "9bc77b72862eba19352698361ac061d22a861cbb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/NOTICE.md",
+      "blob": "14cf20c075e64f1194be9b3a0b125bf3d51f4e71",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/SKILL.md",
+      "blob": "ba463cbaef83aeb76a8df1d78d832132a8b82f83",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/run.bat",
+      "blob": "3bad624c8a3073f267fa61d4ad5fa652555ebdeb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/run.sh",
+      "blob": "bf4df561bd70d2c2c96ee3de9dafd4eba6fced1f",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/scripts/excalidraw_check.py",
+      "blob": "3bfb1727b0c078800745cf29c11b751decbbdc3a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/scripts/excalidraw_cli.py",
+      "blob": "92f6516e339503c33ba3569664add9300123e468",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/scripts/excalidraw_core.py",
+      "blob": "79698f7062aab41498f13ad929773bc89b6c0e32",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/excalidraw-diagram/tests/test_excalidraw.py",
+      "blob": "f74c0e34a9f9f37304a4cf428e0eef94db35ec74",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/SKILL.md",
+      "blob": "a0f47267e7dd983ffa7fd879ad85adc847e36b8d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/config.sample.json",
+      "blob": "b9a8ae84c58f1cf7a4a0692d8bf0a895ef0235f1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/run.bat",
+      "blob": "434c8eaf3a3cf83c2e5e7e6dd38402ff10d281dd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/run.sh",
+      "blob": "0952494e48c249cf37744d1ea67c85403f748ab0",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/scripts/finder_cli.py",
+      "blob": "0bac371fa06202756617aae4ede7522e2ab088b3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/scripts/search_core.py",
+      "blob": "79927e4bb0aadc41c711b86e7ff417ea4320f36f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/file-finder/tests/test_finder.py",
+      "blob": "d873d6b76b77edd4b716105d0504f41b19db600a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/handoff-clean/SKILL.md",
+      "blob": "089e8622cd1a2f057fe028e39ca700ea87bee8e3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/handoff-clean/run.bat",
+      "blob": "a41337c62f47be0ff8d09c8cade1666799cff459",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/handoff-clean/run.sh",
+      "blob": "026b8cd95f6297f346d3f3555388673dce24a6af",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/handoff-clean/scripts/handoff_cli.py",
+      "blob": "b322b5d52411b01fd02e6cc243bd6cd67b4170fd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/handoff-clean/tests/test_handoff.py",
+      "blob": "beec4897ff2cf7bda95ebaf114310cbfaed35b86",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/interview/SKILL.md",
+      "blob": "7e9285eb8cdd409b04b74ccd09b81c25ab3669a0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/interview/run.bat",
+      "blob": "e4d69e53853e4c6d944bd1db029c30a9ef203de1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/interview/run.sh",
+      "blob": "d8194b31c82961ca25dd3a78b6dfee9ec50a8343",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/interview/scripts/interview_cli.py",
+      "blob": "3e8d26963a7f7df5a8a41fe5e93259d83bdddd81",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/interview/tests/test_interview.py",
+      "blob": "a10a1878af35af851286f33bd59ff84b9ccd18eb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/meeting-notes/SKILL.md",
+      "blob": "e725170bf929b89636445221d87f422fb190378d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/memory/SKILL.md",
+      "blob": "013bc9e8182cfd2b6f8262986f76fabd32aff46c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/obsidian-run/SKILL.md",
+      "blob": "27054ee31880274194f492f05df6d4fc005fcde4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/obsidian-run/config.sample.json",
+      "blob": "aaa6cebba3db3514a4e1e33eaaaf8939bc2ebbeb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/obsidian-run/run.bat",
+      "blob": "02e2c5247616f5b921911589a8d814ae56832f53",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/obsidian-run/run.sh",
+      "blob": "6dd686ba7c9f45c7047486f55accdb4cd6caf71f",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/obsidian-run/scripts/obsidian_cli.py",
+      "blob": "5d71cbd73009662215032750a66118eec17f5d64",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/obsidian-run/tests/test_obsidian.py",
+      "blob": "5e2ed54462aa40f985b0399a677a44ea863b82ac",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/outlook-mail/SKILL.md",
+      "blob": "d5d407e3dffec2cfdb32c2a6f6c066dcdb277408",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/outlook-mail/run.bat",
+      "blob": "788537808424832a03a84b60910f0521989ec77f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/outlook-mail/scripts/outlook_cache.py",
+      "blob": "b5e6503bc16164ddaa5a127cdc992974b769eaa4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/outlook-mail/scripts/outlook_cli.py",
+      "blob": "6d3ad46aa89e69f22b5da4540e7826749221c4ec",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/outlook-mail/scripts/outlook_client.py",
+      "blob": "ca1235e3b2b16cd7b96191e3f58ca98fb59d828e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/outlook-mail/tests/test_outlook.py",
+      "blob": "184650caa32ff948f19cb33d6008d7433c60170f",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/people/SKILL.md",
+      "blob": "2470c5b6c4a6732375584fbab9ba52ef9573fa5a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/people/config.sample.json",
+      "blob": "f50aba0b491b395a9277f117bb4d3958d6b60976",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/people/run.bat",
+      "blob": "9d51ee642a6de8dcad4ad159bf495dccdadfafbd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/people/run.sh",
+      "blob": "e3cb6a3e7b105242a38f0cf14e3d02681d11a3b2",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/people/scripts/people_cli.py",
+      "blob": "ea6ba96be7378dcc5140b3e3513fc4255553d97a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/people/tests/test_people.py",
+      "blob": "0e539bf053d3b40211f416ecc96c479d9283d829",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/project-init/SKILL.md",
+      "blob": "a9501c69579335301c9c41d4e05fc7033539223c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/project-init/run.bat",
+      "blob": "2d380961649247e4afe45e8199b7ed4a3ce32094",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/project-init/run.sh",
+      "blob": "13679e4c7cbd5be1ae8c1e1d6e1368192d5d1376",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/project-init/scripts/project_init.py",
+      "blob": "a33a7c30794bfaf2d8953b95f286415c2337e6c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/project-init/tests/test_project_init.py",
+      "blob": "552f9cc3ac717a8eb63edecf5884f8b34782f0ec",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/python-coding/SKILL.md",
+      "blob": "6bf99bc8b70a3b768bb4c9d0ad6b71e55476fceb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/python-env/SKILL.md",
+      "blob": "fae7042dbe0da43aa8d1772a7b0c27f1924c1b29",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/vault-notes/SKILL.md",
+      "blob": "09bc3abe12d849c6472eb61808a6e4ed07ab1948",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/vault-notes/config.sample.json",
+      "blob": "2f13a6a421ada36d008c5793a1ea9773cb24706c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/vault-notes/run.bat",
+      "blob": "c01125b23369aff8b34852071326907915139971",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/vault-notes/run.sh",
+      "blob": "4e776a1609c7c79ccd76dcfee021f77e5e3825d8",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/vault-notes/scripts/vault_cli.py",
+      "blob": "8a26dc0aa2366cb6fef10bea82ec08525a4cd4f1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/vault-notes/tests/test_vault.py",
+      "blob": "d2c511635194d37c1a0d140ccd559f9b26473d65",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/.codex-plugin/plugin.json",
+      "blob": "5a19ff8aea13384325c12c2f8bd6c4720e88fb3e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/LICENSE",
+      "blob": "f0d06f87f9b209d47c7f7963321ff71bab68c1e8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/SKILL.md",
+      "blob": "c22ca3e03ada29222f3e224f77ea702ce52d8a50",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/UNICODE-LICENSE.txt",
+      "blob": "56da58912807030b451a4700687d5bd02c72d6ed",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/VENDOR.md",
+      "blob": "fdb86fc2f779284a094193fbe7aa9b974c7b8301",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/assets/algo-artis.png",
+      "blob": "21f28805968be9191621b00d64efe6b5f70c1ec6",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/audience.md",
+      "blob": "9d5225499745346d48a2fb51cd72ec3fa04a0c4e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/calques.md",
+      "blob": "891994cb79fc214e816013cba02a493c80c55816",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/article.md",
+      "blob": "5555ad6fac4139c443c30bcc71bd31b90b126787",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/essay.md",
+      "blob": "b7759e424621f7e79bc3aee052fbd54b65b5dce2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/formal.md",
+      "blob": "38b2060b773b5a1c24e4e37926afd4c0ae5ccf76",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/incident.md",
+      "blob": "287165f83caa12e08065a187d9c5754a91aee3c5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/mail.md",
+      "blob": "6f6300df44e8203b5764f67ab07106b3726200ea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/manual.md",
+      "blob": "72685c6d34b023e3d22a7814ef360c20a2e7fd32",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/minutes.md",
+      "blob": "0e21a3edb43c7b3ecc1c613d1a6294322570e093",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/paper.md",
+      "blob": "44c20162f3802b4de97db71beb28700a3f8aa716",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/pr.md",
+      "blob": "a49dccda870f97f8e2bbf3b437c1b5910f8fe00b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/promo.md",
+      "blob": "8c39d48e968faa7aa134f2d865c6258fff77badb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/proposal.md",
+      "blob": "cc03100c37ec983afc3cdc69cb48223a39c28fe2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/script.md",
+      "blob": "7d1f4b1de06a4670ff290f80e311df17fb9180bb",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/doc-types/slides.md",
+      "blob": "60f4b6b05a5df5d0f192f0b5793db532241790aa",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/domains/business.md",
+      "blob": "15158385647366a52a9736b2f59d470f151df9dd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/domains/essay.md",
+      "blob": "1450f9fec4a986eb8fc734853d997addbeef0976",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/domains/tech.md",
+      "blob": "1727e8c34ecce7ce6bb30e1a991949064996125c",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/fact-recovery-details.md",
+      "blob": "e37590d4c1f03c8df48fa90c009f54b1d557f400",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/fact-recovery.md",
+      "blob": "3f05677b4fe5cac0090504337796bd00d5fe8a4d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/gemini-syntax.md",
+      "blob": "62750b5081dad379c36fe3863821d2302fd7e4c4",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/fact-gaps.txt",
+      "blob": "2a178e536400ac3a8d0e356a5f73a40ae00a51fd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/feelings.txt",
+      "blob": "c6066da2f3d0eb0838ff92a329a5a26a1664cb7b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/hedges.txt",
+      "blob": "2a20cefc2886ce03116eef8743d84b62523e911e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/intensifiers.txt",
+      "blob": "6433f1e4334133714ec7569c43d7fefca2dbcaa2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/katakana-terms.txt",
+      "blob": "1db55310330d55604d40caccdaa4765193b550a2",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/nominalization.txt",
+      "blob": "68ea6918ea1e09efa6a4baad7918a492d937dd29",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/renyo-nouns.txt",
+      "blob": "158c9f7eee9f3e768228cf6fbd97e7e9a93c2802",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/lists/thin-evaluation.txt",
+      "blob": "a89b3600c90dcb787ce84d61fee5a8aaf82d0767",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/persona.md",
+      "blob": "24a835c32f3b0c27f67f0bf086232c085bf2dfb0",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/rephrase-test.md",
+      "blob": "664c269c5331cad2f4207954d48fcb3d0580385d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/review-points.md",
+      "blob": "d9c8f33294374fd03c606de61c7549001010dd0a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/slop-catalog.md",
+      "blob": "47034b1efad818a5f26c3cccb088d92f0f718f7e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/references/upstream-SKILL.md",
+      "blob": "5de07cc4a3616ac7431abace4eaf12388305445e",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/run.bat",
+      "blob": "28b01f07299ce56e47a1fb7528fb2f8c3a66982d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/run.sh",
+      "blob": "db74091dfed50bc1540694a3e09795799b2ce47b",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/scripts/markdown_visibility.py",
+      "blob": "446f5862342561dc45b443c75763b707697f9f31",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/scripts/run_yomiyasu.py",
+      "blob": "c2ea9eb4f04f32c64c60f0088d64c4e83eac5ac8",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/scripts/yomiyasu_check.py",
+      "blob": "2e66714d36e7deaa1ede6a7cd77befda63e916fd",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/scripts/yomiyasu_diff.py",
+      "blob": "b7367a4adf9e70eafa8bff127304d9c6d7b856f0",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/scripts/yomiyasu_hook.py",
+      "blob": "73f50c2540b653a987d12a4b2f8fd0f05b0c0915",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/scripts/yomiyasu_lint.py",
+      "blob": "288b9526d2c176540fd45e1d419e4bb1eb23e107",
+      "mode": "100755",
+      "type": "blob"
+    },
+    {
+      "path": "skills/yomiyasu/tests/test_vendor.py",
+      "blob": "ce2cad5555012ba7b16b3495878b69acc11bbf31",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.gitignore",
+      "blob": "95d135d8e42e1515cfff22554592332818868b73",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/commands/auto-fix.md",
+      "blob": "736d9601320e50e6718dfd69d1eb7ab3750186ca",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/commands/auto-new.md",
+      "blob": "4fcb38f2d6b76262c860a541350ed19cdb7bb92b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/commands/auto.md",
+      "blob": "39b36955c28b138a052d9fa9ddb6624679613458",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/automation-builder/SKILL.md",
+      "blob": "1c1b9bbf54ea300599e40dc0553a02f053a31baf",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/automation-builder/run.bat",
+      "blob": "f612cb3ff1b7dd52df676dd85e9d52583b87872b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/automation-builder/run.sh",
+      "blob": "fcdaaa137a9642ba2ba8dc8043b1275abbba48fd",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/automation-builder/scripts/new_automation.py",
+      "blob": "d4f6521b02568b734c50606132ce4a2a6a679d6b",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/automation-builder/tests/test_new_automation.py",
+      "blob": "1048e0d8a93d15360ce760b1d65e8ed3ee6a61a7",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/env-check/SKILL.md",
+      "blob": "5a4718901e85e8a60ee8a2c118c6593afc375015",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/env-check/run.bat",
+      "blob": "cf52ee0d003b175a4a326ca62d0b8a2792b98f36",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/env-check/run.sh",
+      "blob": "db709eb0347d4d9dcd801a9451ab5b2fac472c69",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/env-check/scripts/main.py",
+      "blob": "01486687fa57ada56b02371c0a763d28b9d2f602",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/.opencode/skills/env-check/tests/test_main.py",
+      "blob": "6859bf3e9a357d3662b66e8b93bb788df0597c68",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/AGENTS.md",
+      "blob": "779d45b6497f7d390f66a5dda0b9a66c13ee85b5",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/README.md",
+      "blob": "c39a6ddc0c8975ffe830c262a8d8940db9d0da02",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/launcher_slash_commands.sample.json",
+      "blob": "2c6280635ad25e3d088138b156a7a9386349db8a",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/requirements.in",
+      "blob": "31a25ffe56e8a6beb4242b211ab89921010cce99",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/ai_work/自動化一覧.md",
+      "blob": "752de6277d9bb6ce9f3dc4425fde0614db4c86c1",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/memory/profile.md",
+      "blob": "35846a17dbe62c93a929ef85417363545bcb02ea",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/obsidian/AGENTS.md",
+      "blob": "225a67b6f95967cee3748d98c0ab453cd271dc09",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/project/coding/AGENTS.md",
+      "blob": "396b3df377f5a5df68c779ab10e88179e5a9e0ae",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/project/csharp/AGENTS.md",
+      "blob": "c8ca2a97ea22ae6199cab461507b7d28b49e59b3",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "templates/project/document/AGENTS.md",
+      "blob": "a73b2cffbff3d67d582a77dbdb5926ac92d94c33",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "tests/test_harness.py",
+      "blob": "a269ef7feae8f687ec4b0fccc51362ec430a3a8d",
+      "mode": "100644",
+      "type": "blob"
+    },
+    {
+      "path": "クイックスタート.md",
+      "blob": "eb4746e41c49dbdde66057a3562208637f29d2a2",
+      "mode": "100644",
+      "type": "blob"
+    }
+  ],
+  "signature": "22d422653ad7fc70b2897d65133e768986201cffee1b2dfe172d84a803c0a45d"
+}

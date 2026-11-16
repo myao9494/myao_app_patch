@@ -4,9 +4,14 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 25,
-      "manifest_path": "packages/obsidian-settings/000025/manifest.json"
+      "sequence": 26,
+      "manifest_path": "packages/obsidian-settings/000026/manifest.json"
+    },
+    {
+      "repo_id": "opencode",
+      "sequence": 4,
+      "manifest_path": "packages/opencode/000004/manifest.json"
     }
   ],
-  "signature": "8149af3eaa72db7b0db4e90289df3981809882d7355df3b513463cdb56301c30"
+  "signature": "91c9f5426c29f11c525bae80244e381334608a3611b304148d90e99f01b75d62"
 }
