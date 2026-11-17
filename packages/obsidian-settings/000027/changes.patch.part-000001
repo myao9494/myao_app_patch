@@ -1,0 +1,242 @@
+diff --git a/80_script/register_custom_commands/18_file_manager_and_editor_menu.js b/80_script/register_custom_commands/18_file_manager_and_editor_menu.js
+index f535f029f0bcc7fc71802b568a17b89dca9b6d26..ba6f0cd7694a3c4bca5c7556428f187b2b8e0c97 100644
+--- a/80_script/register_custom_commands/18_file_manager_and_editor_menu.js
++++ b/80_script/register_custom_commands/18_file_manager_and_editor_menu.js
+@@ -467,10 +467,10 @@ const handleUrlMenu = (menu, url) => {
+ registerWorkspaceEvent("_customUrlMenuListener", "url-menu", handleUrlMenu);
+ 
+ /**
+- * file: の URL を、ファイルマネージャー（localhost:8001）でそのパスを開く URL にする。file: でなければ null。
++ * file: の URL を、このパソコンで開くパスにする。file: でなければ null。
+  * Mac では、別の Mac で作ったリンク（/Users/<別のユーザー>/…）も開けるよう、ユーザー名を今のユーザーに置き換える。
+  **/
+-const fileUrlToOpenPathUrl = (url, { platform, username } = {}) => {
++const fileUrlToPathForThisComputer = (url, { platform, username } = {}) => {
+     const localPath = fileUrlToLocalPath(url);
+     if (!localPath) return null;
+     const currentPlatform = platform ?? (typeof process !== "undefined" ? process.platform : "");
+@@ -482,16 +482,87 @@ const fileUrlToOpenPathUrl = (url, { platform, username } = {}) => {
+             currentUsername = "";
+         }
+     }
+-    const pathForThisComputer = currentPlatform === "darwin" && currentUsername
++    return currentPlatform === "darwin" && currentUsername
+         ? localPath.replace(/^\/Users\/(?!Shared(?:\/|$))[^/]+(?=\/|$)/, `/Users/${currentUsername}`)
+         : localPath;
+-    return buildOpenPathUrl(pathForThisComputer);
+ };
+ 
+ /**
+- * ノートの file:/// のリンクをクリックしたら、ファイルマネージャー（localhost:8001）で開く。
++ * file: の URL を、ファイルマネージャー（localhost:8001）でそのパスを開く URL にする。file: でなければ null。
++ **/
++const fileUrlToOpenPathUrl = (url, options = {}) => {
++    const localPath = fileUrlToPathForThisComputer(url, options);
++    return localPath ? buildOpenPathUrl(localPath) : null;
++};
++
++/**
++ * ファイルマネージャー（localhost:8001）に、パスがファイルかフォルダか見つからないかを聞く（GET /api/path-info）。
++ * "file" / "directory" / "not_found" を返す。聞けなければ（起動していない、応答しない、エラー）null。
++ * ブラウザの fetch はファイルマネージャーの CORS で止まるため、Obsidian の requestUrl を使う。
++ * 応答が遅いネットワークのパスは、ファイルマネージャーの設定（apiTimeout。既定10秒）で 504 になり、null になる。
++ **/
++const askFileManagerPathType = async (localPath, requestUrlFn = getObsidianModule()?.requestUrl) => {
++    if (typeof requestUrlFn !== "function") return null;
++    try {
++        const response = await requestUrlFn({
++            url: `http://localhost:8001/api/path-info?path=${encodeURIComponent(localPath)}`,
++            throw: false,
++        });
++        if (response?.status !== 200) return null;
++        const type = response.json?.type;
++        return ["file", "directory", "not_found"].includes(type) ? type : null;
++    } catch (e) {
++        return null;
++    }
++};
++
++/**
++ * パスを既定の方法で開く（ファイルは関連付けられたアプリ、フォルダは Explorer / Finder。Electron の shell.openPath）。
++ * 開けたら空文字、開けなければ理由を返す。
++ **/
++const openPathWithSystemDefault = async (localPath) => {
++    let electron = null;
++    try { electron = require("electron"); } catch (e) {
++        try { electron = window.require ? window.require("electron") : null; } catch (err) {}
++    }
++    if (!electron?.shell?.openPath) return "Electron の shell.openPath を使えません";
++    try {
++        return await electron.shell.openPath(localPath);
++    } catch (e) {
++        return e?.message || String(e);
++    }
++};
++
++/**
++ * file: のリンクのパスを開く。
++ * 1. ファイルマネージャーがそのパスをファイルかフォルダとして見つけられれば、今までどおりファイルマネージャーで開く。
++ * 2. 見つけられない、ファイルマネージャーが動いていない・応答しないときは、既定の方法で開く
++ *    （Windows のネットワークのパス、SharePoint の \\host@80\… など、ファイルマネージャーから見えないパスのため）。
++ * 3. どちらでも開けなければ、パスと理由を通知する。
++ * 返り値（どの方法で開いたか）: "file-manager" / "system-default" / "failed"
++ **/
++const openFileLinkPath = async (localPath, {
++    openUrl,
++    askPathType = askFileManagerPathType,
++    openDefault = openPathWithSystemDefault,
++    notify = (message) => new Notice(message, 10000),
++} = {}) => {
++    const type = await askPathType(localPath);
++    if (type === "file" || type === "directory") {
++        openUrl(buildOpenPathUrl(localPath));
++        return "file-manager";
++    }
++    const error = await openDefault(localPath);
++    if (!error) return "system-default";
++    console.warn("[file link] 開けませんでした", { path: localPath, fileManager: type, error });
++    notify(`開けませんでした:\n${localPath}\n${error}`);
++    return "failed";
++};
++
++/**
++ * ノートの file:/// のリンクをクリックしたら、openFileLinkPath で開く。
+  * Obsidian は外部リンクのクリック（閲覧モード、ライブプレビュー）を window.open に渡し、file: なら自分でファイルを開く。
+- * その手前で URL を差し替える。テンプレートを読み直したときは、前回の差し替えを外してから付け直す。
++ * その手前で受け取る。テンプレートを読み直したときは、前回の差し替えを外してから付け直す。
+  **/
+ const installFileUrlOpenPatch = () => {
+     if (typeof window === "undefined") return;
+@@ -500,12 +571,74 @@ const installFileUrlOpenPatch = () => {
+     const original = window.open;
+     const patched = function (url, ...rest) {
+         const href = typeof URL !== "undefined" && url instanceof URL ? url.href : url;
+-        const openPathUrl = typeof href === "string" ? fileUrlToOpenPathUrl(href) : null;
+-        return original.call(this, openPathUrl ?? url, ...rest);
++        const localPath = typeof href === "string" ? fileUrlToPathForThisComputer(href) : null;
++        if (!localPath) return original.call(this, url, ...rest);
++        void openFileLinkPath(localPath, { openUrl: (openPathUrl) => original.call(window, openPathUrl, ...rest) });
++        return null;
+     };
+     window.open = patched;
+     window._customFileUrlOpenPatch = { original, patched };
+ };
+ 
+ installFileUrlOpenPatch();
++
++/**
++ * 1行のテキストの中で、ch（行頭からの文字数）の位置にある file: のリンク（[名前](file:…)）の URL を返す。無ければ null。
++ **/
++const findFileLinkUrlAt = (lineText, ch) => {
++    const pattern = new RegExp(`!?${MARKDOWN_LINK_TEXT}\\((file:${OPEN_PATH_URL_BODY})\\)`, "gi");
++    for (const match of lineText.matchAll(pattern)) {
++        if (ch >= match.index && ch <= match.index + match[0].length) return match[1];
++    }
++    return null;
++};
++
++/**
++ * 編集画面（ライブプレビュー、ソースモード）でクリックした file: のリンクの URL を返す。リンクでなければ null。
++ * Obsidian と同じく、ソースモードは Ctrl / Cmd を押したときだけ、ライブプレビューは Alt / Shift だけを押したときは開かない。
++ **/
++const findClickedEditorFileLinkUrl = (e) => {
++    const target = e.target;
++    if (!target?.closest?.(".cm-content") || !target.closest(".cm-underline, .cm-link, .cm-url")) return null;
++    const view = app.workspace.getLeavesOfType("markdown")
++        .map((leaf) => leaf.view)
++        .find((markdownView) => markdownView?.contentEl?.contains(target));
++    const cm = view?.editor?.cm;
++    if (!cm?.posAtCoords) return null;
++
++    const withMod = e.metaKey || e.ctrlKey;
++    const isSourceMode = view.getState?.()?.source === true;
++    if (isSourceMode && !withMod) return null;
++    if (!isSourceMode && !withMod && (e.altKey || e.shiftKey)) return null;
++    const selection = window.getSelection?.();
++    if (selection && !selection.isCollapsed) return null;
++
++    const offset = cm.posAtCoords({ x: e.clientX, y: e.clientY });
++    if (offset === null || offset === undefined) return null;
++    const line = cm.state.doc.lineAt(offset);
++    return findFileLinkUrlAt(line.text, offset - line.from);
++};
++
++/**
++ * file: のリンクのクリックを、Obsidian が処理する前に受け取って openFileLinkPath で開く。
++ * Obsidian は開く前に new URL() でリンクを確かめ、URL として読めなければ「開けません」と通知して window.open を呼ばない。
++ * Windows の Chromium は file:////host/… のホスト名を確かめるため、SharePoint の \\host@80\… のように @ を含むホスト名は
++ * そこで止まり、window.open の差し替え（installFileUrlOpenPatch）まで届かない。そのため、クリックをキャプチャで先に受け取る。
++ * 閲覧モード（a.external-link）と編集画面（ライブプレビュー、ソースモード）の左クリックが対象。
++ * 中クリックや「リンクを開く」コマンドは、従来どおり window.open の差し替えで受け取る。
++ **/
++const handleFileLinkClick = (e) => {
++    if (e.button !== 0 || e.defaultPrevented) return;
++    const anchor = e.target?.closest?.("a.external-link[href]");
++    const anchorHref = anchor?.getAttribute("href") || "";
++    const url = /^file:/i.test(anchorHref) ? anchorHref : (anchor ? null : findClickedEditorFileLinkUrl(e));
++    const localPath = url ? fileUrlToPathForThisComputer(url) : null;
++    if (!localPath) return;
++
++    e.preventDefault();
++    e.stopImmediatePropagation();
++    void openFileLinkPath(localPath, { openUrl: (openPathUrl) => window.open(openPathUrl, "") });
++};
++
++registerDocumentListener("_customFileLinkClickListener", "click", handleFileLinkClick);
+ console.log("Editor menu listener registered for Summary");
+diff --git a/docs/custom_commands_reference.md b/docs/custom_commands_reference.md
+index b24e8298494a875d1521527205fc89cb1ae129aa..43913c80bec50f765264ad5dcb73e03db36ad93e 100644
+--- a/docs/custom_commands_reference.md
++++ b/docs/custom_commands_reference.md
+@@ -148,7 +148,7 @@ Excalidraw / MarkMind の編集中は、次のコマンドを実行しないよ
+ | マウス | 中ボタンの押下 | マインドマップを掴んで移動 | [markmind_features_spec.md](markmind_features_spec.md) |
+ | マウス | クリック | `03_Dataview/topタグ付きノート一覧.md` の内部リンクを右ペインで開く | [top_notes_list_spec.md](top_notes_list_spec.md) |
+ | ドロップ | ファイルマネージャーからのドロップ | パスの `file:///` のリンクを挿入 | [file_manager_dnd_and_copy_spec.md](file_manager_dnd_and_copy_spec.md) |
+-| リンクのクリック | `file:///` のリンク | ファイルマネージャー（`localhost:8001/api/open-path`）で開く（`window.open` の差し替え） | [file_path_links_spec.md](file_path_links_spec.md) |
++| リンクのクリック | `file:///` のリンク | ファイルマネージャーが見つけられればそこで開き（`localhost:8001/api/open-path`）、だめなら既定のアプリ / Explorer で開く（`window.open` の差し替え） | [file_path_links_spec.md](file_path_links_spec.md) |
+ | DOM監視 | 図の埋め込みの追加・変更 | 図名キャプション、幅の追従、リサイズハンドルの付与（PDF埋め込みは右端・下端・右下隅）、図の後ろの余白調整 | [image_drag_resize_spec.md](image_drag_resize_spec.md)、[image_zoom_and_resize_spec.md](image_zoom_and_resize_spec.md)、[pdf_embed_resize_spec.md](pdf_embed_resize_spec.md)、[iframe_embed_resize_spec.md](iframe_embed_resize_spec.md) |
+ | DOM監視 | PDF エクスポートのモーダル表示 | 「コードブロックの薄いグレー背景」「パスをクリップボードに入れる」の切り替えを追加 | [export_path_temp.md](export_path_temp.md)、本書 6章 |
+ | Obsidian | 保管庫の `modify`（Excalidraw 図） | ノート内の図の埋め込みを描き直す（Web アプリでの編集も反映） | [excalidraw_embed_refresh_spec.md](excalidraw_embed_refresh_spec.md) |
+@@ -164,6 +164,7 @@ Excalidraw / MarkMind の編集中は、次のコマンドを実行しないよ
+ | `http://localhost:3001/?filepath=…` | Excalidraw の Web アプリ（Webアプリで開く / 編集） |
+ | `http://localhost:5001/view/obsidian-dagnetz/…` | フォルダのブラウザ表示（Open Folder in Browser） |
+ | `http://localhost:8001/api/open-path?path=…` | ファイルマネージャー Web アプリ（`file:///` のリンクをクリックしたときに開く。ノートのリンク先はパス） |
++| `http://localhost:8001/api/path-info?path=…` | ファイルマネージャー（`file:///` のリンクを開く前に、パスがファイルかフォルダか見つからないかを確かめる） |
+ | `http://127.0.0.1:8078/` と `/api` | 画像比較・差分表示アプリ（クリップボード画像との比較、Markdown の差分表示） |
+ | `http://localhost:8000/api` | gantt アプリ（ganttに追加） |
+ 
+diff --git a/docs/file_path_links_spec.md b/docs/file_path_links_spec.md
+index 7c5f220d32fd559ee5f458767e3b382ced9abda0..0525a4b286f62be804e80aed05bc7dec396bdb06 100644
+--- a/docs/file_path_links_spec.md
++++ b/docs/file_path_links_spec.md
+@@ -19,7 +19,16 @@ From Clipboard（スラッシュコマンド）とファイルマネージャー
+ - From Clipboard に以前の形のリンク（`localhost:8001/api/open-path?path=…`）や `file:` の URL を貼った場合も、パスに戻して `file:///` のリンクにする。
+ 
+ ## 3. クリックしたとき
+-- Obsidian は外部リンクのクリック（閲覧モード、ライブプレビュー）を `window.open` に渡し、`file:` ならそのファイルを既定のアプリで開く。その手前で `window.open` を差し替え、`file:` の URL をファイルマネージャーの URL（`http://localhost:8001/api/open-path?path=<パス>`）に変えて開く（`installFileUrlOpenPatch` / `fileUrlToOpenPathUrl`）。
++- **クリックを先に受け取る**（`handleFileLinkClick`。document の click をキャプチャで受け取る）: Obsidian は外部リンクを開く前に `new URL()` でリンクを確かめ、読めなければ「開けません」と通知して何もしない。Windows の Chromium は `file:////host/…` をネットワークのパスとして読み、ホスト名を確かめるため、SharePoint の `\\host@80\…` のように `@` を含むホスト名はそこで止まる（Mac では止まらない）。そのため、Obsidian より先にクリックを受け取って開く。
++  - 閲覧モード: `a.external-link` の `href` が `file:` のもの。
++  - 編集画面: `.cm-underline` / `.cm-link` / `.cm-url` をクリックしたとき、クリックした位置の行から `[名前](file:…)` を探す（`findClickedEditorFileLinkUrl` / `findFileLinkUrlAt`）。Obsidian と同じく、ソースモードは Ctrl / Cmd を押したときだけ開き、ライブプレビューは Alt / Shift だけを押したとき、文字を選択しているときは開かない。
++  - 左クリックだけが対象。中クリックや「リンクを開く」コマンド（Ctrl / Cmd + Enter）は、`window.open` の差し替え（`installFileUrlOpenPatch`）で受け取る。こちらは Obsidian の確認を通ったあとなので、Windows の `@` を含むホスト名では届かないことがある。
++- どちらで受け取っても、次の順に開く（`openFileLinkPath`）。
++  1. ファイルマネージャーにパスの種類を聞く（`GET http://localhost:8001/api/path-info?path=<パス>`。`askFileManagerPathType`）。ブラウザの `fetch` はファイルマネージャーの CORS で止まるため、Obsidian の `requestUrl` を使う。
++  2. ファイルかフォルダとして見つかれば、今までどおりファイルマネージャーで開く（`http://localhost:8001/api/open-path?path=<パス>` をブラウザで開く）。
++  3. 見つからない（`not_found`）、ファイルマネージャーが起動していない、応答しない（設定 `apiTimeout`、既定10秒で 504）ときは、既定の方法で開く（Electron の `shell.openPath`。ファイルは関連付けられたアプリ、フォルダは Explorer / Finder。`openPathWithSystemDefault`）。Windows のネットワークのパス（`\\vsv12\…`）や SharePoint の WebDAV のパス（`\\host@80\…`）は、ファイルマネージャーからは見えなくても Explorer では開けることがあるため。
++  4. それでも開けなければ、パスと理由を通知する（10秒）。
++- ファイルマネージャーで開いたあとの結果（ブラウザで開いたページでの失敗）は Obsidian に返ってこない。`open-path` をブラウザで開くと、ファイルマネージャーは見つからないパスを「パスが見つかりません」のページ（404）で知らせるだけで、Obsidian からは分からない。そのため、開く前に `path-info` で確かめている。
+ - `file:` の URL をパスに戻す（`fileUrlToLocalPath`）。`file:///C:/…` は `C:\…`、`file:////host/…` と `file://host/…` は `\\host\…`、`file://localhost/…` と `file:/…` はそのままのパスにする。
+ - Mac では、別の Mac で作ったリンクも開けるよう、パスの `/Users/<ユーザー名>` を今のユーザーに置き換える（`/Users/Shared` は置き換えない）。以前の形のリンクでは Sidebar Explorer Tag の `rewriteLocalhostLinkForMac` が同じことをしている。
+ - テンプレートを読み直したときは、前回の差し替えを外してから付け直す（二重にしない）。
+diff --git a/docs/testing.md b/docs/testing.md
+index ceb6db82d97d543daa9abe76ed49c7d573fa6426..86187d47c89757f192809ae0fb76dfd654bda3bf 100644
+--- a/docs/testing.md
++++ b/docs/testing.md
+@@ -17,7 +17,7 @@
+ | Sidebar Explorer | `.obsidian/plugins/obsidian-sidebar-explorer/utils.test.ts` | `npm test` | 68 |
+ | Sidebar Explorer Tag | `.obsidian/plugins/obsidian-sidebar-explorer-tag/`（`utils.test.ts`、`view.test.js`、`msgParser.test.ts`、`tnefParser.test.ts`、`mailGlobals.test.ts`、`noteListSection.test.ts`、`noteListUpdater.test.ts`） | `npm test` | 116 |
+ | 画像一覧（Excalidraw Cards） | `.obsidian/plugins/obsidian-excalidraw-cards/utils.test.ts` | `npm test` | 26 |
+-| カスタムコマンドのスクリプト（`RegisterCustomCommands.md` と `80_script/register_custom_commands/`）、CSS スニペットほか | `scratch/test_*.js` | `npm test`（`node --test test_*.js`） | 910 |
++| カスタムコマンドのスクリプト（`RegisterCustomCommands.md` と `80_script/register_custom_commands/`）、CSS スニペットほか | `scratch/test_*.js` | `npm test`（`node --test test_*.js`） | 924 |
+ 
+ - いずれも Node.js 標準のテストランナー（`node:test`）を使う。TypeScript のテストは `tsx` 経由で実行する。
+ - プラグインの依存パッケージ（`node_modules`）は Git 管理外。初回や取得し直した後は、各プラグインのフォルダで `npm install` を実行する。

@@ -3,15 +3,20 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "obsidian-settings",
-      "sequence": 26,
-      "manifest_path": "packages/obsidian-settings/000026/manifest.json"
+      "repo_id": "excalidraw_myao9494",
+      "sequence": 5,
+      "manifest_path": "packages/excalidraw_myao9494/000005/manifest.json"
     },
     {
-      "repo_id": "opencode",
-      "sequence": 4,
-      "manifest_path": "packages/opencode/000004/manifest.json"
+      "repo_id": "obsidian-settings",
+      "sequence": 27,
+      "manifest_path": "packages/obsidian-settings/000027/manifest.json"
+    },
+    {
+      "repo_id": "visual-diff-tool",
+      "sequence": 10,
+      "manifest_path": "packages/visual-diff-tool/000010/manifest.json"
     }
   ],
-  "signature": "91c9f5426c29f11c525bae80244e381334608a3611b304148d90e99f01b75d62"
+  "signature": "c8954b759453f11f00f380385661f3e5da4a62c60ac85b4e2dee4020e7eec1bf"
 }

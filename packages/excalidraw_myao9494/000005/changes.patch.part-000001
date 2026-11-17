@@ -1,0 +1,437 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 6ab6ffbc9f2cb8a832113c1331854fd417bbce65..4191a7be2f9c6fea56ffc6b96265f165a38ee887 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -45,7 +45,8 @@
+ 
+ - 一時ファイルに書いてから置換（原子的）。ロック時は 0.2 秒間隔で最大 10 回リトライ
+ - `.md` は Obsidian 形式（本文・Front Matter を維持して図面・Text Elements・Embedded Files だけ更新、画像は外部ファイル、
+-  バックアップなし）。それ以外は JSON（Vault 内の `.excalidraw` も JSON のまま）
++  バックアップなし）。新しい画像は `{図面名}-{タイムスタンプ}.webp` に変換して保存（Pillow、品質 75、30KB 以上小さくならない・
++  GIF/SVG/WebP/tif/heic/`*.drawio.*`/`*.excalidraw.*` は元の形式のまま。詳細: docs/obsidian.md）。それ以外は JSON（Vault 内の `.excalidraw` も JSON のまま）
+ - バックアップ: `backup/<名前>_backup_YYYYMMDD_HHMMSS.ext`。自動保存は 10 分間隔、手動保存は必ず作る。
+   2 週間より古いものは削除、今日以外は各日の最新 1 件だけ残す
+ 
+@@ -109,4 +110,4 @@ API に認証はなく、任意パスの読み書き・コマンド実行がで
+ ## 主要な依存ライブラリ
+ 
+ - フロントエンド: `@excalidraw/excalidraw` 0.18.1、`react`/`react-dom` ^19.2.7、`vite` ^5.4.14、`vitest` ^1.6.1
+-- バックエンド: `fastapi` >=0.115.0、`uvicorn` >=0.30.0、`pydantic` >=2.8.0、`lzstring`、`python-multipart`
++- バックエンド: `fastapi` >=0.115.0、`uvicorn` >=0.30.0、`pydantic` >=2.8.0、`lzstring`、`python-multipart`、`Pillow`（WebP 変換）
+diff --git a/backend/image_convert.py b/backend/image_convert.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..b521607d3537ad8b4132e58e294a5cb1fa04155a
+--- /dev/null
++++ b/backend/image_convert.py
+@@ -0,0 +1,96 @@
++"""
++画像の WebP 変換（Obsidian の obsidian-image-converter と同じ方針）
++
++- 設定は obsidian-dagnetz の image-converter に合わせた定数（WebP 品質 75・リサイズなし）
++- 変換後の削減量が MIN_SAVINGS_BYTES 未満、または元より大きくなる場合は元の画像のまま保存する
++- GIF・SVG・WebP・tif・heic と、*.drawio.* / *.excalidraw.* は変換しない
++- 新しい画像のファイル名は {図面名}-{タイムスタンプ}.<拡張子>（同名があれば -1, -2 ...）
++"""
++import io
++import logging
++import re
++from datetime import datetime
++from fnmatch import fnmatch
++from pathlib import Path
++from typing import Optional
++
++logger = logging.getLogger("excalidraw.image_convert")
++
++WEBP_QUALITY = 75
++MIN_SAVINGS_BYTES = 30 * 1024
++
++SKIP_MIME_TYPES = frozenset({
++    "image/gif",
++    "image/svg+xml",
++    "image/webp",
++    "image/tiff",
++    "image/heic",
++    "image/heif",
++})
++SKIP_FILENAME_PATTERNS = (
++    "*.drawio.png", "*.drawio.svg", "*.dio.png", "*.dio.svg",
++    "*.excalidraw.png", "*.excalidraw.svg",
++)
++
++_INVALID_FILENAME_CHARS = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
++
++
++def should_skip_conversion(mime_type: str, filename: Optional[str]) -> bool:
++    """WebP 変換の対象外か。filename は元のファイル名が分かるときだけ渡す。"""
++    if mime_type.lower() in SKIP_MIME_TYPES:
++        return True
++    if filename:
++        name = Path(filename).name.lower()
++        return any(fnmatch(name, pattern) for pattern in SKIP_FILENAME_PATTERNS)
++    return False
++
++
++def convert_to_webp(image_bytes: bytes, mime_type: str, force: bool = False) -> Optional[bytes]:
++    """
++    画像を WebP（品質 75・リサイズなし）に変換して返す。
++
++    変換しない（または変換できない）場合は None を返し、呼び出し側は元の画像を使う。
++    force=True のときは削減量・サイズの比較をせず、変換できれば必ず返す。
++    """
++    try:
++        from PIL import Image, ImageOps
++    except ImportError:
++        logger.warning("Pillow がないため WebP 変換をスキップします")
++        return None
++
++    try:
++        with Image.open(io.BytesIO(image_bytes)) as image:
++            image = ImageOps.exif_transpose(image)
++            if image.mode not in ("RGB", "RGBA"):
++                has_alpha = image.mode in ("LA", "PA") or "transparency" in image.info
++                image = image.convert("RGBA" if has_alpha else "RGB")
++            buffer = io.BytesIO()
++            image.save(buffer, format="WEBP", quality=WEBP_QUALITY)
++    except Exception as e:
++        logger.warning("WebP 変換に失敗しました (%s): %s", mime_type, e)
++        return None
++
++    webp_bytes = buffer.getvalue()
++    if force:
++        return webp_bytes
++    if len(webp_bytes) >= len(image_bytes) or len(image_bytes) - len(webp_bytes) < MIN_SAVINGS_BYTES:
++        return None
++    return webp_bytes
++
++
++def build_image_filename(directory: Path, note_filename: str, extension: str) -> str:
++    """{図面名}-{タイムスタンプ}.<拡張子>。同名が既にあれば -1, -2 ... を付ける。"""
++    note_name = note_filename
++    if note_name.lower().endswith(".md"):
++        note_name = note_name[:-3]
++    if note_name.lower().endswith(".excalidraw"):
++        note_name = note_name[: -len(".excalidraw")]
++    note_name = _INVALID_FILENAME_CHARS.sub("_", note_name).strip() or "image"
++
++    base = f"{note_name}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
++    candidate = f"{base}.{extension}"
++    counter = 1
++    while (directory / candidate).exists():
++        candidate = f"{base}-{counter}.{extension}"
++        counter += 1
++    return candidate
+diff --git a/backend/obsidian_files.py b/backend/obsidian_files.py
+index c24e3e103a734c51d7016996c293ca88c1c9cd29..ff6b18d439f9191f39fbd5a1077b9249b9369bff 100644
+--- a/backend/obsidian_files.py
++++ b/backend/obsidian_files.py
+@@ -14,9 +14,11 @@ from pathlib import Path
+ from typing import Any, Dict, List, Optional
+ 
+ try:
++    from .image_convert import build_image_filename, convert_to_webp, should_skip_conversion
+     from .obsidian_markdown import find_vault_root, has_excalidraw_plugin_marker
+     from .storage import atomic_write_bytes
+ except ImportError:  # backend/ をカレントにして `uvicorn main:app` で起動した場合
++    from image_convert import build_image_filename, convert_to_webp, should_skip_conversion
+     from obsidian_markdown import find_vault_root, has_excalidraw_plugin_marker
+     from storage import atomic_write_bytes
+ 
+@@ -287,6 +289,17 @@ def _resolve_existing_link_target(file_path: Path, link: str) -> Path:
+     return target
+ 
+ 
++def _original_name_hint(file_data: Any) -> Optional[str]:
++    """元のファイル名が分かれば返す（変換除外パターンの判定用）。"""
++    if not isinstance(file_data, dict):
++        return None
++    for key in ("name", "fileName", "sourcePath"):
++        value = file_data.get(key)
++        if isinstance(value, str) and value:
++            return value
++    return None
++
++
+ def export_embedded_images(
+     file_path: Path,
+     files: Dict[str, Any],
+@@ -323,8 +336,23 @@ def export_embedded_images(
+ 
+             if file_id in existing_embedded_files:
+                 target_path = _resolve_existing_link_target(file_path, existing_embedded_files[file_id])
++                if target_path.suffix.lower() == ".webp" and mime_type.lower() != "image/webp":
++                    # WebP に変換済みの画像。ブラウザは変換前の dataURL を持ち続けるが、
++                    # fileId は内容から決まるので、ファイルがあれば書き直さない
++                    if target_path.exists():
++                        continue
++                    converted = convert_to_webp(image_bytes, mime_type, force=True)
++                    if converted is None:
++                        logger.warning("Failed to restore WebP image %s", file_id)
++                        continue
++                    image_bytes = converted
+             else:
+-                filename = f"{file_id}.{ext}"
++                converted = None
++                if not should_skip_conversion(mime_type, _original_name_hint(file_data)):
++                    converted = convert_to_webp(image_bytes, mime_type)
++                if converted is not None:
++                    image_bytes, ext = converted, "webp"
++                filename = build_image_filename(file_path.parent, file_path.name, ext)
+                 target_path = file_path.parent / filename
+                 image_files_map[file_id] = filename
+ 
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index 24235725fe80ef43daae9ec750b1a5c960101d95..fab8d1d369a1116b8b2d0f93df37d7319a72458b 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -3,3 +3,4 @@ uvicorn>=0.30.0
+ pydantic>=2.8.0
+ lzstring
+ python-multipart
++Pillow>=10
+diff --git a/docs/architecture.md b/docs/architecture.md
+index 9a57dcbbfae7c2c31bf2b1d87c96374eeff59316..8e7701ad30547f6e7b591d596989343ff99dd05c 100644
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -105,6 +105,7 @@ backend/
+   storage.py           原子的な書き込み・バックアップ・JSON 検証・アップロード先
+   obsidian_markdown.py .excalidraw.md の解析・生成（LZString 圧縮、Text Elements など）
+   obsidian_files.py    Embedded Files の画像の解決（読み込み時）・書き出し（保存時）
++  image_convert.py     画像の WebP 変換・新しい画像のファイル名（Pillow）
+   system_open.py       OS の既定アプリで開く・VS Code・コマンド実行
+ ```
+ 
+diff --git a/docs/obsidian.md b/docs/obsidian.md
+index de46752493374ad6a2094902289742526b7e252f..86a33a7a0885cd73e816cddf6cd624167173a523 100644
+--- a/docs/obsidian.md
++++ b/docs/obsidian.md
+@@ -67,7 +67,15 @@ fileId: [[画像ファイル名.png]]
+ - `files` の画像（dataURL）を外部ファイルとして書き出し、Markdown には `[[リンク]]` だけを残す（dataURL は Markdown に入れない）
+ - 既にリンクがある画像は、**リンクの文字列を変えずに** そのリンク先を上書きする
+   （図面からの相対パス → Vault ルートからの相対パス → 見つからなければ図面と同じフォルダに同名で保存）
+-- 新しい画像は図面と同じフォルダに `<fileId>.<拡張子>` で保存する
++- 新しい画像は図面と同じフォルダに `{図面名}-{タイムスタンプ(YYYYMMDDHHmmss)}.<拡張子>` で保存する
++  （`.excalidraw` は図面名から除く。同名があれば `-1`, `-2` …）
++- 新しい画像は **WebP（品質 75・リサイズなし）に変換して保存**する（`backend/image_convert.py`、Pillow 使用。
++  obsidian-dagnetz の obsidian-image-converter の設定に合わせた固定値）。次の場合は元の形式のまま保存する
++  - 変換しても 30KB 以上小さくならない、または元より大きくなる
++  - GIF・SVG・WebP・tif・heic、`*.drawio.*`・`*.dio.*`・`*.excalidraw.*`（元のファイル名が分かるとき）
++  - Pillow が使えない、画像として読めない
++- 既にリンクがある画像は変換しない。ただしリンク先が `.webp` の画像は、ブラウザが変換前の dataURL を持ち続けるため、
++  ファイルがあれば書き直さない（fileId は内容から決まる）
+ - 埋め込みノートの表示用 SVG（`isEmbeddedMarkdownSnapshot`）は書き出さない
+ 
+ ### 読み込み時
+diff --git a/tests/test_api_integration.py b/tests/test_api_integration.py
+index f5b916bc6a7a09660aa80211aa7ebe4c3239b7ee..c00329dba6318a510a199cfd18e41c9b863ae250 100644
+--- a/tests/test_api_integration.py
++++ b/tests/test_api_integration.py
+@@ -109,8 +109,10 @@ def test_new_image_is_written_as_external_file(vault):
+ 
+     assert save(path, data).status_code == 200
+ 
+-    assert (vault / "img00001.png").exists()
++    # 1x1 の小さな PNG は WebP 変換で小さくならないので PNG のまま。名前は {図面名}-{タイムスタンプ}
++    written = list(vault.glob("test_api-*.png"))
++    assert len(written) == 1
+     content = path.read_text(encoding="utf-8")
+-    assert "img00001: [[img00001.png]]" in content
++    assert f"img00001: [[{written[0].name}]]" in content
+     reloaded = load(path).json()["data"]
+     assert reloaded["files"]["img00001"]["dataURL"].startswith("data:image/png;base64,")
+diff --git a/tests/test_image_webp.py b/tests/test_image_webp.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..fca10dd5e771b8eb5dfa7464de39e490bd25079a
+--- /dev/null
++++ b/tests/test_image_webp.py
+@@ -0,0 +1,191 @@
++"""
++画像の WebP 変換テスト（obsidian-image-converter と同じ方針）
++
++- 新しく書き出す画像だけを WebP（品質 75・リサイズなし）に変換する
++- 元より 30KB 以上小さくならない場合、元より大きくなる場合は元の形式のまま
++- GIF・SVG・WebP・tif・heic・*.drawio.*・*.excalidraw.* は変換しない
++- ファイル名は {図面名}-{タイムスタンプ}.webp（同名があれば連番）
++"""
++import base64
++import io
++import os
++import re
++import shutil
++from pathlib import Path
++
++import pytest
++from fastapi.testclient import TestClient
++from PIL import Image
++
++from backend.main import app
++from backend.image_convert import (
++    MIN_SAVINGS_BYTES,
++    build_image_filename,
++    convert_to_webp,
++    should_skip_conversion,
++)
++
++FIXTURE_VAULT = Path(__file__).parent / "obsidian_test"
++client = TestClient(app)
++
++
++def noisy_png_bytes(size: int = 300) -> bytes:
++    """WebP にすると 30KB 以上小さくなる、圧縮しにくい PNG を作る。"""
++    image = Image.frombytes("RGB", (size, size), os.urandom(size * size * 3))
++    buffer = io.BytesIO()
++    image.save(buffer, format="PNG")
++    return buffer.getvalue()
++
++
++def flat_png_bytes() -> bytes:
++    """もともと小さい PNG（30KB も削れない）。"""
++    buffer = io.BytesIO()
++    Image.new("RGB", (4, 4), (255, 0, 0)).save(buffer, format="PNG")
++    return buffer.getvalue()
++
++
++def data_url(raw: bytes, mime: str = "image/png") -> str:
++    return f"data:{mime};base64,{base64.b64encode(raw).decode()}"
++
++
++@pytest.fixture
++def vault(tmp_path):
++    copy = tmp_path / "vault"
++    shutil.copytree(FIXTURE_VAULT, copy)
++    return copy
++
++
++def load(path: Path):
++    return client.get("/api/load-file", params={"filepath": str(path)})
++
++
++def save(path: Path, data: dict):
++    return client.post("/api/save-file", json={"filepath": str(path), "data": data})
++
++
++def add_image(data: dict, file_id: str, raw: bytes, mime: str = "image/png") -> None:
++    data["files"][file_id] = {"id": file_id, "mimeType": mime, "dataURL": data_url(raw, mime)}
++
++
++# --- convert_to_webp / should_skip_conversion ---------------------------------
++
++def test_convert_to_webp_shrinks_large_png():
++    raw = noisy_png_bytes()
++    result = convert_to_webp(raw, "image/png")
++    assert result is not None
++    webp_bytes = result
++    assert webp_bytes[:4] == b"RIFF" and webp_bytes[8:12] == b"WEBP"
++    assert len(raw) - len(webp_bytes) >= MIN_SAVINGS_BYTES
++
++
++def test_convert_to_webp_keeps_original_when_savings_are_small():
++    assert convert_to_webp(flat_png_bytes(), "image/png") is None
++
++
++def test_convert_to_webp_force_ignores_savings_threshold():
++    result = convert_to_webp(flat_png_bytes(), "image/png", force=True)
++    assert result is not None and result[8:12] == b"WEBP"
++
++
++def test_convert_to_webp_returns_none_for_broken_data():
++    assert convert_to_webp(b"not an image", "image/png", force=True) is None
++
++
++@pytest.mark.parametrize("mime", ["image/gif", "image/svg+xml", "image/webp", "image/tiff", "image/heic"])
++def test_skipped_mime_types(mime):
++    assert should_skip_conversion(mime, None) is True
++
++
++@pytest.mark.parametrize("name", ["a.drawio.png", "a.dio.svg", "図.excalidraw.png", "x.excalidraw.svg"])
++def test_skipped_filename_patterns(name):
++    assert should_skip_conversion("image/png", name) is True
++
++
++def test_png_is_not_skipped():
++    assert should_skip_conversion("image/png", "photo.png") is False
++    assert should_skip_conversion("image/jpeg", None) is False
++
++
++# --- ファイル名 ---------------------------------------------------------------
++
++def test_build_image_filename_uses_note_name_and_timestamp(tmp_path):
++    name = build_image_filename(tmp_path, "設計図.excalidraw.md", "webp")
++    assert re.fullmatch(r"設計図-\d{14}\.webp", name)
++
++
++def test_build_image_filename_increments_on_conflict(tmp_path):
++    first = build_image_filename(tmp_path, "note.md", "webp")
++    (tmp_path / first).write_bytes(b"x")
++    second = build_image_filename(tmp_path, "note.md", "webp")
++    assert second != first
++    assert re.fullmatch(r"note-\d{14}-1\.webp", second)
++
++
++# --- 保存 API ----------------------------------------------------------------
++
++def test_new_image_is_saved_as_webp_with_note_name(vault):
++    path = vault / "test_api.excalidraw.md"
++    data = load(path).json()["data"]
++    raw = noisy_png_bytes()
++    add_image(data, "img00001", raw)
++
++    assert save(path, data).status_code == 200
++
++    webps = list(vault.glob("test_api-*.webp"))
++    assert len(webps) == 1
++    assert webps[0].read_bytes()[8:12] == b"WEBP"
++    assert not (vault / "img00001.png").exists()
++    content = path.read_text(encoding="utf-8")
++    assert f"img00001: [[{webps[0].name}]]" in content
++
++    reloaded = load(path).json()["data"]
++    assert reloaded["files"]["img00001"]["dataURL"].startswith("data:image/webp;base64,")
++
++
++def test_small_image_stays_png_but_uses_new_name(vault):
++    path = vault / "test_api.excalidraw.md"
++    data = load(path).json()["data"]
++    add_image(data, "img00002", flat_png_bytes())
++
++    assert save(path, data).status_code == 200
++
++    pngs = list(vault.glob("test_api-*.png"))
++    assert len(pngs) == 1
++    assert not list(vault.glob("test_api-*.webp"))
++
++
++def test_saving_again_does_not_rewrite_or_duplicate_webp(vault):
++    path = vault / "test_api.excalidraw.md"
++    data = load(path).json()["data"]
++    raw = noisy_png_bytes()
++    add_image(data, "img00003", raw)
++    assert save(path, data).status_code == 200
++    webp = next(vault.glob("test_api-*.webp"))
++    first_bytes = webp.read_bytes()
++
++    # ブラウザ側は PNG の dataURL を持ち続けるので、同じ内容のまま再保存する
++    data2 = load(path).json()["data"]
++    add_image(data2, "img00003", raw)
++    assert save(path, data2).status_code == 200
++
++    assert list(vault.glob("test_api-*.webp")) == [webp]
++    assert webp.read_bytes() == first_bytes
++    assert webp.read_bytes()[8:12] == b"WEBP"
++
++
++def test_existing_png_link_is_not_converted(vault):
++    path = vault / "test_api.excalidraw.md"
++    data = load(path).json()["data"]
++    # まず PNG のまま書き出された画像（Embedded Files に PNG のリンクがある状態）を作る
++    add_image(data, "old00001", flat_png_bytes())
++    assert save(path, data).status_code == 200
++    png = next(vault.glob("test_api-*.png"))
++
++    # 既存リンクの画像は、リンク先を変えず元の形式のまま上書きする
++    raw = noisy_png_bytes()
++    data2 = load(path).json()["data"]
++    add_image(data2, "old00001", raw)
++    assert save(path, data2).status_code == 200
++
++    assert png.read_bytes() == raw
++    assert not list(vault.glob("*.webp"))
