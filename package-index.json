@@ -4,14 +4,9 @@
   "packages": [
     {
       "repo_id": "obsidian-settings",
-      "sequence": 28,
-      "manifest_path": "packages/obsidian-settings/000028/manifest.json"
-    },
-    {
-      "repo_id": "visual-diff-tool",
-      "sequence": 11,
-      "manifest_path": "packages/visual-diff-tool/000011/manifest.json"
+      "sequence": 29,
+      "manifest_path": "packages/obsidian-settings/000029/manifest.json"
     }
   ],
-  "signature": "9cdc6e571acd4b77c3ba618324865575a1b6f08e095c5a6a1c0b82ee497765c1"
+  "signature": "0b17c5b90b3d00778504486526f692b9eb42123d02ce2fd7fe5c7b5776df9c85"
 }
