@@ -1,0 +1,36 @@
+# uv.lock から書き出した版固定の依存一覧（Windows の setup_windows.bat と、uv の無い Mac が pip で入れる）
+#
+# 会社の Windows 端末には uv が無いため、uv.lock と同じ版をこのファイルで再現する。
+# 全パッケージに Python 3.14 / Windows (win_amd64) 用のビルド済み wheel がある版を使っている。
+#
+# uv.lock を更新したら、uv のある端末（Mac）で書き出し直す:
+#   cd backend
+#   { grep '^#' requirements-lock.txt; uv export --frozen --no-hashes --no-emit-project --no-header --no-annotate; } > requirements-lock.txt.new && mv requirements-lock.txt.new requirements-lock.txt
+#   （冒頭のコメントはそのまま残る。tests/test_python_env.py が uv.lock との一致を確かめる）
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.12.1
+certifi==2026.2.25
+click==8.3.1
+colorama==0.4.6 ; sys_platform == 'win32'
+coverage==7.16.2
+fastapi==0.128.0
+greenlet==3.3.0 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.11
+iniconfig==2.3.1
+packaging==26.3
+pluggy==1.7.0
+pydantic==2.12.5
+pydantic-core==2.41.5
+pygments==2.21.0
+pytest==9.1.1
+pytest-cov==7.1.0
+python-multipart==0.0.21
+sqlalchemy==2.0.45
+starlette==0.50.0
+typing-extensions==4.15.0
+typing-inspection==0.4.2
+uvicorn==0.40.0

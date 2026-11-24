@@ -1,0 +1,563 @@
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000000000000000000000000000000000000..2aa82eada3eb1418b6610fd9b51136f729bf6182
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,3 @@
++# Windows のバッチは CRLF でないと cmd が行を読み違えるため、作業ツリーでは常に CRLF にする
++*.bat text eol=crlf
++*.cmd text eol=crlf
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 12cc40d32ebf750ca3fb0f5add8e0075afe70419..0abc964957a76171e2eb565a678886b6012347cc 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -14,6 +14,15 @@ React + DHTMLX Gantt + Univer（フロントエンド）と FastAPI + SQLite（
+ | `./start_app.sh` | フロントエンドをビルドし、バックエンド（ポート8000）がそれを配信する。普段使い用 |
+ | `./start_dev.sh` | 開発用。Vite（ポート5172）とバックエンド（ポート8000）を同時に起動する |
+ | `start_app.bat` / `start_dev.bat` | Windows用。`start_app.bat` はビルドをせず、コミット済みの `frontend/dist` を配信する |
++| `setup_windows.bat` | Windows用の環境の用意。`backend\.venv` を作り、`backend\requirements-lock.txt` を pip で入れる（uv 不要） |
++
++### Python 実行環境（backend/.venv）
++
++- Python は 3.14（`backend/.python-version` = 3.14.9。会社の Windows 端末と同じ）。サーバーは Mac・Windows とも必ず `backend/.venv` の Python で起動する（`uv run` やシステムの `python` は使わない）。
++- **会社の Windows 端末には uv が無い**。`setup_windows.bat` が Python 3.14 を `py -3.14` → `python` の順に探し、`backend\.venv` を作って（壊れている・3.14 でないときは作り直す）`backend\requirements-lock.txt` を pip で入れる。`start_app.bat` / `start_dev.bat` は `backend\.venv` が無ければこれを `/nopause` 付きで呼ぶ。社内プロキシが必要なら先に pip の設定を済ませておく。
++- Mac の `start_app.sh` / `start_dev.sh` は `backend/ensure_venv.sh` で venv を用意する。uv があれば毎回 `uv sync --frozen --inexact` で `uv.lock` どおりに揃え、無ければ Windows と同じく `requirements-lock.txt` を pip で入れる。
++- 依存の版は `backend/uv.lock` が正。`requirements-lock.txt` はそこから `uv export` で書き出す（コマンドはファイル冒頭）。`uv.lock` を変えたら書き出し直すこと（`tests/test_python_env.py` が一致を確かめる）。全パッケージに Python 3.14 / win_amd64 のビルド済み wheel がある版にしておく（会社PCではビルドできない）。
++- バッチファイルは CRLF 改行で保存する（`.gitattributes`）。LF だと cmd が行を読み違える。
+ 
+ - Windows では pull するだけで動かせるよう、`frontend/dist` をコミットしている。フロントエンドを変更したら `npm run build` して `dist` も一緒にコミットすること。
+ - バックエンドは `--reload` 付きで起動するので、稼働中に `backend/` のファイルを書き換えると再読み込みされる。稼働中のアプリに影響させたくない作業は、git worktree など別の作業コピーで行う。
+@@ -21,9 +30,9 @@ React + DHTMLX Gantt + Univer（フロントエンド）と FastAPI + SQLite（
+ ## テストとチェック
+ 
+ ```bash
+-# バックエンド（backend ディレクトリで）
+-uv run pytest
+-uv run pytest --cov=. --cov-report=term-missing   # カバレッジ
++# バックエンド（backend ディレクトリで。Windows は .venv\Scripts\python）
++.venv/bin/python -m pytest
++.venv/bin/python -m pytest --cov=. --cov-report=term-missing   # カバレッジ
+ 
+ # フロントエンド（frontend ディレクトリで）
+ npx vitest run     # テスト
+@@ -37,7 +46,7 @@ npm run build      # 本番ビルド（型チェック込み）
+ - フロントエンドのガント関連テストは、モックではなく実物の DHTMLX Gantt を jsdom 上で動かしている（`components/GanttChart/__tests__/ganttTestHarness.ts`）。
+ - フロントエンドのフック・コンポーネントのテストは、APIモジュール（`services/api`）を `vi.mock` で差し替えて書く。タイマーを使うものは `vi.useFakeTimers()` を使う。
+ - 画面の動作確認を稼働中のアプリと分けたいときは、環境変数で別のDB・別のポートを使う:
+-  - バックエンド: `GANTT_DATABASE_URL=sqlite:////tmp/verify.db uv run python -m uvicorn main:app --port 8010`
++  - バックエンド: `GANTT_DATABASE_URL=sqlite:////tmp/verify.db .venv/bin/python -m uvicorn main:app --port 8010`
+   - フロントエンド: `GANTT_DEV_PORT=5180 GANTT_API_TARGET=http://localhost:8010 npm run dev`
+ 
+ ## 本番データの保護（最重要）
+@@ -127,4 +136,4 @@ frontend/src/
+ - **タスク名の整形**（先頭のインデント・アイコンの除去）は、フロントエンドは `utils/taskText.ts`、バックエンドは `services/task_text.py` に1か所ずつ。対象の文字を変えるときは両方を合わせる。
+ - **日付文字列**（`YYYY-MM-DD HH:mm:ss`）を `Date` にするときは、空白を `T` に置き換える（Safari対策）。`toGanttTask` / `parseTaskDate` を使う。
+ - **CSVをファイルに書くとき**は `newline=""` を指定する（Windowsで改行が二重に変換されるのを防ぐ）。
+-- Python のパッケージ管理は `uv`、フロントエンドは `npm`。`backend/.venv/bin/` の実行ファイルは、プロジェクトを移動した場合に古いパスを指すことがある。その場合は `uv run python -m uvicorn ...` で起動するか、`.venv` を作り直す。
++- Python のパッケージ管理は `uv`（版は `uv.lock`。uv の無い会社 PC では `requirements-lock.txt` を pip で入れる）、フロントエンドは `npm`。`backend/.venv/bin/` の実行ファイルは、プロジェクトを移動した場合に古いパスを指すことがある。その場合は `.venv` を消して `./backend/ensure_venv.sh`（Windows は `setup_windows.bat`）で作り直す。
+diff --git a/README.md b/README.md
+index 694db8544659ccd8ee22653ff1c5f0548ecb3512..179a2c10401c376112901ad9fefc034c8340eb20 100644
+--- a/README.md
++++ b/README.md
+@@ -23,11 +23,18 @@ React + FastAPI + SQLite で構築した、個人用のガントチャートア
+ | --- | --- |
+ | Frontend | React 19, TypeScript, Vite, DHTMLX Gantt, Univer |
+ | Backend | FastAPI, SQLAlchemy, SQLite |
+-| Package Manager | npm (Frontend), uv (Backend) |
++| Package Manager | npm (Frontend), uv / pip (Backend。版は `backend/uv.lock`、uv の無い Windows は `backend/requirements-lock.txt`) |
+ 
+ ## セットアップと起動
+ 
+-前提: Node.js 20以上、Python 3.12以上、[uv](https://docs.astral.sh/uv/)
++前提: Node.js 20以上、Python 3.14（3.14.9）。Mac で [uv](https://docs.astral.sh/uv/) があれば使い、なければ pip で入れます。
++
++バックエンドは常に `backend/.venv` の Python で動きます。起動スクリプトが自動で用意しますが、先に作っておくこともできます:
++
++```bash
++./backend/ensure_venv.sh   # macOS
++setup_windows.bat          # Windows（uv 不要。pip で backend\requirements-lock.txt を入れる）
++```
+ 
+ ### 普段使い（ビルドして1つのサーバーで動かす）
+ 
+@@ -36,7 +43,7 @@ React + FastAPI + SQLite で構築した、個人用のガントチャートア
+ ```
+ 
+ フロントエンドをビルドし、バックエンドが http://localhost:8000 で配信します。
+-Windows では `start_app.bat` を使います（コミット済みのビルド結果 `frontend/dist` を配信します）。
++Windows では `start_app.bat` を使います（コミット済みのビルド結果 `frontend/dist` を配信します。`backend\.venv` が無ければ先に `setup_windows.bat` を実行します）。
+ 
+ ### 開発（ホットリロード）
+ 
+@@ -63,7 +70,7 @@ gantt_react_myao/
+ ## テスト
+ 
+ ```bash
+-cd backend && uv run pytest
++cd backend && .venv/bin/python -m pytest
+ cd frontend && npx vitest run
+ ```
+ 
+diff --git a/backend/.python-version b/backend/.python-version
+index e4fba2183587225f216eeada4c78dfab6b2e65f5..70c445ec156402543c7dd71665ed5bda202dfcef 100644
+--- a/backend/.python-version
++++ b/backend/.python-version
+@@ -1 +1 @@
+-3.12
++3.14.9
+diff --git a/backend/README.md b/backend/README.md
+index f18444a4ad8fbaec4b9f26ddecf0a2e73f7a4f71..c31f0b3780cb71991c11972ab6ed028027fd1354 100644
+--- a/backend/README.md
++++ b/backend/README.md
+@@ -6,7 +6,8 @@ APIの一覧と仕様は [../docs/SPECIFICATION.md](../docs/SPECIFICATION.md)、
+ ## 起動
+ 
+ ```bash
+-uv run python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
++./ensure_venv.sh   # .venv（Python 3.14）を用意する（Windows はルートの setup_windows.bat）
++.venv/bin/python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+ ```
+ 
+ - Swagger UI: http://localhost:8000/docs
+@@ -21,7 +22,7 @@ uv run python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+ ## テスト
+ 
+ ```bash
+-uv run pytest
++.venv/bin/python -m pytest
+ ```
+ 
+ `tests/conftest.py` が接続先を一時DBへ差し替えるため、`gantt.db` には触れません。
+@@ -32,6 +33,6 @@ uv run pytest
+ 
+ | スクリプト | 内容 |
+ | --- | --- |
+-| `uv run python restore_from_csv.py [obsidian_home]` | Obsidian Vault の `70_gantt_csv/` に保存されたCSVから、タスク・リンクを復元する |
+-| `uv run python generate_load_test_data.py` | 負荷テスト用のタスクを3000件追加する |
+-| `uv run python sample_data.py` | 既存データを消してサンプルデータを入れる |
++| `.venv/bin/python restore_from_csv.py [obsidian_home]` | Obsidian Vault の `70_gantt_csv/` に保存されたCSVから、タスク・リンクを復元する |
++| `.venv/bin/python generate_load_test_data.py` | 負荷テスト用のタスクを3000件追加する |
++| `.venv/bin/python sample_data.py` | 既存データを消してサンプルデータを入れる |
+diff --git a/backend/ensure_venv.sh b/backend/ensure_venv.sh
+new file mode 100755
+index 0000000000000000000000000000000000000000..eba5a9a9ed0b1b44f14cec61ceefdbd1f5e69a36
+--- /dev/null
++++ b/backend/ensure_venv.sh
+@@ -0,0 +1,54 @@
++#!/bin/bash
++# backend/.venv を用意する（macOS / Linux 用）。
++#
++# start_app.sh / start_dev.sh から source して ensure_backend_venv を呼ぶ。単独で実行してもよい。
++# 呼んだあとは BACKEND_PYTHON に backend/.venv/bin/python が入り、サーバーはこの Python で起動する
++# （uv run やシステムの python には頼らない）。
++#
++# 仕様:
++# - uv がある場合: 毎回 `uv sync --frozen --inexact` で uv.lock どおりに揃える。
++#   Python は backend/.python-version（3.14.9）を使う。venv が壊れている・版が違うときは uv が作り直す。
++#   --inexact なので、手で追加したパッケージは消さない。
++# - uv がない場合: .venv の Python が動かない・3.14 でないときは python3（3.14）で
++#   `python3 -m venv --clear` して作り直し、fastapi / uvicorn / sqlalchemy が import できなければ
++#   requirements-lock.txt（uv.lock と同じ版）を pip で入れる。Windows の setup_windows.bat と同じ手順。
++
++ensure_backend_venv() {
++    local backend_dir
++    backend_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++    local venv_python="$backend_dir/.venv/bin/python"
++    local is_314='import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)'
++    local check_imports='import fastapi, uvicorn, sqlalchemy, multipart'
++
++    if command -v uv >/dev/null 2>&1; then
++        echo "Syncing backend/.venv with uv.lock..."
++        (cd "$backend_dir" && uv sync --frozen --inexact --quiet) || return 1
++    else
++        if ! "$venv_python" -c "$is_314" >/dev/null 2>&1; then
++            if ! python3 -c "$is_314" >/dev/null 2>&1; then
++                echo "エラー: Python 3.14 の python3 が見つかりません（現在: $(python3 -V 2>&1 || echo なし)）。" >&2
++                return 1
++            fi
++            echo "Creating backend/.venv with $(python3 -V 2>&1)..."
++            python3 -m venv --clear "$backend_dir/.venv" || return 1
++        fi
++        if ! "$venv_python" -c "$check_imports" >/dev/null 2>&1; then
++            echo "Installing backend/requirements-lock.txt into backend/.venv..."
++            "$venv_python" -m pip install --quiet --upgrade pip
++            "$venv_python" -m pip install -r "$backend_dir/requirements-lock.txt" || return 1
++        fi
++    fi
++
++    if ! "$venv_python" -c "$check_imports" >/dev/null 2>&1; then
++        echo "エラー: backend/.venv の準備に失敗しました: $venv_python" >&2
++        return 1
++    fi
++    BACKEND_PYTHON="$venv_python"
++    echo "Backend Python: $("$BACKEND_PYTHON" -V 2>&1) ($BACKEND_PYTHON)"
++}
++
++# 単独で実行されたときは venv を用意するだけ
++if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
++    set -Eeuo pipefail
++    ensure_backend_venv
++fi
+diff --git a/backend/requirements-lock.txt b/backend/requirements-lock.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..9114f83c43b4d5243086351714c672b1c5b77b07
+--- /dev/null
++++ b/backend/requirements-lock.txt
+@@ -0,0 +1,36 @@
++# uv.lock から書き出した版固定の依存一覧（Windows の setup_windows.bat と、uv の無い Mac が pip で入れる）
++#
++# 会社の Windows 端末には uv が無いため、uv.lock と同じ版をこのファイルで再現する。
++# 全パッケージに Python 3.14 / Windows (win_amd64) 用のビルド済み wheel がある版を使っている。
++#
++# uv.lock を更新したら、uv のある端末（Mac）で書き出し直す:
++#   cd backend
++#   { grep '^#' requirements-lock.txt; uv export --frozen --no-hashes --no-emit-project --no-header --no-annotate; } > requirements-lock.txt.new && mv requirements-lock.txt.new requirements-lock.txt
++#   （冒頭のコメントはそのまま残る。tests/test_python_env.py が uv.lock との一致を確かめる）
++annotated-doc==0.0.4
++annotated-types==0.7.0
++anyio==4.12.1
++certifi==2026.2.25
++click==8.3.1
++colorama==0.4.6 ; sys_platform == 'win32'
++coverage==7.16.2
++fastapi==0.128.0
++greenlet==3.3.0 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
++h11==0.16.0
++httpcore==1.0.9
++httpx==0.28.1
++idna==3.11
++iniconfig==2.3.1
++packaging==26.3
++pluggy==1.7.0
++pydantic==2.12.5
++pydantic-core==2.41.5
++pygments==2.21.0
++pytest==9.1.1
++pytest-cov==7.1.0
++python-multipart==0.0.21
++sqlalchemy==2.0.45
++starlette==0.50.0
++typing-extensions==4.15.0
++typing-inspection==0.4.2
++uvicorn==0.40.0
+diff --git a/backend/restore_from_csv.py b/backend/restore_from_csv.py
+index 12ac1977c5b2b0268231148d7fcb46cc9f01a011..240591a27bc633f3c3fa5b7543360acb1e4de228 100644
+--- a/backend/restore_from_csv.py
++++ b/backend/restore_from_csv.py
+@@ -6,7 +6,7 @@ gantt_tasks.csv / gantt_links.csv を読み込み、tasks / links テーブル
+ 置き換えは1トランザクションで行うため、失敗した場合は元のデータが残る。
+ 
+ 使い方（backend ディレクトリで実行）:
+-    uv run python restore_from_csv.py [obsidian_home]
++    .venv/bin/python restore_from_csv.py [obsidian_home]   （Windows は .venv/Scripts/python.exe）
+ 
+ obsidian_home を省略した場合は環境変数 OBSIDIAN_HOME、それもなければ既定のVaultパスを使う。
+ """
+diff --git a/backend/tests/test_python_env.py b/backend/tests/test_python_env.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..05ccbe4b61c548b7fd9a37283749f990b175f332
+--- /dev/null
++++ b/backend/tests/test_python_env.py
+@@ -0,0 +1,106 @@
++"""
++Python 実行環境（backend/.venv）の用意と起動スクリプトの約束を確かめるテスト。
++
++仕様（CLAUDE.md「起動」）:
++- Python は 3.14（Mac・会社の Windows とも 3.14.9）。サーバーは常に backend/.venv の Python で起動する
++- 会社の Windows 端末には uv が無い。setup_windows.bat が pip だけで backend\\.venv を作り、
++  uv.lock から書き出した requirements-lock.txt（版固定）を入れる。Windows の起動バッチは uv を使わない
++- macOS の start_app.sh / start_dev.sh は backend/ensure_venv.sh で venv を用意してから、その Python で起動する
++"""
++import re
++import tomllib
++from pathlib import Path
++
++BACKEND_DIR = Path(__file__).resolve().parent.parent
++ROOT_DIR = BACKEND_DIR.parent
++
++
++def _normalize(name: str) -> str:
++    return re.sub(r"[-_.]+", "-", name).lower()
++
++
++def _locked_versions() -> dict[str, str]:
++    """uv.lock に記録された依存パッケージ（プロジェクト自身を除く）の名前と版"""
++    data = tomllib.loads((BACKEND_DIR / "uv.lock").read_text(encoding="utf-8"))
++    return {
++        _normalize(pkg["name"]): pkg["version"]
++        for pkg in data["package"]
++        if "virtual" not in pkg.get("source", {}) and "editable" not in pkg.get("source", {})
++    }
++
++
++def _pinned_versions() -> dict[str, str]:
++    """requirements-lock.txt で == 固定されたパッケージの名前と版"""
++    pinned: dict[str, str] = {}
++    for line in (BACKEND_DIR / "requirements-lock.txt").read_text(encoding="utf-8").splitlines():
++        line = line.split("#", 1)[0].strip()
++        if not line:
++            continue
++        match = re.match(r"^([A-Za-z0-9._-]+)==([^\s;]+)", line)
++        assert match, f"== で版を固定していない行があります: {line}"
++        pinned[_normalize(match.group(1))] = match.group(2)
++    return pinned
++
++
++def _read_crlf_batch(name: str) -> str:
++    """CRLF で保存されていることを確かめてから中身を返す（LF だと cmd が行を読み違える）"""
++    raw = (ROOT_DIR / name).read_bytes()
++    assert b"\n" not in raw.replace(b"\r\n", b""), f"{name} に LF だけの改行があります"
++    return raw.decode("utf-8")
++
++
++def test_requirements_lock_pins_every_package_in_uv_lock():
++    assert _pinned_versions() == _locked_versions()
++
++
++def test_requirements_lock_keeps_windows_only_packages():
++    text = (BACKEND_DIR / "requirements-lock.txt").read_text(encoding="utf-8")
++    assert re.search(r"^colorama==.*sys_platform == 'win32'", text, re.MULTILINE)
++
++
++def test_python_version_is_314():
++    assert (BACKEND_DIR / ".python-version").read_text(encoding="utf-8").strip() == "3.14.9"
++
++
++def test_setup_windows_batch_contract():
++    script = _read_crlf_batch("setup_windows.bat")
++
++    # Python 3.14 を py ランチャー → python の順に探し、uv には頼らない
++    assert script.index("py -3.14") < script.index('set "PY_CMD=python"')
++    assert "sys.version_info[:2] == (3, 14)" in script
++    assert not re.search(r"^\s*uv\s", script, re.MULTILINE | re.IGNORECASE)
++
++    # backend\.venv を作り（壊れている・版が違うときは作り直す）、版固定の一覧を入れる
++    assert "%PY_CMD% -m venv --clear .venv" in script
++    assert '"%VENV_PY%" -m pip install -r requirements-lock.txt' in script
++    assert "/nopause" in script
++
++    labels = {line.strip()[1:].lower() for line in script.splitlines() if line.strip().startswith(":") and not line.strip().startswith("::")}
++    goto_targets = {line.strip().split(":")[-1].lower() for line in script.splitlines() if "goto :" in line.lower()}
++    assert goto_targets <= labels
++
++
++def test_windows_start_batches_use_backend_venv_without_uv():
++    for name in ("start_app.bat", "start_dev.bat"):
++        script = _read_crlf_batch(name)
++        assert "uv run" not in script, name
++        assert r'set "PYTHON_EXE=%~dp0backend\.venv\Scripts\python.exe"' in script, name
++        assert r'call "%~dp0setup_windows.bat" /nopause' in script, name
++        assert '"%PYTHON_EXE%" -m uvicorn main:app' in script, name
++
++
++def test_mac_start_scripts_use_backend_venv():
++    for name in ("start_app.sh", "start_dev.sh"):
++        script = (ROOT_DIR / name).read_text(encoding="utf-8")
++        assert 'source "$ROOT_DIR/backend/ensure_venv.sh"' in script, name
++        assert '"$BACKEND_PYTHON" -m uvicorn main:app' in script, name
++        assert "uv run" not in script, name
++
++
++def test_ensure_venv_script_contract():
++    script = (BACKEND_DIR / "ensure_venv.sh").read_text(encoding="utf-8")
++    # uv があれば uv.lock どおりに揃え、無ければ pip で requirements-lock.txt を入れる
++    assert "uv sync --frozen --inexact" in script
++    assert "requirements-lock.txt" in script
++    assert "-m venv --clear" in script
++    assert "sys.version_info[:2] == (3, 14)" in script
+diff --git a/setup_windows.bat b/setup_windows.bat
+new file mode 100644
+index 0000000000000000000000000000000000000000..007213c30273e8181f3b087200de260ee9e3545d
+--- /dev/null
++++ b/setup_windows.bat
+@@ -0,0 +1,66 @@
++@echo off
++setlocal
++rem ==============================================================================
++rem Gantt - Windows 用セットアップ（backend\.venv を作る）
++rem
++rem 会社PC向け（uv なし・pip だけで用意する）:
++rem 1. Python 3.14 を探す（py -3.14 → python の順）。3.14 が無ければ止める
++rem 2. backend\.venv を作る。既にあって Python 3.14 で動くならそのまま使い、
++rem    壊れている・版が違う（Mac で作った venv など）ときは作り直す（消すのは .venv の中身だけ）
++rem 3. pip を更新し、backend\requirements-lock.txt（uv.lock と同じ版に固定）を入れる
++rem    requirements.txt は下限だけで新しすぎる版が入るため使わない
++rem 4. fastapi / uvicorn / sqlalchemy が import できるか確かめる
++rem
++rem 使い方: setup_windows.bat をダブルクリック。何度実行してもよい。
++rem   start_app.bat / start_dev.bat から呼ぶときは /nopause を付ける（最後に止まらない）
++rem   社内プロキシが必要な場合は、先に pip の設定（pip.ini や HTTPS_PROXY）を済ませておく
++rem ==============================================================================
++
++set "BACKEND_DIR=%~dp0backend"
++set "VENV_PY=%BACKEND_DIR%\.venv\Scripts\python.exe"
++set "NOPAUSE="
++if /i "%~1"=="/nopause" set "NOPAUSE=1"
++
++cd /d "%BACKEND_DIR%" || goto :fail
++
++rem --- Python 3.14 を探す ---
++set "PY_CMD="
++py -3.14 -c "import sys" >nul 2>&1 && set "PY_CMD=py -3.14"
++if not defined PY_CMD (
++    python -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)" >nul 2>&1 && set "PY_CMD=python"
++)
++if not defined PY_CMD (
++    echo [Setup] ERROR: Python 3.14 was not found. Install Python 3.14 and add it to PATH.
++    goto :fail
++)
++for /f "delims=" %%v in ('%PY_CMD% -V 2^>^&1') do echo [Setup] Using %%v [%PY_CMD%]
++
++rem --- backend\.venv を用意する ---
++set "VENV_OK="
++if exist "%VENV_PY%" (
++    "%VENV_PY%" -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)" >nul 2>&1 && set "VENV_OK=1"
++)
++if defined VENV_OK (
++    echo [Setup] Reusing backend\.venv
++) else (
++    echo [Setup] Creating backend\.venv ...
++    %PY_CMD% -m venv --clear .venv || goto :fail
++)
++
++rem --- 依存パッケージを入れる ---
++echo [Setup] Upgrading pip ...
++"%VENV_PY%" -m pip install --upgrade pip
++echo [Setup] Installing backend\requirements-lock.txt ...
++"%VENV_PY%" -m pip install -r requirements-lock.txt || goto :fail
++
++echo [Setup] Verifying installation ...
++"%VENV_PY%" -c "import fastapi, uvicorn, sqlalchemy, multipart, sys; print('[Setup] Python', sys.version.split()[0], '/ fastapi', fastapi.__version__, '/ sqlalchemy', sqlalchemy.__version__)" || goto :fail
++
++echo [Setup] Done. Start the app with start_app.bat or start_dev.bat.
++if not defined NOPAUSE pause
++exit /b 0
++
++:fail
++echo [Setup] Setup failed. See the messages above.
++if not defined NOPAUSE pause
++exit /b 1
+diff --git a/start_app.bat b/start_app.bat
+index b71e19f3a6850cce5153758b969d8e023dfa6e99..1c651765c461f6025ea4364a4d4be2f509e549d4 100644
+--- a/start_app.bat
++++ b/start_app.bat
+@@ -4,6 +4,21 @@ setlocal
+ :: Define ports
+ set BACKEND_PORT=8000
+ 
++:: ---------------------------------------------------------
++:: 0. Python: backend\.venv only (created by setup_windows.bat, no uv needed)
++:: ---------------------------------------------------------
++cd /d "%~dp0"
++set "PYTHON_EXE=%~dp0backend\.venv\Scripts\python.exe"
++if not exist "%PYTHON_EXE%" (
++    echo backend\.venv was not found. Running setup_windows.bat ...
++    call "%~dp0setup_windows.bat" /nopause
++)
++if not exist "%PYTHON_EXE%" (
++    echo Failed to prepare backend\.venv. Run setup_windows.bat and check the messages.
++    pause
++    exit /b 1
++)
++
+ echo Starting Gantt Chart Application...
+ echo.
+ 
+@@ -29,7 +44,7 @@ echo.
+ :: ---------------------------------------------------------
+ echo Starting Backend...
+ cd backend
+-start "Gantt Backend" cmd /k "echo Starting Backend... & uv run uvicorn main:app --reload --host 0.0.0.0 --port %BACKEND_PORT%"
++start "Gantt Backend" cmd /k ""%PYTHON_EXE%" -m uvicorn main:app --reload --host 0.0.0.0 --port %BACKEND_PORT%"
+ cd ..
+ 
+ echo.
+diff --git a/start_app.sh b/start_app.sh
+index be9530af8ac5a08f4e3fb33b892836c7d7c0d649..ca16d6ae3d4ec5c6a19895d1de5131d70f294851 100755
+--- a/start_app.sh
++++ b/start_app.sh
+@@ -1,5 +1,9 @@
+ #!/bin/bash
+ 
++# スクリプトの場所（プロジェクトルート）を基準に動く。バックエンドは backend/.venv の Python で起動する
++ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++cd "$ROOT_DIR"
++
+ BACKEND_PORT=8000
+ 
+ # Colors for output
+@@ -40,8 +44,11 @@ echo ""
+ echo "-----------------------------------"
+ echo "Starting Backend (Serving Frontend)..."
+ echo "-----------------------------------"
++# backend/.venv（Python 3.14）を用意する（詳細は backend/ensure_venv.sh）
++source "$ROOT_DIR/backend/ensure_venv.sh"
++ensure_backend_venv || exit 1
+ cd backend
+-uv run python -m uvicorn main:app --reload --host 0.0.0.0 --port $BACKEND_PORT &
++"$BACKEND_PYTHON" -m uvicorn main:app --reload --host 0.0.0.0 --port $BACKEND_PORT &
+ BACKEND_PID=$!
+ cd ..
+ 
+diff --git a/start_dev.bat b/start_dev.bat
+index 157f5f160822ac3ab9cb7c431913a00b571a0eb5..6694ab9d4a5c02e9323c0d6694d085ad045ea037 100644
+--- a/start_dev.bat
++++ b/start_dev.bat
+@@ -5,6 +5,21 @@ setlocal
+ set BACKEND_PORT=8000
+ set FRONTEND_PORT=5172
+ 
++:: ---------------------------------------------------------
++:: 0. Python: backend\.venv only (created by setup_windows.bat, no uv needed)
++:: ---------------------------------------------------------
++cd /d "%~dp0"
++set "PYTHON_EXE=%~dp0backend\.venv\Scripts\python.exe"
++if not exist "%PYTHON_EXE%" (
++    echo backend\.venv was not found. Running setup_windows.bat ...
++    call "%~dp0setup_windows.bat" /nopause
++)
++if not exist "%PYTHON_EXE%" (
++    echo Failed to prepare backend\.venv. Run setup_windows.bat and check the messages.
++    pause
++    exit /b 1
++)
++
+ echo Starting Gantt Chart Application (Development Mode)...
+ echo.
+ 
+@@ -38,7 +53,7 @@ echo.
+ :: ---------------------------------------------------------
+ echo Starting Backend...
+ cd backend
+-start "Gantt Backend" cmd /k "echo Starting Backend... & uv run uvicorn main:app --reload --host 0.0.0.0 --port %BACKEND_PORT%"
++start "Gantt Backend" cmd /k ""%PYTHON_EXE%" -m uvicorn main:app --reload --host 0.0.0.0 --port %BACKEND_PORT%"
+ cd ..
+ 
+ :: Wait a moment for backend to initialize
+diff --git a/start_dev.sh b/start_dev.sh
+index 328d6e37c7e5e5108105f39d3398ca73c552c21a..6692e18eb6554c5e90083c6d23767e52e6c08da3 100755
+--- a/start_dev.sh
++++ b/start_dev.sh
+@@ -1,5 +1,9 @@
+ #!/bin/bash
+ 
++# スクリプトの場所（プロジェクトルート）を基準に動く。バックエンドは backend/.venv の Python で起動する
++ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++cd "$ROOT_DIR"
++
+ BACKEND_PORT=8000
+ FRONTEND_PORT=5172
+ 
+@@ -32,8 +36,11 @@ echo ""
+ echo "-----------------------------------"
+ echo "Starting Backend..."
+ echo "-----------------------------------"
++# backend/.venv（Python 3.14）を用意する（詳細は backend/ensure_venv.sh）
++source "$ROOT_DIR/backend/ensure_venv.sh"
++ensure_backend_venv || exit 1
+ cd backend
+-uv run python -m uvicorn main:app --reload --host 0.0.0.0 --port $BACKEND_PORT &
++"$BACKEND_PYTHON" -m uvicorn main:app --reload --host 0.0.0.0 --port $BACKEND_PORT &
+ BACKEND_PID=$!
+ cd ..
+ 

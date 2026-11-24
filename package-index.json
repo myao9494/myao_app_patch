@@ -3,10 +3,40 @@
   "package_type": "myao-patch-bridge",
   "packages": [
     {
-      "repo_id": "obsidian-settings",
-      "sequence": 29,
-      "manifest_path": "packages/obsidian-settings/000029/manifest.json"
+      "repo_id": "excalidraw_myao9494",
+      "sequence": 6,
+      "manifest_path": "packages/excalidraw_myao9494/000006/manifest.json"
+    },
+    {
+      "repo_id": "file_manager",
+      "sequence": 12,
+      "manifest_path": "packages/file_manager/000012/manifest.json"
+    },
+    {
+      "repo_id": "gantt_react_myao",
+      "sequence": 6,
+      "manifest_path": "packages/gantt_react_myao/000006/manifest.json"
+    },
+    {
+      "repo_id": "local-fulltext-search",
+      "sequence": 23,
+      "manifest_path": "packages/local-fulltext-search/000023/manifest.json"
+    },
+    {
+      "repo_id": "visual-diff-tool",
+      "sequence": 12,
+      "manifest_path": "packages/visual-diff-tool/000012/manifest.json"
+    },
+    {
+      "repo_id": "spoon_feeder2",
+      "sequence": 8,
+      "manifest_path": "packages/spoon_feeder2/000008/manifest.json"
+    },
+    {
+      "repo_id": "mail_adress_creater",
+      "sequence": 3,
+      "manifest_path": "packages/mail_adress_creater/000003/manifest.json"
     }
   ],
-  "signature": "0b17c5b90b3d00778504486526f692b9eb42123d02ce2fd7fe5c7b5776df9c85"
+  "signature": "60dab4d5e3b96ab6877efcfe7cc638db93a516fae01f83cdb31a4b5f639476bd"
 }

@@ -1,0 +1,745 @@
+diff --git a/README.md b/README.md
+index c7e85dea55cc019b21e0db67d8861a2115902fda..87f31a8bff0aec00d011cd9702fa8b712f9e71e9 100644
+--- a/README.md
++++ b/README.md
+@@ -196,8 +196,8 @@ BACKEND_HOST=0.0.0.0 BACKEND_PORT=8079 ./start_dev.sh
+ 
+ 配布先で必要な前提:
+ 
+-- Python 3 が入っていること
+-- `pip install -r backend/requirements.txt` が 1 回実行できること
++- Python 3.14 系が入っていること（Mac・Win11 とも 3.14.9 で動作確認。`pydantic` 2.11 以前は 3.14 用のビルド済みパッケージが無いため `requirements.txt` で 2.12.5 に固定している）
++- `setup_windows.bat`（GPU は `setup_windows_cuda.bat`）が 1 回実行できること。`backend\.venv` を作り、版固定の `backend/requirements-lock.txt` を pip で入れる（uv は不要）
+ - `frontend/dist/` が clone / pull した内容に含まれていること
+ - デスクトップランチャー依存も `backend/requirements.txt` に含まれていること
+ - Windows でランチャーを使う場合は、発行済み WPF 版（`launcher/windows/publish/`）が含まれていること
+@@ -247,6 +247,18 @@ $env:SEARCH_APP_PORT="8079"
+ python run.py
+ ```
+ 
++### 1-0. Windows で NVIDIA GPU（CUDA）を使う場合
++
++pip だけで構築できる（uv・Node.js は不要）。Python 3.14 と、PyPI・download.pytorch.org への接続が必要。
++
++1. `nvidia-smi` を実行し、`CUDA Version: 12.6` 以上（ドライバ 560 以上が目安）と表示されることを確認する。表示されない・古い場合は、NVIDIA 公式サイトから GPU 用ドライバを入れて再起動する。
++2. `setup_windows_cuda.bat` を実行する（`backend\.venv` の作成、CUDA 12.6 版 torch 約 2GB と固定版の依存の導入、GPU 認識の確認まで行う）。
++3. 最後に `CUDA Available : True` と GPU 名が表示されれば成功。`False` のときはドライバを更新して 2 を再実行する（CPU でも動作はする）。
++4. `start_windows.bat` で起動する。
++
++- 必要なのは NVIDIA ドライバだけ。CUDA Toolkit・cuDNN・環境変数の設定は不要（torch に同梱）。
++- GPU を使わない場合は `setup_windows.bat`（CPU 版）を使う。
++
+ ### 1-1. 配布先での最短起動手順
+ 
+ フロントエンドのビルド環境がない端末では、`frontend/dist/` をそのまま使って FastAPI から配信します。
+@@ -355,7 +367,7 @@ VITE_API_BASE_URL=http://mac-mini:8079 npm run build
+ 
+ 復旧時の前提:
+ 
+-- Python 3 が入っていること
++- Python 3.14 系が入っていること（3.14.9 で動作確認）
+ - 検索対象のフォルダに、その端末から実際にアクセスできること
+ - 初回起動時はネットワーク越しに Python 依存取得ができること
+ - `frontend/dist/` がリポジトリに含まれていること
+@@ -363,12 +375,10 @@ VITE_API_BASE_URL=http://mac-mini:8079 npm run build
+ 復旧手順:
+ 
+ 1. リポジトリを clone する
+-2. `cd backend` に移動する
+-3. `python -m venv .venv` を実行する
+-4. `.venv` の Python で `pip install -r requirements.txt` を実行する
+-5. 必要なら `SEARCH_APP_HOST` / `SEARCH_APP_PORT` を設定して `.venv\Scripts\python.exe run.py` で起動する
+-6. 画面を開いて、検索対象フォルダのフルパスと階層数を入力して `Search` を 1 回実行する
+-7. その検索時に DB が作成され、対象ファイルのインデックスが順次作られる
++2. `setup_windows.bat`（GPU は `setup_windows_cuda.bat`）を実行する。`backend\.venv` を Python 3.14 で作り、`backend/requirements-lock.txt` を入れる
++3. 必要なら `SEARCH_APP_HOST` / `SEARCH_APP_PORT` を設定して `start_windows.bat` で起動する（`backend\.venv\Scripts\python.exe run.py` と同じ）
++4. 画面を開いて、検索対象フォルダのフルパスと階層数を入力して `Search` を 1 回実行する
++5. その検索時に DB が作成され、対象ファイルのインデックスが順次作られる
+ 
+ DB について:
+ 
+diff --git a/backend/.python-version b/backend/.python-version
+new file mode 100644
+index 0000000000000000000000000000000000000000..70c445ec156402543c7dd71665ed5bda202dfcef
+--- /dev/null
++++ b/backend/.python-version
+@@ -0,0 +1 @@
++3.14.9
+diff --git a/backend/requirements-cuda.txt b/backend/requirements-cuda.txt
+index b1ddbd4d2ced98767caf989a30f2559aa6059b33..fa523f2a4137bf085bec3fc501db178d2db2fab1 100644
+--- a/backend/requirements-cuda.txt
++++ b/backend/requirements-cuda.txt
+@@ -1,13 +1,16 @@
+ # -*- coding: utf-8 -*-
+ # ==============================================================================
+ # Windows NVIDIA GPU (RTX A500 等) 専用 requirements
+-# 
+-# 使用方法:
+-#   pip install -r requirements-cuda.txt
+-# 
+-# これにより、PyTorch 公式の CUDA 12.4 対応 wheel が自動取得され、
+-# Windows 環境で GPU (CUDA) 高速化が有効化されます。
++#
++# 使用方法（通常は setup_windows_cuda.bat が実行する）:
++#   .venv\Scripts\python.exe -m pip install -r requirements-cuda.txt
++#
++# PyTorch 公式の CUDA 12.6 の索引を足して、requirements-lock.txt と同じ版を入れる。
++# torch だけは GPU 版の 2.14.1+cu126 を明示する（requirements-lock.txt の torch==2.14.1 も満たす）。
++# 明示しないと、CPU 版の 2.14.1 が入った venv では「入っている」と見なされ GPU 版に入れ替わらない。
++# CUDA 12.4 の索引には Python 3.14 用の torch が無く、黙って CPU 版が入ってしまうため使わない。
+ # ==============================================================================
+ 
+---extra-index-url https://download.pytorch.org/whl/cu124
+--r requirements.txt
++--extra-index-url https://download.pytorch.org/whl/cu126
++torch==2.14.1+cu126
++-r requirements-lock.txt
+diff --git a/backend/requirements-lock.txt b/backend/requirements-lock.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..f06f68978fa3484d5abbba2e24f76fd31b897dd9
+--- /dev/null
++++ b/backend/requirements-lock.txt
+@@ -0,0 +1,126 @@
++# -*- coding: utf-8 -*-
++# ==============================================================================
++# Local Fulltext Search - 版を固定した依存一覧（requirements.txt から書き出す）
++#
++# setup_windows.bat（会社の Windows。uv が無いので pip で入れる）と Mac の start_dev.sh が
++# backend/.venv にこれを入れる。どの端末でも同じ版になるようにしている。Python 3.14 用。
++# - 全パッケージに Python 3.14 用のビルド済み wheel がある（lzstring・red-black-tree-mod・unidic-lite・
++#   win-unicode-console は純 Python のソースだけだが、pip がそのまま入れられる）
++# - torch は 2.14.1 に固定する。PyPI（Mac・CPU の Windows）と CUDA 12.6 の索引（requirements-cuda.txt）の
++#   両方にある版で、GPU 版は同じ版の 2.14.1+cu126 が入る
++#
++# requirements.txt を変えたら、uv のある端末（Mac）で書き出し直す（冒頭のコメントはそのまま残る）:
++#   cd backend
++#   { grep '^#' requirements-lock.txt; uv pip compile -q --universal --python-version 3.14 --no-header --no-annotate requirements.txt -c <(echo torch==2.14.1); } > requirements-lock.txt.new && mv requirements-lock.txt.new requirements-lock.txt
++# tests/test_python_env_contract.py が固定漏れと torch・pydantic の版を確かめる。
++# ==============================================================================
++annotated-doc==0.0.7
++annotated-types==0.8.0
++anyio==4.16.0
++beautifulsoup4==4.13.5
++cffi==2.1.1 ; platform_python_implementation != 'PyPy'
++click==8.5.1
++cloudpickle==3.1.3
++colorama==0.4.6 ; sys_platform == 'win32'
++colorclass==2.2.2
++compressed-rtf==1.0.7
++cryptography==50.0.2 ; platform_python_implementation != 'PyPy' or (sys_platform != 'darwin' and sys_platform != 'win32')
++cuda-bindings==13.5.0 ; python_full_version < '3.15' and sys_platform == 'linux'
++cuda-pathfinder==1.9.1 ; python_full_version < '3.15' and sys_platform == 'linux'
++cuda-toolkit==13.0.3.0 ; sys_platform == 'linux'
++easygui==0.98.3
++ebcdic==1.1.1
++et-xmlfile==2.0.0
++extract-msg==0.55.0
++faiss-cpu==1.16.0
++fastapi==0.116.1
++filelock==4.3.1
++fsspec==2026.9.0
++fugashi==1.5.2
++future==1.0.0
++greenlet==3.5.6
++h11==0.16.0
++hf-xet==1.8.0 ; platform_machine == 'AMD64' or platform_machine == 'ARM64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64'
++httpcore2==2.16.2 ; sys_platform != 'emscripten'
++httpx2==2.16.2
++httpx2-jsfetch==1.0 ; sys_platform == 'emscripten'
++huggingface-hub==2.4.0
++idna==3.20
++jinja2==3.1.6
++joblib==1.6.0
++lark==1.3.1
++lxml==6.1.3
++lzstring==1.0.4
++markdown-it-py==4.3.0
++markupsafe==3.0.4
++mdurl==0.1.2
++mpmath==1.3.0
++msoffcrypto-tool==6.1.0 ; platform_python_implementation != 'PyPy' or (sys_platform != 'darwin' and sys_platform != 'win32')
++narwhals==2.29.0
++networkx==3.7
++numpy==2.5.5
++nvidia-cublas==13.1.1.3 ; sys_platform == 'linux'
++nvidia-cuda-cupti==13.0.85 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-cuda-nvrtc==13.0.88 ; sys_platform == 'linux'
++nvidia-cuda-runtime==13.0.96 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-cudnn-cu13==9.24.0.43 ; sys_platform == 'linux'
++nvidia-cufft==12.0.0.61 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-cufile==1.15.1.6 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-curand==10.4.0.35 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-cusolver==12.0.4.66 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-cusparse==12.6.3.3 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-cusparselt-cu13==0.8.1 ; sys_platform == 'linux'
++nvidia-nccl-cu13==2.30.7 ; sys_platform == 'linux'
++nvidia-nvjitlink==13.5.37 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++nvidia-nvshmem-cu13==3.4.5 ; sys_platform == 'linux'
++nvidia-nvtx==13.0.85 ; (platform_machine == 'aarch64' or platform_machine == 'x86_64') and sys_platform == 'linux'
++olefile==0.47
++oletools==0.60.2
++openpyxl==3.1.5
++packaging==26.4
++pcodedmp==1.2.6
++pillow==13.0.0
++playwright==1.65.2
++pycparser==3.12 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
++pydantic==2.12.5
++pydantic-core==2.41.5
++pygments==2.21.0
++pyobjc-core==13.0 ; sys_platform == 'darwin'
++pyobjc-framework-cocoa==11.1 ; sys_platform == 'darwin'
++pyobjc-framework-coreservices==11.1 ; sys_platform == 'darwin'
++pyobjc-framework-fsevents==11.1 ; sys_platform == 'darwin'
++pyparsing==3.3.3
++pypdf==6.4.0
++python-docx==1.2.0
++python-pptx==1.0.2
++pyyaml==6.0.4
++red-black-tree-mod==1.22
++regex==2026.11.23
++resvg-py==0.5.0
++rich==15.0.0
++rtfde==0.1.2.2
++safetensors==0.8.0
++scikit-learn==1.9.1
++scipy==1.18.1
++sentence-transformers==6.3.0
++setuptools==84.2.1
++shellingham==1.5.4
++soupsieve==4.1.3
++starlette==0.47.3
++sympy==1.14.0
++threadpoolctl==3.8.0
++tokenizers==0.23.3
++torch==2.14.1
++tqdm==4.70.1
++transformers==5.24.0
++triton==3.8.0 ; python_full_version < '3.15' and sys_platform == 'linux'
++truststore==0.10.5 ; sys_platform != 'emscripten'
++typer==0.29.2
++typing-extensions==4.16.0
++typing-inspection==0.4.5
++tzdata==2026.6 ; sys_platform == 'win32'
++tzlocal==5.4.5
++unidic-lite==1.0.8
++uvicorn==0.35.0
++win-unicode-console==0.5 ; platform_python_implementation != 'PyPy' and sys_platform == 'win32'
++xlsxwriter==3.3.4
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index 1835a64d4e7f2b378df5c8b44069bf1744e9addf..c89ccab7b29ac43d13a0870130004e269e3f6a72 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -16,7 +16,7 @@
+ 
+ fastapi==0.116.1
+ uvicorn==0.35.0
+-pydantic==2.11.7
++pydantic==2.12.5
+ pypdf==6.4.0
+ python-docx==1.2.0
+ openpyxl==3.1.5
+diff --git a/backend/tests/test_python_env_contract.py b/backend/tests/test_python_env_contract.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..8aec6d56883eda9c0ec0117a6d976b498fb6ee0a
+--- /dev/null
++++ b/backend/tests/test_python_env_contract.py
+@@ -0,0 +1,136 @@
++"""
++Python 実行環境（backend/.venv）の用意と起動スクリプトの約束を固定するテスト。
++
++仕様（docs/runtime_and_distribution.md「Python 実行環境」）:
++- Python は 3.14（Mac・会社の Windows とも 3.14.9）。バックエンドは常に backend/.venv の Python で動かす。
++- 会社の Windows には uv が無い。setup_windows.bat が pip だけで backend\\.venv を作り、
++  版を固定した requirements-lock.txt を入れる。既存の venv が 3.14 で動かなければ作り直す。
++- GPU 版は setup_windows_cuda.bat（= setup_windows.bat /cuda）。requirements-cuda.txt が CUDA 12.6 の
++  索引を足して同じ requirements-lock.txt を入れるので、torch だけが同じ版の +cu126 になる。
++  CUDA 12.4 には Python 3.14 用の torch が無く、黙って CPU 版が入るため使わない。
++- start_windows.bat は backend\\.venv が無ければ setup_windows.bat を呼んでから起動する。システムの python は使わない。
++- Mac の start_dev.sh も requirements-lock.txt を入れ、3.14 でない venv は作り直す。
++"""
++
++import re
++from pathlib import Path
++
++PROJECT_ROOT = Path(__file__).resolve().parents[2]
++BACKEND_DIR = PROJECT_ROOT / "backend"
++
++
++def _normalize(name: str) -> str:
++    return re.sub(r"[-_.]+", "-", name).lower()
++
++
++def _requirement_lines(path: Path) -> list[str]:
++    lines = []
++    for line in path.read_text(encoding="utf-8").splitlines():
++        line = line.split("#", 1)[0].strip()
++        if line and not line.startswith("-"):
++            lines.append(line)
++    return lines
++
++
++def _pinned_versions() -> dict[str, str]:
++    pinned = {}
++    for line in _requirement_lines(BACKEND_DIR / "requirements-lock.txt"):
++        match = re.match(r"^([A-Za-z0-9._-]+)==([^\s;]+)", line)
++        assert match, f"== で版を固定していない行があります: {line}"
++        pinned[_normalize(match.group(1))] = match.group(2)
++    return pinned
++
++
++def _read_crlf_batch(name: str) -> str:
++    """CRLF で保存されていることを確かめてから中身を返す（LF だと cmd が行を読み違える）"""
++    raw = (PROJECT_ROOT / name).read_bytes()
++    assert b"\n" not in raw.replace(b"\r\n", b""), f"{name} に LF だけの改行があります"
++    return raw.decode("utf-8")
++
++
++def _assert_goto_targets_exist(script: str) -> None:
++    labels = {
++        line.strip()[1:].lower()
++        for line in script.splitlines()
++        if line.strip().startswith(":") and not line.strip().startswith("::")
++    }
++    goto_targets = {line.strip().split(":")[-1].lower() for line in script.splitlines() if "goto :" in line.lower()}
++    assert goto_targets <= labels
++
++
++def test_requirements_lock_pins_every_direct_requirement() -> None:
++    pinned = _pinned_versions()
++    direct = {
++        _normalize(re.match(r"^[A-Za-z0-9._-]+", line).group(0))
++        for line in _requirement_lines(BACKEND_DIR / "requirements.txt")
++    }
++
++    assert direct <= set(pinned)
++    # Python 3.14 用の wheel がある版（2.11 以前は Rust でのビルドになり失敗する）
++    assert pinned["pydantic"] == "2.12.5"
++    # PyPI（Mac・CPU の Windows）と CUDA 12.6 の索引の両方にある版にそろえる
++    assert pinned["torch"] == "2.14.1"
++
++
++def test_requirements_lock_keeps_platform_markers() -> None:
++    text = (BACKEND_DIR / "requirements-lock.txt").read_text(encoding="utf-8")
++
++    assert re.search(r"^pyobjc-framework-cocoa==.*sys_platform == 'darwin'", text, re.MULTILINE | re.IGNORECASE)
++    assert re.search(r"^colorama==.*sys_platform == 'win32'", text, re.MULTILINE)
++
++
++def test_cuda_requirements_use_cuda126_index_and_the_same_lock() -> None:
++    text = (BACKEND_DIR / "requirements-cuda.txt").read_text(encoding="utf-8")
++
++    assert "--extra-index-url https://download.pytorch.org/whl/cu126" in text
++    assert "-r requirements-lock.txt" in text
++    # CPU 版の torch 2.14.1 が入った venv でも GPU 版に入れ替わるよう、+cu126 を明示する
++    assert re.search(r"^torch==2\.14\.1\+cu126$", text, re.MULTILINE)
++    active_lines = [line for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
++    assert not any("cu124" in line for line in active_lines)
++
++
++def test_python_version_is_314() -> None:
++    assert (BACKEND_DIR / ".python-version").read_text(encoding="utf-8").strip() == "3.14.9"
++
++
++def test_setup_windows_batch_contract() -> None:
++    script = _read_crlf_batch("setup_windows.bat")
++
++    # Python 3.14 を py ランチャー → python の順に探し、uv には頼らない
++    assert script.index("py -3.14") < script.index('set "PY_CMD=python"')
++    assert "sys.version_info[:2] == (3, 14)" in script
++    assert not re.search(r"^\s*uv\s", script, re.MULTILINE | re.IGNORECASE)
++
++    # backend\.venv を作り（壊れている・3.14 でないときは作り直す）、版固定の一覧を入れる
++    assert "%PY_CMD% -m venv --clear .venv" in script
++    assert 'set "REQ_FILE=requirements-lock.txt"' in script
++    assert 'set "REQ_FILE=requirements-cuda.txt"' in script
++    assert '"%VENV_PY%" -m pip install -r "%REQ_FILE%"' in script
++    assert "/nopause" in script and "/cuda" in script
++    _assert_goto_targets_exist(script)
++
++
++def test_setup_windows_cuda_batch_delegates_to_setup_windows() -> None:
++    script = _read_crlf_batch("setup_windows_cuda.bat")
++
++    assert 'call "%~dp0setup_windows.bat" /cuda' in script
++    assert "torch.cuda.is_available()" in script
++
++
++def test_start_windows_uses_backend_venv_only() -> None:
++    script = _read_crlf_batch("start_windows.bat")
++
++    assert 'set "PYTHON_EXE=%BACKEND_DIR%\\.venv\\Scripts\\python.exe"' in script
++    assert 'call "%APP_ROOT%setup_windows.bat" /nopause' in script
++    assert 'set "PYTHON_EXE=python"' not in script
++    assert "venv\\Scripts\\python.exe\" (" not in script
++    assert '"%PYTHON_EXE%" run.py' in script
++
++
++def test_mac_start_dev_installs_lock_into_python314_venv() -> None:
++    script = (PROJECT_ROOT / "start_dev.sh").read_text(encoding="utf-8")
++
++    assert "requirements-lock.txt" in script
++    assert "sys.version_info[:2] == (3, 14)" in script
++    assert "-m venv --clear" in script
+diff --git a/backend/tests/test_requirements_encoding.py b/backend/tests/test_requirements_encoding.py
+index e020c7ebdce197adcdcfbeb7325e8d56705b694e..39458f5190a52035d0619f5dd58fa99e06385c34 100644
+--- a/backend/tests/test_requirements_encoding.py
++++ b/backend/tests/test_requirements_encoding.py
+@@ -15,7 +15,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
+ ENCODING_DECLARATION = re.compile(rb"coding[:=]\s*([-\w.]+)")
+ 
+ 
+-@pytest.mark.parametrize("name", ["requirements.txt", "requirements-cuda.txt"])
++@pytest.mark.parametrize("name", ["requirements.txt", "requirements-cuda.txt", "requirements-lock.txt"])
+ def test_requirements_declare_utf8_in_the_first_two_lines(name: str) -> None:
+     raw = (BACKEND_DIR / name).read_bytes()
+     head_lines = raw.splitlines()[:2]
+diff --git a/docs/offline_environment_and_models.md b/docs/offline_environment_and_models.md
+index f1fdd0a295b807ac5f5b9d2fa1b8233eea2cf775..3866c1ed897bee407d19ec6fb212a601e18c782d 100644
+--- a/docs/offline_environment_and_models.md
++++ b/docs/offline_environment_and_models.md
+@@ -38,11 +38,12 @@
+ 
+ ### 2.4 Windows ワンクリックセットアップスクリプト
+ - **`setup_windows.bat` (CPU標準)**:
+-  - 仮想環境（`.venv`）作成 ➔ `pip` 最新化 ➔ `pip install -r requirements.txt` を自動実行。
++  - Python 3.14 を探し、`backend\.venv` を作成（3.14 でない・壊れた venv は作り直す）➔ `pip` 最新化 ➔ 版固定の `requirements-lock.txt` を `pip install`。uv は不要。
+ - **`setup_windows_cuda.bat` (NVIDIA GPU / RTX A500 等)**:
+-  - CUDA 12.4 対応 PyTorch を含む `requirements-cuda.txt` を自動インストール。
++  - `setup_windows.bat /cuda` を実行し、CUDA 12.6 対応 PyTorch（`torch==2.14.1+cu126`）を含む `requirements-cuda.txt` をインストールして GPU の認識を表示。
+ - **`start_windows.bat`**:
+-  - `.venv` または `venv` を自動認識し、ポートチェック・旧プロセス終了を行ってワンクリックで起動。
++  - `backend\.venv` の Python で起動（無ければ先に `setup_windows.bat` を実行）。ポートチェック・旧プロセス終了を行ってワンクリックで起動。
++- 詳細は [`runtime_and_distribution.md`](runtime_and_distribution.md) の「Python 実行環境」。
+ 
+ ### 2.5 CPU のみの環境で Embedding 生成が遅い場合（スレッド数の切替）
+ 
+diff --git a/docs/runtime_and_distribution.md b/docs/runtime_and_distribution.md
+index ef1d53b0134184774e565485e3ccfc728c90d461..491324da6e27afdf59312ae364dfbe1a07c8c84f 100644
+--- a/docs/runtime_and_distribution.md
++++ b/docs/runtime_and_distribution.md
+@@ -16,12 +16,24 @@
+ 
+ 会社PCなどでフロントエンドのビルド環境がない場合は、`frontend/dist/` をリポジトリに含めた状態で配布し、`backend/run.py` を直接起動します。
+ 
+-この運用で必要なのは基本的に Python のみです。  
++この運用で必要なのは基本的に Python のみです（Mac・Win11 とも Python 3.14.9 にそろえている）。  
+ Node.js / npm は、フロントエンドを再ビルドするときだけ必要です。
+ `backend/requirements.txt` にはデスクトップランチャーの依存関係も含めています。
+ 
+ `launcher/requirements.txt` は、ランチャーだけを単体で動かす環境を最小構成で用意したい場合に使います。
+ 
++Python 3.14 では `pydantic` 2.11 以前のビルド済みパッケージ（wheel）が無く、`pip install` が Rust でのビルドを試みて失敗します。そのため `requirements.txt` は `pydantic==2.12.5` に固定しています。
++
++## Python 実行環境（backend/.venv）
++
++- Python は 3.14（`backend/.python-version` = 3.14.9。Mac・会社の Windows とも同じ）。バックエンドは常に `backend/.venv` の Python で動かす（システムの `python` は使わない）。
++- 依存は版を固定した `backend/requirements-lock.txt` を pip で入れる。会社の Windows には uv が無いので、どの端末でも pip だけで同じ版になるようにしている。`requirements.txt` を変えたら、uv のある Mac で書き出し直す（コマンドはファイル冒頭。`tests/test_python_env_contract.py` が固定漏れを確かめる）。
++- 全パッケージに Python 3.14 用のビルド済み wheel がある（lzstring など 4 つは純 Python のソースで、pip がそのまま入れる）。会社PCでビルドが要るパッケージは無い。
++- torch は 2.14.1 に固定する。PyPI（Mac・CPU の Windows）と CUDA 12.6 の索引の両方にある版。CUDA 12.4 の索引には Python 3.14 用の torch が無く、黙って CPU 版が入るため使わない。
++- **Windows**: `setup_windows.bat` が Python 3.14 を `py -3.14` → `python` の順に探し、`backend\.venv` を作って（壊れている・3.14 でないときは作り直す）`requirements-lock.txt` を入れる。GPU 版は `setup_windows_cuda.bat`（= `setup_windows.bat /cuda`）で、`requirements-cuda.txt`（CUDA 12.6 の索引 + `torch==2.14.1+cu126` + `requirements-lock.txt`）を入れる。`start_windows.bat` は `backend\.venv` が無ければ `setup_windows.bat /nopause` を呼んでから起動する。
++- **Mac**: `start_dev.sh` が `backend/.venv` を用意する。3.14 でない venv は作り直し、`requirements-lock.txt` が前回入れたときより新しければ入れ直す（`.venv/.requirements-lock.installed` で判定）。
++- バッチファイルは CRLF 改行で保存する（`.gitattributes`）。
++
+ ## 起動方法ごとの違い
+ 
+ ### 1. `start_dev.sh`
+@@ -75,26 +87,18 @@ Node.js / npm は、フロントエンドを再ビルドするときだけ必要
+ ### 初回セットアップ (GPU / CPU ごとの選択)
+ 
+ #### パターン A: Windows PC で NVIDIA GPU (RTX A500 等) を使って高速化する場合 (推奨)
+-ルートにあるワンクリックセットアップスクリプトを実行します。
++ルートにあるワンクリックセットアップスクリプトを実行します（Python 3.14 が必要。uv は不要）。
+ ```powershell
+ .\setup_windows_cuda.bat
+ ```
+-または PowerShell / CMD で手動実行:
+-```powershell
+-cd backend
+-python -m venv .venv
+-.venv\Scripts\python.exe -m pip install --upgrade pip
+-.venv\Scripts\python.exe -m pip install -r requirements-cuda.txt
+-```
+-※ `requirements-cuda.txt` を使用することで、PyTorch 公式の CUDA 12.4 対応 wheel が自動インストールされ、GPU 加速が有効になります。
++※ `requirements-cuda.txt` で PyTorch 公式の CUDA 12.6 対応 wheel（`torch==2.14.1+cu126`）が入り、GPU 加速が有効になります。最後に GPU の認識状態を表示します。
+ 
+-#### パターン B: 通常の CPU 環境 (または Mac) の場合
++#### パターン B: 通常の CPU 環境の場合
+ ```powershell
+-cd backend
+-python -m venv .venv
+-.venv\Scripts\python.exe -m pip install -r requirements.txt
++.\setup_windows.bat
+ ```
+-※ Mac (Apple Silicon) の場合は `requirements.txt` のインストールだけで自動的に GPU (Metal / MPS) が有効になります。
++※ どちらも `backend\.venv` を作り（古い・壊れた venv は作り直す）、`backend\requirements-lock.txt` を pip で入れます。何度実行してもかまいません。
++※ Mac は `./start_dev.sh` が `backend/.venv` を自動で用意します。Apple Silicon では自動的に GPU (Metal / MPS) が有効になります。
+ 
+ ### 毎回の起動
+ 
+@@ -102,7 +106,7 @@ Windows の場合は、ルートのバッチファイルをダブルクリック
+ ```powershell
+ .\start_windows.bat
+ ```
+-※ `start_windows.bat` は仮想環境 `.venv` 内の Python を自動検知し、起動時にコンソール上に現在の稼働デバイス（`⚡ NVIDIA GPU (RTX A500)` または `💻 CPU`）を表示します。
++※ `start_windows.bat` は `backend\.venv` の Python で起動し（無ければ先に `setup_windows.bat` を実行する）、起動時にコンソール上に現在の稼働デバイス（`⚡ NVIDIA GPU (RTX A500)` または `💻 CPU`）を表示します。
+ 
+ PowerShell から直接起動する場合:
+ ```powershell
+diff --git a/docs/testing.md b/docs/testing.md
+index 721b18ec8e7ab00cb5f361b586301581d8141ca9..e8595bbf01361eed90d46f8fe0354b3e786374f2 100644
+--- a/docs/testing.md
++++ b/docs/testing.md
+@@ -25,7 +25,7 @@ dotnet run --project launcher/windows/LocalSearchLauncher.Tests
+ - `tests/test_ai_markdown_image_export.py` の Excalidraw の 2 件は `resvg-py`（`requirements.txt` に記載）が必要。
+   無いと `cairosvg` へ切り替わるが、Windows では cairo の DLL が無く図を画像にできずに失敗する。
+ - `launcher/tests/test_native_mac_escape.py` は macOS 専用で、他の OS ではスキップする。
+-- `requirements.txt` を読めるよう、先頭に UTF-8 の宣言を置いている（無いと Python 付属の古い pip が日本語版 Windows で失敗する）。
++- `requirements.txt`・`requirements-cuda.txt`・`requirements-lock.txt` を読めるよう、先頭に UTF-8 の宣言を置いている（無いと Python 付属の古い pip が日本語版 Windows で失敗する）。
+ - `tests/test_vector_embedder.py` の実モデルのテストは `models/ruri-v3-30m` が無いとスキップする。
+ - 個人のサンプルファイルが無いとスキップするテストが 2 件ある（`test_ai_markdown_image_export.py`、`test_link_expander_dataview.py`）。
+ 
+diff --git a/docs/vector_search_spec.md b/docs/vector_search_spec.md
+index 0a6ed1162ea305b9a83ccb344b20ae9e640dd44a..00e59ad72fa18a12411c5c5df2af6251d76e2c87 100644
+--- a/docs/vector_search_spec.md
++++ b/docs/vector_search_spec.md
+@@ -289,8 +289,8 @@
+   - `GET /api/vector/model/status` に `device`, `device_name`, `cuda_available`, `mps_available` を追加。
+   - ベクトル管理画面のヘッダー最上部に常時表示のデバイスバッジ（`⚡ GPU稼働中: Apple Silicon (Metal)` / `⚡ GPU稼働中: NVIDIA RTX A500 (CUDA)` / `💻 CPU稼働中 (フォールバック)`）とデバイス名を表示。
+ - **Windows NVIDIA GPU (RTX A500) 向けセットアップ環境**:
+-  - `backend/requirements-cuda.txt`: PyTorch 公式の CUDA 12.4 対応 wheel を自動解決してインストール。
+-  - `setup_windows_cuda.bat`: 仮想環境作成から CUDA 版 PyTorch インストール、GPU 動作検証までをワンクリックで実行可能。
++  - `backend/requirements-cuda.txt`: PyTorch 公式の CUDA 12.6 対応 wheel（`torch==2.14.1+cu126`。Python 3.14 用）を入れる。CUDA 12.4 には 3.14 用の torch が無い。
++  - `setup_windows_cuda.bat`: `setup_windows.bat /cuda` で仮想環境作成から CUDA 版 PyTorch インストールまで行い、GPU 動作検証を表示する。
+   - `start_windows.bat`: 起動時に現在の実行環境（CUDA or CPU）をコンソール上に表示。
+ 
+ ## 17. FAISS 高速エンジンと NumPy 自動フォールバック（未導入時のUI可視化）
+diff --git a/setup_windows.bat b/setup_windows.bat
+index 8e1c12ab90b0d7b7601f626879851f023f02c48c..36a6f549e261a237382ae628b4472db1f1a0eb8b 100644
+--- a/setup_windows.bat
++++ b/setup_windows.bat
+@@ -1,40 +1,73 @@
+ @echo off
+ setlocal
+ rem ==============================================================================
+-rem Windows 標準環境 (CPU) 専用セットアップスクリプト
+-rem 
+-rem 会社PC等の一般環境向け（pip install のみ許可されている環境に対応）:
+-rem 1. backend\.venv を作成
+-rem 2. pip を最新化
+-rem 3. requirements.txt から依存パッケージを一括インストール
+-rem 4. 完了後、start_windows.bat で即座に起動可能
++rem Local Fulltext Search - Windows 用セットアップ（backend\.venv を作る）
+ rem
+-rem ※ NVIDIA GPU (CUDA) を搭載しているPCの場合は、
+-rem    setup_windows_cuda.bat をご利用ください。
++rem 会社PC等の一般環境向け（uv なし・pip だけで用意する）:
++rem 1. Python 3.14 を探す（py -3.14 → python の順）。3.14 が無ければ止める
++rem 2. backend\.venv を作る。既にあって Python 3.14 で動くならそのまま使い、
++rem    壊れている・版が違う（3.12 で作った古い venv など）ときは作り直す（消すのは .venv の中身だけ）
++rem 3. pip を更新し、版を固定した backend\requirements-lock.txt を入れる
++rem    /cuda を付けると requirements-cuda.txt（CUDA 12.6 の torch + 同じ版固定）を入れる
++rem 4. 主要なパッケージが import できるか確かめる
++rem
++rem 使い方: setup_windows.bat をダブルクリック。何度実行してもよい。
++rem   GPU (CUDA) を使う PC は setup_windows_cuda.bat（= setup_windows.bat /cuda）を使う
++rem   start_windows.bat から呼ぶときは /nopause を付ける（最後に止まらない）
++rem   社内プロキシが必要な場合は、先に pip の設定（pip.ini や HTTPS_PROXY）を済ませておく
++rem 完了後、start_windows.bat で起動できる
+ rem ==============================================================================
+ 
+ set "APP_ROOT=%~dp0"
+ set "BACKEND_DIR=%APP_ROOT%backend"
++set "VENV_PY=%BACKEND_DIR%\.venv\Scripts\python.exe"
++set "REQ_FILE=requirements-lock.txt"
++set "NOPAUSE="
++for %%A in (%*) do (
++    if /i "%%~A"=="/nopause" set "NOPAUSE=1"
++    if /i "%%~A"=="/cuda" set "REQ_FILE=requirements-cuda.txt"
++)
++
++cd /d "%BACKEND_DIR%" || goto :fail
+ 
+-echo [Setup] Initializing Python Virtual Environment for Windows...
+-cd /d "%BACKEND_DIR%"
++rem --- Python 3.14 を探す ---
++set "PY_CMD="
++py -3.14 -c "import sys" >nul 2>&1 && set "PY_CMD=py -3.14"
++if not defined PY_CMD (
++    python -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)" >nul 2>&1 && set "PY_CMD=python"
++)
++if not defined PY_CMD (
++    echo [Setup] ERROR: Python 3.14 was not found. Install Python 3.14 and add it to PATH.
++    goto :fail
++)
++for /f "delims=" %%v in ('%PY_CMD% -V 2^>^&1') do echo [Setup] Using %%v [%PY_CMD%]
+ 
+-if not exist ".venv" (
+-    echo [Setup] Creating virtual environment (.venv)...
+-    python -m venv .venv
++rem --- backend\.venv を用意する ---
++set "VENV_OK="
++if exist "%VENV_PY%" (
++    "%VENV_PY%" -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)" >nul 2>&1 && set "VENV_OK=1"
++)
++if defined VENV_OK (
++    echo [Setup] Reusing backend\.venv
++) else (
++    echo [Setup] Creating backend\.venv ...
++    %PY_CMD% -m venv --clear .venv || goto :fail
+ )
+ 
+-echo [Setup] Upgrading pip...
+-.venv\Scripts\python.exe -m pip install --upgrade pip
++rem --- 依存パッケージを入れる ---
++echo [Setup] Upgrading pip ...
++"%VENV_PY%" -m pip install --upgrade pip
++echo [Setup] Installing backend\%REQ_FILE% ...
++"%VENV_PY%" -m pip install -r "%REQ_FILE%" || goto :fail
+ 
+-echo [Setup] Installing dependencies from requirements.txt...
+-.venv\Scripts\python.exe -m pip install -r requirements.txt
++echo [Setup] Verifying installation ...
++"%VENV_PY%" -c "import fastapi, uvicorn, faiss, fugashi, sentence_transformers, torch, sys; print('[Setup] Python', sys.version.split()[0], '/ torch', torch.__version__)" || goto :fail
+ 
+-echo.
+-echo [Setup] Verifying installation...
+-.venv\Scripts\python.exe -c "import fastapi, uvicorn, sentence_transformers; print('----------------------------------------'); print('Dependencies installed successfully!'); print('----------------------------------------')"
++echo [Setup] Setup completed. Start the application with start_windows.bat
++if not defined NOPAUSE pause
++exit /b 0
+ 
+-echo.
+-echo [Setup] Setup completed!
+-echo You can now start the application by running start_windows.bat
+-pause
++:fail
++echo [Setup] Setup failed. See the messages above.
++if not defined NOPAUSE pause
++exit /b 1
+diff --git a/setup_windows_cuda.bat b/setup_windows_cuda.bat
+index 60bd9f0a558fb21be935e3526a5a0d8b64ee41fa..f6950a6e02feab7dd8a383392b151fb2d82695a9 100644
+--- a/setup_windows_cuda.bat
++++ b/setup_windows_cuda.bat
+@@ -2,33 +2,22 @@
+ setlocal
+ rem ==============================================================================
+ rem Windows NVIDIA GPU (RTX A500 等) 専用セットアップスクリプト
+-rem 
+-rem このスクリプトを実行すると:
+-rem 1. backend\.venv を作成
+-rem 2. CUDA 12.4 対応の PyTorch および依存パッケージを一括インストール
+-rem 3. GPU (CUDA) の認識状態を確認・表示
++rem
++rem setup_windows.bat /cuda を実行して backend\.venv を用意し（Python 3.14・uv 不要）、
++rem requirements-cuda.txt（CUDA 12.6 の torch 2.14.1+cu126 + requirements-lock.txt と同じ版）を入れる。
++rem そのあと GPU (CUDA) の認識状態を確認・表示する。
+ rem ==============================================================================
+ 
+-set "APP_ROOT=%~dp0"
+-set "BACKEND_DIR=%APP_ROOT%backend"
+-
+-echo [Setup CUDA] Initializing Python Virtual Environment for Windows GPU...
+-cd /d "%BACKEND_DIR%"
+-
+-if not exist ".venv" (
+-    echo [Setup CUDA] Creating virtual environment (.venv)...
+-    python -m venv .venv
++call "%~dp0setup_windows.bat" /cuda /nopause
++if errorlevel 1 (
++    echo [Setup CUDA] Setup failed. See the messages above.
++    pause
++    exit /b 1
+ )
+ 
+-echo [Setup CUDA] Upgrading pip...
+-.venv\Scripts\python.exe -m pip install --upgrade pip
+-
+-echo [Setup CUDA] Installing PyTorch with CUDA 12.4 support (NVIDIA RTX A500)...
+-.venv\Scripts\python.exe -m pip install -r requirements-cuda.txt
+-
+ echo.
+ echo [Setup CUDA] Verifying GPU acceleration...
+-.venv\Scripts\python.exe -c "import torch; print('----------------------------------------'); print('PyTorch Version :', torch.__version__); print('CUDA Available  :', torch.cuda.is_available()); print('Device Name     :', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU (CUDA not detected)'); print('----------------------------------------')"
++"%~dp0backend\.venv\Scripts\python.exe" -c "import torch; print('----------------------------------------'); print('PyTorch Version :', torch.__version__); print('CUDA Available  :', torch.cuda.is_available()); print('Device Name     :', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU (CUDA not detected)'); print('----------------------------------------')"
+ 
+ echo.
+ echo [Setup CUDA] Setup completed!
+diff --git a/start_dev.sh b/start_dev.sh
+index e6225c16284e34551fc2c5ecc07d55d31bd25035..ffe1fc7c9482db2b2b54857cc1f9f0fc0d334686 100755
+--- a/start_dev.sh
++++ b/start_dev.sh
+@@ -49,13 +49,30 @@ kill_launcher() {
+   fi
+ }
+ 
++# backend/.venv（Python 3.14）を用意する。Windows の setup_windows.bat と同じく、版固定の requirements-lock.txt を pip で入れる。
++# - venv の Python が動かない・3.14 でないときは python3（3.14）で作り直す（消すのは .venv の中身だけ）
++# - requirements-lock.txt が前回入れたときより新しければ入れ直す（.venv/.requirements-lock.installed で判定）
+ ensure_backend_env() {
+-  if [[ ! -d "${BACKEND_DIR}/.venv" ]]; then
+-    python3 -m venv "${BACKEND_DIR}/.venv"
++  local venv_python="${BACKEND_DIR}/.venv/bin/python"
++  local lock_file="${BACKEND_DIR}/requirements-lock.txt"
++  local marker="${BACKEND_DIR}/.venv/.requirements-lock.installed"
++  local is_314='import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)'
++
++  if ! "${venv_python}" -c "${is_314}" >/dev/null 2>&1; then
++    if ! python3 -c "${is_314}" >/dev/null 2>&1; then
++      echo "Python 3.14 の python3 が見つかりません（現在: $(python3 -V 2>&1 || echo なし)）" >&2
++      exit 1
++    fi
++    echo "Creating backend/.venv with $(python3 -V 2>&1)"
++    python3 -m venv --clear "${BACKEND_DIR}/.venv"
++    rm -f "${marker}"
+   fi
+ 
+-  if ! "${BACKEND_DIR}/.venv/bin/python" -c "import fastapi, uvicorn, pydantic" >/dev/null 2>&1; then
+-    "${BACKEND_DIR}/.venv/bin/pip" install -r "${BACKEND_DIR}/requirements.txt"
++  if [[ ! -f "${marker}" || "${lock_file}" -nt "${marker}" ]]; then
++    echo "Installing backend/requirements-lock.txt into backend/.venv"
++    "${venv_python}" -m pip install --upgrade pip
++    "${venv_python}" -m pip install -r "${lock_file}"
++    touch "${marker}"
+   fi
+ 
+   if [[ "$(uname -s)" == "Darwin" ]] && ! "${BACKEND_DIR}/.venv/bin/python" -c "import AppKit" >/dev/null 2>&1; then
+diff --git a/start_windows.bat b/start_windows.bat
+index f2f0a0f55dbd9c610e54f6b9aedf9d996409e849..ea314b45acc1176ffa6c58c7c44bd12f7ae14b78 100644
+--- a/start_windows.bat
++++ b/start_windows.bat
+@@ -25,20 +25,26 @@ if not exist "%BACKEND_DIR%\run.py" (
+   exit /b 1
+ )
+ 
+-cd /d "%BACKEND_DIR%"
+-set "PYTHON_EXE=python"
+-if exist ".venv\Scripts\python.exe" (
+-    set "PYTHON_EXE=.venv\Scripts\python.exe"
+-) else if exist "venv\Scripts\python.exe" (
+-    set "PYTHON_EXE=venv\Scripts\python.exe"
++rem Python は backend\.venv だけを使う（システムの python は使わない）。無ければ setup_windows.bat で作る
++set "PYTHON_EXE=%BACKEND_DIR%\.venv\Scripts\python.exe"
++if not exist "%PYTHON_EXE%" (
++  echo [Local Fulltext Search] backend\.venv was not found. Running setup_windows.bat ...
++  call "%APP_ROOT%setup_windows.bat" /nopause
++)
++if not exist "%PYTHON_EXE%" (
++  echo [Local Fulltext Search] Failed to prepare backend\.venv. Run setup_windows.bat and check the messages.
++  pause
++  exit /b 1
+ )
+ 
++cd /d "%BACKEND_DIR%"
++
+ rem 稼働デバイスの簡易検知表示
+-%PYTHON_EXE% -c "import torch; print('[Local Fulltext Search] Execution Device: ' + ('⚡ NVIDIA GPU (' + torch.cuda.get_device_name(0) + ')' if torch.cuda.is_available() else '💻 CPU'))" 2>nul
++"%PYTHON_EXE%" -c "import torch; print('[Local Fulltext Search] Execution Device: ' + ('⚡ NVIDIA GPU (' + torch.cuda.get_device_name(0) + ')' if torch.cuda.is_available() else '💻 CPU'))" 2>nul
+ 
+ echo [Local Fulltext Search] Starting http://127.0.0.1:%SEARCH_APP_PORT%/
+ echo [Local Fulltext Search] External Open hub expected at http://127.0.0.1:8001/
+-%PYTHON_EXE% run.py
++"%PYTHON_EXE%" run.py
+ 
+ 
+ echo.

@@ -1,0 +1,355 @@
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000000000000000000000000000000000000..2aa82eada3eb1418b6610fd9b51136f729bf6182
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,3 @@
++# Windows のバッチは CRLF でないと cmd が行を読み違えるため、作業ツリーでは常に CRLF にする
++*.bat text eol=crlf
++*.cmd text eol=crlf
+diff --git a/.python-version b/.python-version
+new file mode 100644
+index 0000000000000000000000000000000000000000..70c445ec156402543c7dd71665ed5bda202dfcef
+--- /dev/null
++++ b/.python-version
+@@ -0,0 +1 @@
++3.14.9
+diff --git a/README.md b/README.md
+index 9072e630e3d31b64b92c9f8c735995cd479fcdac..f2db4568b25c610cacdd94d35579b92126763913 100644
+--- a/README.md
++++ b/README.md
+@@ -4,22 +4,21 @@ Python/C#リポジトリを会社環境のAIチャットへ渡し、安全に変
+ 
+ ## 起動
+ 
+-Python 3.10以上で仮想環境を作り、依存関係を導入します。
++Python 3.14（Mac・会社PCとも3.14.9）を使います。サーバーは常に `.venv` のPythonで動き、依存は版を固定した `backend/requirements-lock.txt` をpipで入れます（uvは不要）。
+ 
+ ```sh
+-python3 -m venv .venv
+-.venv/bin/pip install -r backend/requirements.txt
+-./start.sh
++./start.sh   # .venv が無い・Python 3.14 でなければ作り直し、requirements-lock.txt を入れてから起動
+ ```
+ 
+-Windowsでは同じ依存関係を導入後、`start.bat` を実行します。配布物には `frontend/dist` を含むため、会社PCにNode.jsは不要です。既定URLは `http://127.0.0.1:8077` です。
++Windowsでは、初回に `setup_windows.bat` で `.venv` を作ってから `start.bat` を実行します（`start.bat` も `.venv` が無ければ自動で `setup_windows.bat` を実行します）。配布物には `frontend/dist` を含むため、会社PCにNode.jsは不要です。既定URLは `http://127.0.0.1:8077` です。
+ 
+ ```bat
+-py -3 -m venv .venv
+-.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
++setup_windows.bat
+ start.bat
+ ```
+ 
++`setup_windows.bat` はPython 3.14を `py -3.14` → `python` の順に探し、3.14で動かない既存の `.venv`（古いPythonで作ったものなど）は作り直します。社内プロキシが必要な場合は、先にpipの設定（`pip.ini` や `HTTPS_PROXY`）を済ませてください。
++
+ ソース配布時に`frontend/dist`を省く場合だけ、初回起動時のビルド用にNode.jsが必要です。起動スクリプトは配布物がなくビルドもできない状態をエラーとして明示します。
+ 
+ 起動時に既存のポートリスナーを終了してからサーバーを起動します。ポートは`SPOONFEEDER_PORT`、待受アドレスは`SPOONFEEDER_HOST`で変更できます。
+diff --git a/backend/requirements-lock.txt b/backend/requirements-lock.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..1c81b25c2251a1662a60942c4c1faceae91a36d6
+--- /dev/null
++++ b/backend/requirements-lock.txt
+@@ -0,0 +1,39 @@
++# -*- coding: utf-8 -*-
++# 版を固定した依存一覧（backend/requirements.txt から書き出す）
++#
++# Windows の setup_windows.bat と macOS の start.sh が、.venv へ pip でこれを入れる。
++# 会社PCには uv が無いので、どの端末でも pip だけで同じ版を再現できるようにしている。
++# Python 3.14 用。全パッケージに Windows (win_amd64) / macOS のビルド済み wheel がある。
++#
++# requirements.txt を変えたら、uv のある端末（Mac）で書き出し直す（冒頭のコメントはそのまま残る）:
++#   cd backend
++#   { grep '^#' requirements-lock.txt; uv pip compile -q --universal --python-version 3.14 --no-header --no-annotate requirements.txt; } > requirements-lock.txt.new && mv requirements-lock.txt.new requirements-lock.txt
++# pytest/python_env_test.py が固定漏れを確かめる。
++annotated-doc==0.0.7
++annotated-types==0.8.0
++anyio==4.16.0
++certifi==2026.11.20
++click==8.5.1
++colorama==0.4.6 ; sys_platform == 'win32'
++fastapi==0.165.0
++h11==0.16.0
++httpcore==1.0.9
++httpx==0.28.1
++idna==3.20
++iniconfig==2.3.1
++opentelemetry-api==1.45.2
++packaging==26.4
++pillow==13.0.0
++pluggy==1.7.0
++pydantic==2.14.4
++pydantic-core==2.50.5
++pygments==2.21.0
++pytest==9.2.0
++pywinpty==3.1.2 ; sys_platform == 'win32'
++pyyaml==6.0.4
++resvg-py==0.5.0
++starlette==1.10.0
++typing-extensions==4.16.0
++typing-inspection==0.4.5
++uvicorn==0.54.0
++websockets==17.4
+diff --git a/claude.md b/claude.md
+index bd21cf97e60345a168090211a62cc2ef57a737df..ab6b0444c7f22bafd14dfb1ff633f4ca9d798bb3 100644
+--- a/claude.md
++++ b/claude.md
+@@ -12,7 +12,7 @@
+ また、AIが出力したコードの差分反映（関数・クラス単位の置換、複数ファイル変更、Markdown反映）、ローカルテスト実行、ブラウザ上の対話型ターミナル（xterm.js + PTY）、MkDocsリポジトリ向けの「統合マークダウン＋図PDF」出力を提供する、ローカル専用の補助ツール。
+ 
+ ## 2. アーキテクチャ
+-- **バックエンド**: Python 3.10+ / FastAPI / Uvicorn / Pillow / PyYAML / resvg-py（SVG描画）/ pywinpty（Windowsのみ）。POSIXは標準 `pty`。
++- **バックエンド**: Python 3.14（`.python-version` = 3.14.9。会社PCと同じ） / FastAPI / Uvicorn / Pillow / PyYAML / resvg-py（SVG描画）/ pywinpty（Windowsのみ）。POSIXは標準 `pty`。
+ - **フロントエンド**: React 19 (Vite) / xterm.js / d3 / lucide-react / 素のCSS（`frontend/src/styles.css`。Tailwindは使用しない）。PWA（vite-plugin-pwa）。
+ - **配信**: ビルド済み `frontend/dist` をFastAPIが静的配信する（Node.jsは開発・ビルド時のみ必要。`frontend/dist` はGit管理しており、変更後は `npm run build --prefix frontend` で更新してコミットする）。
+ - **環境変数**:
+@@ -150,6 +150,10 @@
+ 
+ ## 11. 起動と配布
+ - `start.sh`（macOS/Linux）/ `start.bat`（Windows）: 指定ポートの既存リスナーを終了 → `frontend/dist` がなければNode.jsでビルド → Uvicorn起動（既定 `127.0.0.1:8077`）。配布物に `frontend/dist` を含めればNode.js不要。
++- **Python実行環境**: サーバーは常に `.venv` のPython（3.14）で起動する（システムの `python` は使わない）。依存は版固定の `backend/requirements-lock.txt` をpipで入れる（会社PCにuvは無い）。`requirements.txt` を変えたら、uvのあるMacで書き出し直す（コマンドはファイル冒頭）。
++  - `setup_windows.bat`（Windows、ASCIIのみ）: Python 3.14を `py -3.14` → `python` の順に探し、`.venv` を作る（3.14で動かない `.venv` は `--clear` で作り直す）→ `requirements-lock.txt` を入れる。`start.bat` は `.venv` が無ければ `/nopause` 付きで呼ぶ。
++  - `start.sh`: 同じく3.14で動かない `.venv` は作り直し、`requirements-lock.txt` が前回入れたときより新しければ入れ直す（`.venv/.requirements-lock.installed`）。
++  - `.bat` はCRLFで保存する（`.gitattributes`）。約束は `pytest/python_env_test.py` が確かめる。Windows上での実行はMacでは確かめられない。
+ - 設定ファイル `spoonfeeder_configs.json` は `.gitignore` 対象。JSONが壊れていた場合は `*.corrupt[.N]` へ退避してから空の設定で始める（履歴が上書きで消えない）。
+ 
+ ## 12. 開発ルール
+diff --git a/pytest/python_env_test.py b/pytest/python_env_test.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..2258ebed9ab467820cfcb05357d7b316473e8fbf
+--- /dev/null
++++ b/pytest/python_env_test.py
+@@ -0,0 +1,108 @@
++"""Python実行環境（.venv）の用意と起動スクリプトの約束を確かめる統合テスト。
++
++仕様（claude.md「11. 起動と配布」）:
++- Pythonは3.14（自宅のMac・会社のWindowsとも3.14.9。`.python-version`）。サーバーは常に `.venv` のPythonで起動する。
++- 依存は版を固定した `backend/requirements-lock.txt` をpipで入れる（会社PCにuvは無い）。
++- Windowsは `setup_windows.bat` がPython 3.14を `py -3.14` → `python` の順に探して `.venv` を作り（3.14で動かない
++  `.venv` は作り直す）、`requirements-lock.txt` を入れる。`start.bat` は `.venv` が無ければこれを呼ぶ。
++- macOSは `start.sh` が同じ手順で `.venv` を用意する。
++- `.bat` はCRLFで保存する（LFだとcmd.exeが行を読み違える）。`setup_windows.bat` はASCIIのみ。
++
++Windows上での実行はこのMacでは確かめられないため、スクリプトの約束だけを確かめる。
++"""
++
++from __future__ import annotations
++
++import re
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++LOCK = ROOT / "backend" / "requirements-lock.txt"
++
++
++def _normalize(name: str) -> str:
++    return re.sub(r"[-_.]+", "-", name).lower()
++
++
++def _pinned() -> dict[str, str]:
++    pinned: dict[str, str] = {}
++    for line in LOCK.read_text(encoding="utf-8").splitlines():
++        line = line.split("#", 1)[0].strip()
++        if line:
++            match = re.match(r"^([A-Za-z0-9._-]+)==([^\s;]+)", line)
++            assert match, f"==で版を固定していない行があります: {line}"
++            pinned[_normalize(match.group(1))] = match.group(2)
++    return pinned
++
++
++def _direct_requirements() -> set[str]:
++    names: set[str] = set()
++    for line in (ROOT / "backend" / "requirements.txt").read_text(encoding="utf-8").splitlines():
++        line = line.split("#", 1)[0].strip()
++        if line:
++            names.add(_normalize(re.match(r"^[A-Za-z0-9._-]+", line).group(0)))
++    return names
++
++
++def _batch(name: str) -> bytes:
++    return (ROOT / name).read_bytes()
++
++
++def test_requirements_lockはrequirements_txtの全パッケージを版固定している() -> None:
++    assert _direct_requirements() <= set(_pinned())
++
++
++def test_requirements_lockはWindowsだけで入るpywinptyを含む() -> None:
++    assert re.search(r"^pywinpty==.*sys_platform == 'win32'", LOCK.read_text(encoding="utf-8"), re.MULTILINE)
++
++
++def test_requirements_lockは先頭でUTF8を宣言している() -> None:
++    # 宣言が無いと、pipが日本語版Windowsの既定（cp932）で読んで日本語コメントで失敗することがある
++    assert LOCK.read_bytes().splitlines()[0] == b"# -*- coding: utf-8 -*-"
++
++
++def test_Pythonの版は3_14_9に固定されている() -> None:
++    assert (ROOT / ".python-version").read_text(encoding="utf-8").strip() == "3.14.9"
++
++
++def test_batファイルはすべてCRLFで保存されている() -> None:
++    for name in ("setup_windows.bat", "start.bat"):
++        assert b"\n" not in _batch(name).replace(b"\r\n", b""), name
++
++
++def test_setup_windows_batはASCIIのみで書かれている() -> None:
++    _batch("setup_windows.bat").decode("ascii")
++
++
++def test_setup_windows_batはPython314をpyランチャーから探す() -> None:
++    script = _batch("setup_windows.bat").decode("ascii")
++    assert script.index("py -3.14") < script.index('set "PY_CMD=python"') and "sys.version_info[:2] == (3, 14)" in script
++
++
++def test_setup_windows_batは314で動かないvenvを作り直す() -> None:
++    assert "%PY_CMD% -m venv --clear .venv" in _batch("setup_windows.bat").decode("ascii")
++
++
++def test_setup_windows_batは版固定の一覧をpipで入れuvを使わない() -> None:
++    script = _batch("setup_windows.bat").decode("ascii")
++    assert '"%VENV_PY%" -m pip install -r backend\\requirements-lock.txt' in script
++    assert not re.search(r"^\s*uv\s", script, re.MULTILINE | re.IGNORECASE)
++
++
++def test_setup_windows_batのgoto先ラベルがすべて存在する() -> None:
++    script = _batch("setup_windows.bat").decode("ascii")
++    labels = {line.strip()[1:].lower() for line in script.splitlines() if line.strip().startswith(":")}
++    targets = {line.strip().split(":")[-1].lower() for line in script.splitlines() if "goto :" in line.lower()}
++    assert targets <= labels
++
++
++def test_start_batはvenvが無ければsetup_windows_batを呼びシステムのpythonを使わない() -> None:
++    script = _batch("start.bat").decode("utf-8")
++    assert 'call "%~dp0setup_windows.bat" /nopause' in script
++    assert "set PYTHON=python" not in script and "venv\\Scripts\\python.exe" in script
++
++
++def test_start_shは314で動かないvenvを作り直して版固定の一覧を入れる() -> None:
++    script = (ROOT / "start.sh").read_text(encoding="utf-8")
++    assert "sys.version_info[:2] == (3, 14)" in script and "-m venv --clear" in script
++    assert "backend/requirements-lock.txt" in script and "PYTHON=python3" not in script
+diff --git a/setup_windows.bat b/setup_windows.bat
+new file mode 100644
+index 0000000000000000000000000000000000000000..c7ed011ad467eeb134961ebff3fcbf6b23b945e0
+--- /dev/null
++++ b/setup_windows.bat
+@@ -0,0 +1,66 @@
++@echo off
++rem ==============================================================================
++rem Spoonfeeder2 Windows setup (setup_windows.bat)
++rem Keep this file ASCII-only: cmd.exe may misparse multi-byte text under the
++rem Japanese code page.
++rem The company PC has no uv, so this uses only Python 3.14 and pip.
++rem 1. Find Python 3.14 (py -3.14 first, then python). Stop if it is missing.
++rem 2. Create .venv. Reuse it when it already runs on Python 3.14; otherwise
++rem    (broken, or made with another Python version) recreate it. Only the
++rem    contents of .venv are replaced. Never install into the system Python.
++rem 3. Install backend\requirements-lock.txt (pinned versions) with pip.
++rem Usage: double-click. Safe to run again.
++rem   start.bat calls it with /nopause when .venv is missing.
++rem   If a proxy is required, configure pip (pip.ini or HTTPS_PROXY) first.
++rem ==============================================================================
++setlocal
++cd /d "%~dp0"
++
++set "VENV_PY=%~dp0.venv\Scripts\python.exe"
++set "NOPAUSE="
++if /i "%~1"=="/nopause" set "NOPAUSE=1"
++
++rem --- Find Python 3.14 ---
++set "PY_CMD="
++py -3.14 -c "import sys" >nul 2>&1 && set "PY_CMD=py -3.14"
++if not defined PY_CMD (
++  python -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)" >nul 2>&1 && set "PY_CMD=python"
++)
++if not defined PY_CMD (
++  echo [Setup] ERROR: Python 3.14 was not found. Install Python 3.14 and add it to PATH.
++  goto :fail
++)
++for /f "delims=" %%V in ('%PY_CMD% -V 2^>^&1') do echo [Setup] Using %%V [%PY_CMD%]
++
++rem --- Prepare .venv ---
++set "VENV_OK="
++if exist "%VENV_PY%" (
++  "%VENV_PY%" -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)" >nul 2>&1 && set "VENV_OK=1"
++)
++if defined VENV_OK (
++  echo [Setup] Reusing .venv
++) else (
++  echo [Setup] Creating .venv ...
++  %PY_CMD% -m venv --clear .venv
++  if errorlevel 1 goto :fail
++)
++if not exist "%VENV_PY%" goto :fail
++
++rem --- Install dependencies ---
++echo [Setup] Upgrading pip ...
++"%VENV_PY%" -m pip install --upgrade pip
++echo [Setup] Installing backend\requirements-lock.txt ...
++"%VENV_PY%" -m pip install -r backend\requirements-lock.txt
++if errorlevel 1 goto :fail
++
++"%VENV_PY%" -c "import fastapi, uvicorn, PIL, yaml, resvg_py, sys; print('[Setup] Python', sys.version.split()[0], '/ fastapi', fastapi.__version__)"
++if errorlevel 1 goto :fail
++
++echo [Setup] Done. Start the app with start.bat
++if not defined NOPAUSE pause
++exit /b 0
++
++:fail
++echo [Setup] Setup failed. See the messages above.
++if not defined NOPAUSE pause
++exit /b 1
+diff --git a/start.bat b/start.bat
+index 973a714edbcfc6a89d4e50cd450c74627628ffc4..8af68512b6e26997f0907aa41253fff6868466fc 100644
+--- a/start.bat
++++ b/start.bat
+@@ -28,6 +28,12 @@ if not exist frontend\dist\index.html (
+   echo フロントエンドのビルドに失敗しました。 1>&2
+   exit /b 1
+ )
+-if exist .venv\Scripts\python.exe (set PYTHON=.venv\Scripts\python.exe) else if exist venv\Scripts\python.exe (set PYTHON=venv\Scripts\python.exe) else (set PYTHON=python)
++rem Python is always .venv (Python 3.14). When .venv is missing, create it with setup_windows.bat.
++set "PYTHON=%~dp0.venv\Scripts\python.exe"
++if not exist "%PYTHON%" call "%~dp0setup_windows.bat" /nopause
++if not exist "%PYTHON%" (
++  echo .venv could not be prepared. Run setup_windows.bat and check the messages. 1>&2
++  exit /b 1
++)
+ "%PYTHON%" -m uvicorn backend.main:app --host "%HOST%" --port "%PORT%"
+ endlocal
+diff --git a/start.sh b/start.sh
+index 90269d55204e42e419fe7bd27965e40a18d7c526..417e37ecca8aea8b837662dcef03941612a6a2d3 100755
+--- a/start.sh
++++ b/start.sh
+@@ -35,8 +35,25 @@ if [ ! -f frontend/dist/index.html ]; then
+   echo "フロントエンドのビルドに失敗しました。" >&2
+   exit 1
+ fi
+-if [ -x .venv/bin/python ]; then PYTHON=.venv/bin/python
+-elif [ -x venv/bin/python ]; then PYTHON=venv/bin/python
+-else PYTHON=python3
++# Pythonは常に .venv（Python 3.14）を使う。Windowsの setup_windows.bat と同じ手順で用意する。
++# - .venv のPythonが動かない・3.14でないときは python3（3.14）で作り直す（消すのは .venv の中身だけ）
++# - backend/requirements-lock.txt が前回入れたときより新しければ入れ直す（.venv/.requirements-lock.installed で判定）
++PYTHON=.venv/bin/python
++IS_314='import sys; sys.exit(0 if sys.version_info[:2] == (3, 14) else 1)'
++MARKER=.venv/.requirements-lock.installed
++if ! "$PYTHON" -c "$IS_314" >/dev/null 2>&1; then
++  if ! python3 -c "$IS_314" >/dev/null 2>&1; then
++    echo "Python 3.14 の python3 が見つかりません（現在: $(python3 -V 2>&1 || echo なし)）。" >&2
++    exit 1
++  fi
++  echo "Python 3.14 で .venv を作成します..."
++  python3 -m venv --clear .venv
++  rm -f "$MARKER"
++fi
++if [ ! -f "$MARKER" ] || [ backend/requirements-lock.txt -nt "$MARKER" ]; then
++  echo "backend/requirements-lock.txt を .venv に入れます..."
++  "$PYTHON" -m pip install --quiet --upgrade pip
++  "$PYTHON" -m pip install --quiet -r backend/requirements-lock.txt
++  touch "$MARKER"
+ fi
+ exec "$PYTHON" -m uvicorn backend.main:app --host "$HOST" --port "$PORT"
