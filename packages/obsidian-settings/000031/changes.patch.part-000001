@@ -1,0 +1,785 @@
+diff --git a/80_script/register_custom_commands/24_html_pdf_export.js b/80_script/register_custom_commands/24_html_pdf_export.js
+index 8815b03c572a68e2895d3382bc2bb383d601791c..e4d3c73a61ed3659687197cbd06e40781a63afd8 100644
+--- a/80_script/register_custom_commands/24_html_pdf_export.js
++++ b/80_script/register_custom_commands/24_html_pdf_export.js
+@@ -71,10 +71,20 @@ const rasterizeSvgFileToPngDataUrl = async (filePath) => {
+     }
+ };
+ 
++/**
++ * 図を PNG にするときの倍率。ブラウザのキャンバスには大きさの上限があり（超えると空の画像になる）、
++ * 縦長・横長の大きな図では、辺の長さ 16000px・面積 1億px に収まるまで倍率を下げる。
++ **/
++const getSafeCanvasScale = (width, height, scale) => {
++    const w = Math.max(1, Number(width) || 1);
++    const h = Math.max(1, Number(height) || 1);
++    return Math.min(scale, 16000 / w, 16000 / h, Math.sqrt(100000000 / (w * h)));
++};
++
+ /**
+  * SVG文字列をPNGのData URL(Base64)にラスタライズする
+  **/
+-const rasterizeSvgContentToPngDataUrl = async (svgContent) => {
++const rasterizeSvgContentToPngDataUrl = async (svgContent, scale = 3) => {
+     try {
+         // 1. color-scheme を light に強制設定して白黒反転を防ぐ
+         if (svgContent.includes("color-scheme")) {
+@@ -87,6 +97,13 @@ const rasterizeSvgContentToPngDataUrl = async (svgContent) => {
+         const fallbackTextRegex = /<switch>\s*<g[^>]*requiredFeatures="http:\/\/www\.w3\.org\/TR\/SVG11\/feature#Extensibility"[^>]*\/>\s*<a[^>]*>[\s\S]*?Text is not SVG - cannot display[\s\S]*?<\/a>\s*<\/switch>/gi;
+         svgContent = svgContent.replace(fallbackTextRegex, "");
+ 
++        // 3. 日本語の文字は、図のフォント（Cascadia など）に無いため端末のフォントで描かれる。
++        //    言語の指定が無いと、漢字に使うフォントを端末の言語設定から選ぶ（中国語のフォントになることがある）ため、
++        //    日本語として描かせる。すでに言語の指定がある SVG はそのまま。
++        if (!/<svg\b[^>]*\s(?:xml:)?lang=/i.test(svgContent)) {
++            svgContent = svgContent.replace(/<svg\b/i, '<svg xml:lang="ja" lang="ja"');
++        }
++
+         return new Promise((resolve) => {
+             const img = new Image();
+             img.crossOrigin = "anonymous";
+@@ -114,20 +131,25 @@ const rasterizeSvgContentToPngDataUrl = async (svgContent) => {
+                         }
+                     }
+ 
+-                    // 解像度を3倍に上げてカクカク感を解消(高精細化)
+-                    const scale = 3;
+-                    canvas.width = width * scale;
+-                    canvas.height = height * scale;
++                    // 解像度を上げてカクカク感を解消(高精細化。既定は3倍)。
++                    // ただし、ブラウザが作れるキャンバスの大きさを超えると空の画像になるため、大きな図は倍率を下げる。
++                    const drawScale = getSafeCanvasScale(width, height, scale);
++                    canvas.width = Math.max(1, Math.round(width * drawScale));
++                    canvas.height = Math.max(1, Math.round(height * drawScale));
+ 
+                     const ctx = canvas.getContext("2d");
+                     if (ctx) {
+                         ctx.fillStyle = "#ffffff";
+                         ctx.fillRect(0, 0, canvas.width, canvas.height);
+-                        ctx.scale(scale, scale);
++                        ctx.scale(drawScale, drawScale);
+                         ctx.drawImage(img, 0, 0, width, height);
+                         const pngDataUrl = canvas.toDataURL("image/png");
+-                        resolve({ pngDataUrl, width, height });
+-                        return;
++                        // キャンバスを作れなかったときは "data:," になる（画像として使えない）
++                        if (/^data:image\/png;base64,./.test(pngDataUrl)) {
++                            resolve({ pngDataUrl, width, height });
++                            return;
++                        }
++                        console.error("Canvas could not be exported for SVG:", width, height, drawScale);
+                     }
+                 } catch (e) {
+                     console.error("Canvas render error for SVG:", e);
+@@ -367,22 +389,20 @@ const findExcalidrawCachePath = async (file) => {
+         }
+     } catch (e) {}
+ 
++    // 索引に載っていないキャッシュ（画像一覧の `<hash>_<更新日時>_preview.png` など）を探す。
++    // 図の今の版（更新日時が同じ）のものだけを使う。古い版の画像を使うと、編集前の図が出力されるため。
+     const hashHex = getStringHashForExcalidrawCache(file.path);
++    const mtime = Number(file.stat?.mtime || 0);
+     try {
+         const listed = await app.vault.adapter.list(".excalidraw-cache");
+         const files = (listed?.files || [])
+             .filter((cacheFile) => {
+                 const name = normalizeVaultPath(cacheFile).split("/").pop() || "";
+-                return name.startsWith(`${hashHex}_`) && (name.endsWith(".png") || name.endsWith(".svg"));
++                const match = name.match(/^([^_]+)_(\d+)(?:_preview)?\.(png|svg)$/);
++                return !!match && match[1] === hashHex && Number(match[2]) === mtime;
+             })
+-            .sort((a, b) => {
+-                const getMtime = (cacheFile) => {
+-                    const name = normalizeVaultPath(cacheFile).split("/").pop() || "";
+-                    const match = name.match(/^[^_]+_(\d+)\.(?:png|svg)$/);
+-                    return match ? Number(match[1]) : 0;
+-                };
+-                return getMtime(b) - getMtime(a);
+-            });
++            // PNG をそのまま使える方を先にする
++            .sort((a, b) => Number(b.toLowerCase().endsWith(".png")) - Number(a.toLowerCase().endsWith(".png")));
+         return files[0] || null;
+     } catch (e) {
+         return null;
+@@ -456,6 +476,28 @@ const renderExcalidrawFileToPngDataUrl = async (targetFile) => {
+         const scale = 3;
+         const { exportSettings, loader } = createExcalidrawPngExportContext(ea);
+         const exportAttempts = [];
++
++        // 画像一覧（obsidian-excalidraw-cards）と同じく、フォントを埋め込んだ SVG を描かせてから PNG にする。
++        // createPNG（Obsidian の画面のフォントでキャンバスへ直接描く）は、会社の Windows で
++        // 日本語が化けた。画像一覧の SVG を経由する方法は、同じ端末でも正しく描けている。
++        if (typeof ea.createSVG === "function") {
++            try {
++                if (typeof ea.reset === "function") ea.reset();
++                const svgElement = await ea.createSVG(targetFile.path, true, exportSettings, loader, "light", 10);
++                const svgContent = svgElement?.outerHTML || "";
++                const rasterized = svgContent ? await rasterizeSvgContentToPngDataUrl(svgContent, scale) : null;
++                if (rasterized?.pngDataUrl) {
++                    const imageData = { src: rasterized.pngDataUrl, width: null, height: null };
++                    window._htmlExportExcalidrawRenderCache.set(renderCacheKey, imageData);
++                    return imageData;
++                }
++                exportAttempts.push(`createSVG: ${svgContent ? "PNG化に失敗" : "SVGが空"}`);
++            } catch (svgError) {
++                exportAttempts.push(`createSVG: ${svgError?.message || svgError}`);
++            }
++        }
++
++        // SVG を作れなかったときだけ、Excalidraw に PNG を直接描かせる
+         const exportMethodNames = ["craetePNGBase64", "createPNGBase64", "createPNG"];
+ 
+         for (const exportMethod of exportMethodNames) {
+@@ -467,6 +509,11 @@ const renderExcalidrawFileToPngDataUrl = async (targetFile) => {
+                 const rawResult = await ea[exportMethod](targetFile.path, scale, exportSettings, loader, "light", 10);
+                 const dataUrl = await normalizePngExportResultToDataUrl(rawResult);
+                 if (dataUrl) {
++                    // この方法は会社の Windows で日本語が化けたため、使ったことを知らせて確かめてもらう
++                    console.warn("Excalidraw の図を予備の方法（createPNG）で描きました:", targetFile.path, exportAttempts.join(" | "));
++                    if (typeof Notice === "function") {
++                        new Notice(`図「${targetFile.basename || targetFile.name}」は予備の方法で描きました。文字が化けていないか確かめてください。`, 10000);
++                    }
+                     const imageData = {
+                         src: dataUrl,
+                         width: null,
+@@ -1252,6 +1299,11 @@ tbody tr:nth-child(even) { background: #fafaf8; }
+ img, video, svg { display: inline-block; max-width: 100%; height: auto; margin: 0; vertical-align: middle; }
+ figure { margin: 1.2em 0; }
+ figcaption { color: var(--text-muted); font-size: .88em; text-align: center; }
++/* 図の名前（ノートの画面で画像の下に出しているキャプション）は、図の幅に合わせて図の真ん中に置く */
++[data-figure-name] { display: inline-flex; flex-direction: column; align-items: center; max-width: 100%; vertical-align: top; }
++/* 名前が図より長くても図の幅を広げない（幅 0 で並べてから、図の幅いっぱいに伸ばす） */
++.custom-figure-caption { display: block; width: 0; min-width: 100%; box-sizing: border-box; margin-top: .45em; color: var(--text-muted); font-size: .88em; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
++.custom-image-resizer-handle { display: none; }
+ hr { margin: 2em 0; border: 0; border-top: 1px solid var(--background-modifier-border); }
+ mark { padding: .05em .18em; background: #fff59a; }
+ /* コールアウトは種類ごとに色を分ける（MkDocs Material と同じ配色。種類は Obsidian の data-callout と別名） */
+@@ -1361,10 +1413,19 @@ const applyHtmlHeadingNumbers = (root) => {
+ };
+ 
+ class HtmlExportOptionsModal extends (SummaryModal || class {}) {
+-    constructor(app, callback) {
++    // allowSeparateImages: 「画像を分けて保存」を出すか（HTMLとして保存するときだけ。PDF と印刷では出さない）
++    constructor(app, callback, { allowSeparateImages = false } = {}) {
+         super(app);
+         this.callback = callback;
+         this.numberHeadings = false;
++        this.allowSeparateImages = allowSeparateImages;
++        this.separateImages = false;
++    }
++
++    getResult() {
++        return this.allowSeparateImages
++            ? { numberHeadings: this.numberHeadings, separateImages: this.separateImages }
++            : { numberHeadings: this.numberHeadings };
+     }
+ 
+     onOpen() {
+@@ -1381,6 +1442,17 @@ class HtmlExportOptionsModal extends (SummaryModal || class {}) {
+                     this.numberHeadings = value;
+                 }));
+ 
++        if (this.allowSeparateImages) {
++            new SummarySetting(contentEl)
++                .setName("画像を分けて保存")
++                .setDesc("画像をHTMLの中に入れず、HTMLと同じ場所の images フォルダへPNGなどのファイルとして保存し、HTMLからそのファイルを読み込みます。画像だけを差し替えたいときに使います（既定：オフ）")
++                .addToggle((toggle) => toggle
++                    .setValue(this.separateImages)
++                    .onChange((value) => {
++                        this.separateImages = value;
++                    }));
++        }
++
+         new SummarySetting(contentEl)
+             .addButton((btn) => btn
+                 .setButtonText("出力")
+@@ -1389,7 +1461,7 @@ class HtmlExportOptionsModal extends (SummaryModal || class {}) {
+                     const callback = this.callback;
+                     this.callback = null;
+                     this.close();
+-                    callback?.({ numberHeadings: this.numberHeadings });
++                    callback?.(this.getResult());
+                 }))
+             .addButton((btn) => btn
+                 .setButtonText("キャンセル")
+@@ -1450,10 +1522,10 @@ const askAiHtmlExportOptions = async () => {
+     return { selectedPrompts: ["11_common_prompt/common_prompt.md"] };
+ };
+ 
+-const askHtmlExportOptions = async () => {
++const askHtmlExportOptions = async ({ allowSeparateImages = false } = {}) => {
+     if (SummaryModal && SummarySetting) {
+         return new Promise((resolve) => {
+-            new HtmlExportOptionsModal(app, (result) => resolve(result)).open();
++            new HtmlExportOptionsModal(app, (result) => resolve(result), { allowSeparateImages }).open();
+         });
+     }
+ 
+@@ -1651,6 +1723,21 @@ const unlinkHtmlExportAnchor = (anchor) => {
+ // - 同じノートの見出しへのリンク: 見出しに id を付け、そこへ飛ぶリンクにする
+ // - 他のノート・ファイル・タグへのリンク、飛び先の見出しが無いリンク: リンクを外して文字だけ残す
+ // - URL（https:// など）と、ページ内の飛び先（脚注など）: そのまま
++// 図の名前（ノートの画面で画像の下に出す .custom-figure-caption）は <div> だが、出力では段落 <p> の中の
++// 図の箱（<span data-figure-name>）に入っている。ブラウザは <p> の中の <div> の手前で段落を閉じるため、
++// そのままでは名前が図の箱の外へ出て、段落の幅で左に寄る。<span> にして図の箱の中に残す。
++// リサイズのつまみ（.custom-image-resizer-handle）は出力では使わないので取り除く。
++const normalizeHtmlExportFigureCaptions = (root, createElement = (tagName) => document.createElement(tagName)) => {
++    for (const handle of Array.from(root.querySelectorAll(".custom-image-resizer-handle"))) handle.remove();
++    for (const caption of Array.from(root.querySelectorAll(".custom-figure-caption"))) {
++        if (String(caption.tagName).toUpperCase() === "SPAN") continue;
++        const span = createElement("span");
++        span.className = caption.className;
++        span.textContent = caption.textContent;
++        caption.replaceWith(span);
++    }
++};
++
+ const adjustHtmlExportLinks = (root, options = {}) => {
+     if (!root || typeof root.querySelectorAll !== "function") return;
+     const isSamePageLinkpath = typeof options.isSamePageLinkpath === "function"
+@@ -2200,6 +2287,11 @@ const generateExportHtml = async (file, exportTarget = "ai", exportOptions = {})
+         // 現在のbodyのクラス名を取得して引き継ぐ (テーマ、フォント、モードの反映のため)
+         let bodyClass = toLightThemeBodyClass(document.body ? document.body.className : "");
+         if (isHumanExport) {
++            // 図の名前は普段、DOM の変更を見張る処理（03_figure_embeds.js）が少し遅れて付ける。
++            // その処理は変更が続くあいだ先送りされるため、待たずにここで付ける（名前の無いまま書き出さない）。
++            // ここから書き出しまでは await が無く、見張る処理が割り込んで作り直すことはない。
++            if (typeof applyFigureEmbedDisplayNames === "function") applyFigureEmbedDisplayNames(tempDiv);
++            normalizeHtmlExportFigureCaptions(tempDiv);
+             // 見出し番号を足す前に行う（番号を足すと見出しの文字がリンクと合わなくなるため）。
+             adjustHtmlExportLinks(tempDiv, {
+                 isSamePageLinkpath: (linkpath) => {
+@@ -2536,6 +2628,69 @@ const exportPdf = async (file, exportOptions = {}) => {
+     }
+ };
+ 
++// 「画像を分けて保存」で画像を書き出すフォルダ（HTML と同じ場所）
++const HTML_EXPORT_IMAGE_DIR = "images";
++
++const HTML_EXPORT_IMAGE_EXTENSIONS = {
++    png: "png", jpeg: "jpg", jpg: "jpg", gif: "gif", webp: "webp", bmp: "bmp", "svg+xml": "svg", avif: "avif",
++};
++
++const decodeHtmlAttributeValue = (value) => String(value ?? "")
++    .replace(/&quot;/g, "\"")
++    .replace(/&#39;/g, "'")
++    .replace(/&lt;/g, "<")
++    .replace(/&gt;/g, ">")
++    .replace(/&amp;/g, "&");
++
++/**
++ * 「画像を分けて保存」: HTML に埋め込んだ画像（<img src="data:image/...;base64,...">）を取り出し、
++ * src を images フォルダのファイル（images/<名前>.png など）に書き換える。
++ * - 名前は、Excalidraw の図なら図の名前（data-excalidraw-source）、ほかは alt（画像のファイル名）から付ける。
++ *   名前の無い画像は image_01 など。同じ名前が続いたら _2, _3 … を付ける。
++ * - 中身が同じ画像（同じ画像を何度も埋め込んだもの）は、1つのファイルにまとめる（差し替えが1か所で済む）。
++ * - ファイル名に使えない文字は _ にする。拡張子は画像の種類から決める（元の拡張子は外す）。
++ * - 戻り値: { html, images: [{ fileName, base64, mimeType }] }（ファイルへは書かない）
++ **/
++const splitHtmlExportImages = (html) => {
++    const images = [];
++    const usedNames = new Set();
++    const fileNameByData = new Map();
++    let unnamedCount = 0;
++    const readAttr = (tag, name) => {
++        const match = tag.match(new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, "i"));
++        return match ? decodeHtmlAttributeValue(match[1] ?? match[2]) : "";
++    };
++    const output = String(html ?? "").replace(/<img\b[^>]*>/gi, (tag) => {
++        const srcMatch = tag.match(/(\ssrc\s*=\s*)(["'])data:image\/([a-z0-9.+-]+);base64,([^"']+)\2/i);
++        if (!srcMatch) return tag;
++        const mimeSubtype = srcMatch[3].toLowerCase();
++        const relativeSrcOf = (name) => `${HTML_EXPORT_IMAGE_DIR}/${encodeURIComponent(name)}`;
++        const dataKey = `${mimeSubtype};${srcMatch[4]}`;
++        if (fileNameByData.has(dataKey)) {
++            return tag.replace(srcMatch[0], `${srcMatch[1]}"${relativeSrcOf(fileNameByData.get(dataKey))}"`);
++        }
++        const extension = HTML_EXPORT_IMAGE_EXTENSIONS[mimeSubtype] || "png";
++
++        const excalidrawSource = readAttr(tag, "data-excalidraw-source");
++        let baseName = excalidrawSource
++            ? excalidrawSource.split("/").pop().replace(/\.md$/i, "").replace(/\.excalidraw$/i, "")
++            : readAttr(tag, "alt").split("/").pop().replace(/\.(?:png|jpe?g|gif|webp|bmp|svg|avif|tiff?)$/i, "");
++        baseName = baseName.replace(/[\\/:*?"<>|#%\u0000-\u001f]/g, "_").replace(/\s+/g, " ").trim().slice(0, 100);
++        if (!baseName || /^_+$/.test(baseName)) {
++            unnamedCount += 1;
++            baseName = `image_${String(unnamedCount).padStart(2, "0")}`;
++        }
++        let fileName = `${baseName}.${extension}`;
++        for (let n = 2; usedNames.has(fileName.toLowerCase()); n++) fileName = `${baseName}_${n}.${extension}`;
++        usedNames.add(fileName.toLowerCase());
++        fileNameByData.set(dataKey, fileName);
++
++        images.push({ fileName, base64: srcMatch[4], mimeType: `image/${mimeSubtype}` });
++        return tag.replace(srcMatch[0], `${srcMatch[1]}"${relativeSrcOf(fileName)}"`);
++    });
++    return { html: output, images };
++};
++
+ /**
+  * 対象のマークダウンファイルをHTMLとして出力する
+  * - 一時的な要素にレンダリング後、Pandoc向けにHTMLを変換
+@@ -2543,6 +2698,7 @@ const exportPdf = async (file, exportOptions = {}) => {
+  * - 人間用は、保存ダイアログで保存したら既定のブラウザで開く
+  * - exportOptions.savePath が指定された場合は、指定先へ自動保存（ブラウザでは開かない）
+  * - 人間用で exportOptions.skipPromptSelection が true の場合は、設定モーダルを出さず、見出し番号なしで出力
++ * - 人間用で「画像を分けて保存」（separateImages）をオンにすると、画像を HTML の隣の images フォルダへ書き出す
+  *   （コマンド custom:export-html-human から、API など無人の実行をするため）
+  **/
+ const exportHtml = async (file, exportTarget = "ai", exportOptions = {}) => {
+@@ -2554,7 +2710,9 @@ const exportHtml = async (file, exportTarget = "ai", exportOptions = {}) => {
+         : null;
+     let humanExportOptions = { numberHeadings: false };
+     if (isHumanExport) {
+-        humanExportOptions = exportOptions?.skipPromptSelection ? { numberHeadings: false } : await askHtmlExportOptions();
++        humanExportOptions = exportOptions?.skipPromptSelection
++            ? { numberHeadings: false }
++            : await askHtmlExportOptions({ allowSeparateImages: true });
+         if (!humanExportOptions) return null;
+     } else if (selectedPrompts === null && !exportOptions?.skipPromptSelection) {
+         const aiExportOptions = await askAiHtmlExportOptions();
+@@ -2632,7 +2790,21 @@ const exportHtml = async (file, exportTarget = "ai", exportOptions = {}) => {
+ 
+         if (savePath) {
+             fs.mkdirSync(path.dirname(savePath), { recursive: true });
+-            fs.writeFileSync(savePath, fullHtml, "utf8");
++            const separateImages = isHumanExport
++                && (humanExportOptions?.separateImages === true || exportOptions?.separateImages === true);
++            if (separateImages) {
++                // 画像を HTML の隣の images フォルダへファイルとして書き出し、HTML からはそのファイルを読む
++                const { html, images } = splitHtmlExportImages(fullHtml);
++                const imageDir = path.join(path.dirname(savePath), HTML_EXPORT_IMAGE_DIR);
++                if (images.length > 0) fs.mkdirSync(imageDir, { recursive: true });
++                for (const image of images) {
++                    fs.writeFileSync(path.join(imageDir, image.fileName), Buffer.from(image.base64, "base64"));
++                }
++                fs.writeFileSync(savePath, html, "utf8");
++                new NoticeClass(`画像 ${images.length} 枚を ${imageDir} に保存しました`);
++            } else {
++                fs.writeFileSync(savePath, fullHtml, "utf8");
++            }
+             if (!isHumanExport) {
+                 await postProcessSavedHtmlExport(savePath);
+             }
+diff --git a/docs/custom_commands_reference.md b/docs/custom_commands_reference.md
+index f77653346c9b53b99b72fe8cfe276b2373e9aa6a..098763c4a1c163d1b1af72a7a277b2372cb6c5d9 100644
+--- a/docs/custom_commands_reference.md
++++ b/docs/custom_commands_reference.md
+@@ -108,7 +108,7 @@ Excalidraw / MarkMind の編集中は、次のコマンドを実行しないよ
+ | メニュー | 項目 | 対象 | 仕様書 |
+ | :--- | :--- | :--- | :--- |
+ | ファイルメニュー（`file-menu`） | 今日のフォルダに移動 | すべてのファイル | [move_to_today_folder_spec.md](move_to_today_folder_spec.md) |
+-| | Webアプリで開く | `.excalidraw.md`（`http://localhost:3001/?filepath=…`） | [../AGENTS.md](../AGENTS.md) |
++| | Webアプリで開く | `.excalidraw.md`（`http://localhost:3001/?filepath=…`） | [plugin_specs.md](plugin_specs.md) |
+ | | Webアプリで編集 | Excalidraw のデータを持つ通常の `.md` | 本書 6章 |
+ | | フォルダを開く / VS Codeで開く | Markdown | [open_folder_and_vscode_menu_spec.md](open_folder_and_vscode_menu_spec.md) |
+ | | ganttに追加 | Markdown（非Excalidraw） | [gantt_add_task_spec.md](gantt_add_task_spec.md) |
+diff --git a/docs/markmind_features_spec.md b/docs/markmind_features_spec.md
+index c3fe318328b4257f45858f558e65e40bf3a447a6..8288460dc16a880c59ba97836091d835e59fc8e5 100644
+--- a/docs/markmind_features_spec.md
++++ b/docs/markmind_features_spec.md
+@@ -92,7 +92,7 @@ Obsidian におけるマインドマッププラグイン「MarkMind」本体は
+ ## 3. 影響ファイル
+ 1. [RegisterCustomCommands.md](file:///Users/mine/000_work/obsidian-dagnetz/00_templates/RegisterCustomCommands.md)（全ての機能を集約）
+ 2. [claude.md](file:///Users/mine/000_work/obsidian-dagnetz/claude.md)
+-3. [AGENTS.md](file:///Users/mine/000_work/obsidian-dagnetz/AGENTS.md)
++3. [plugin_specs.md](file:///Users/mine/000_work/obsidian-dagnetz/docs/plugin_specs.md)
+ 4. [scratch/test_markmind_features.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_markmind_features.js)
+ 5. [scratch/test_markmind_ime_enter.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_markmind_ime_enter.js)（IME 確定の Enter）
+ ※ `.obsidian/plugins/obsidian-markmind/main.js` は一切変更していません。
+diff --git a/docs/pdf_export_from_html.md b/docs/pdf_export_from_html.md
+index e68d4362c0afb5f15542c59246cc480b412c86d8..4248cf85438dae6b3c450323e35901d0022fbf14 100644
+--- a/docs/pdf_export_from_html.md
++++ b/docs/pdf_export_from_html.md
+@@ -46,7 +46,11 @@ Markdownノート（`りんご.md` などのExcalidraw埋め込みや画像、Ma
+ 2. **HTML生成 (`generateExportHtml`)**:
+    - ノート本文から `# Excalidraw Data` などの内部データセクションを除去。
+    - WebP の画像は人間用 HTML と PDF ではそのまま埋め込み、AI用 HTML では PNG にする（`convertWebpImagesToPng`。pandoc で Word へ変換するため）。
+-   - `replaceExcalidrawEmbedsForHtmlExport` により、同名Excalidraw埋め込み（`![[りんご|75]]`）等をPNG画像として置換。図を読めない、リンク先が無いなどで出力できない図は、その位置に「図を出力できませんでした」の案内を残し、通知を出して出力を続ける（図1枚のために出力全体を止めない）。
++   - `replaceExcalidrawEmbedsForHtmlExport` により、同名Excalidraw埋め込み（`![[りんご|75]]`）等をPNG画像として置換。画像一覧（obsidian-excalidraw-cards）のキャッシュ（`.excalidraw-cache`）にその図の今の版の PNG があれば、それをそのまま使う。無ければ、画像一覧と同じく、フォントを埋め込んだ SVG を Excalidraw に描かせて（`ea.createSVG`）から PNG にする（`rasterizeSvgContentToPngDataUrl`、3倍の解像度、白背景）。Excalidraw に PNG を直接描かせる `createPNG` は、SVG を作れなかったときだけ使う（会社の Windows で、`createPNG` の図だけ日本語が化け、同じ端末の画像一覧は正しく描けていたため。使ったときは、その図の名前を通知して確かめてもらう）。
++     - キャッシュは、図の今の版（更新日時が同じ `<hash>_<更新日時>_preview.png`）だけを使う。索引（`index.json`）に載っていないキャッシュも探すが、古い版の画像は使わない（編集前の図を出力しないため。`findExcalidrawCachePath`）。
++     - SVG を PNG にするときは、SVG に `lang="ja"` を付ける。図のフォント（Cascadia など）に無い日本語の文字は端末のフォントで描かれ、言語の指定が無いと漢字のフォントを端末の言語設定から選ぶ（中国語のフォントになりうる）ため。
++     - ブラウザのキャンバスには大きさの上限があり、超えると空の画像（`data:,`）になる。大きな図は辺 16000px・面積 1億px に収まるまで倍率を下げ（`getSafeCanvasScale`）、それでも空なら失敗として扱う。
++     - 図を読めない、リンク先が無いなどで出力できない図は、その位置に「図を出力できませんでした」の案内を残し、通知を出して出力を続ける（図1枚のために出力全体を止めない）。
+    - `replaceCadCodeBlocksForHtmlExport` により、CAD Viewer のコードブロック（` ```step ` / ` ```cad `）を白背景のPNG画像へ置き換え（注記、座標軸を含む。[cad_viewer_spec.md](cad_viewer_spec.md) の 2.19）。
+    - 一時DOM（`tempDiv`）に `MarkdownRenderer.render` で描画し、非同期レンダリング完了を待機。
+    - `convertPreviewHtmlForPandoc` で画像をBase64 Data URLへ変換し、MathJax数式をパース。
+@@ -59,7 +63,9 @@ Markdownノート（`りんご.md` などのExcalidraw埋め込みや画像、Ma
+      - **右上の検索窓**（`setupHtmlExportSearch`）: そのページの中だけを探す。日本語を単語に分けず、文字の並びをそのまま探す（単語の途中の文字でも見つかる）。全角と半角・大文字と小文字・ひらがなとカタカナをそろえて比べる（`htmlExportSearchNormalizeWithMap`）。空白で区切った語は、すべて同じ章（見出しから次の見出しまで）にあるものだけを出し、見出しに語がある章を先に並べる（`htmlExportSearchSections`）。結果は章ごとに見出しと抜粋を出し、クリックか Enter でその章へ飛ぶ。本文の一致した箇所も色付けする（CSS Custom Highlight API。DOM は変えない）。`/` か `Ctrl/Cmd+K` で検索窓へ、`↑` `↓` で結果を選び、`Esc` で閉じる（2回で消す）。打ち間違いの許容、言い換え、関連度の順位付けはしない。
+      - **スクリプト**: ノートに書かれた `<script>` は今までどおり取り除き（`sanitizeHtmlExportForHuman`）、その後に出力の仕組みが用意した検索・目次の処理だけを `</body>` の前へ入れる（`appendHtmlExportPageScript`）。処理は関数のソースをそのまま書き出す（`buildHtmlExportPageScript`）ため、その関数は外側の変数を使わない。外部のファイルを読まないので、オフラインでも `file://` で開いても動く。スクリプトを止める環境では検索窓を出さない（目次は動く）。
+    - 人間用印刷CSS（`getHumanHtmlExportCss`）と `@page { size: A4; margin: 15mm; }` スタイルを適用。
++   - **画像を分けて保存（「HTMLで出力(人間用)」だけ。既定はオフ）**: 出力前のポップアップのトグルをオンにすると、HTML に埋め込んだ画像（`data:image/...;base64`）を、保存した HTML と同じ場所の `images` フォルダへファイルとして書き出し、HTML の `<img src>` を `images/<名前>.png` などに書き換える（`splitHtmlExportImages`）。名前は、Excalidraw の図なら図の名前、ほかは画像のファイル名（`alt`）で、無ければ `image_01` など、重なれば `_2` を付ける。中身が同じ画像は1つのファイルにまとめる。画像だけを差し替えたいときに使う（同じ名前のファイルで上書きすれば、HTML はそのまま差し替えた画像を表示する）。PDF と印刷のポップアップには出さない。
+    - **保存後に開く（「HTMLで出力(人間用)」）**: 保存ダイアログで保存したら、そのまま既定のブラウザで開く（`openHtmlFileInDefaultBrowser`。「印刷」と同じ）。開けなければパスを添えて通知する。AI用と、保存先を指定した無人の実行（`custom:export-html-human`）では開かない。
++   - **図の名前**（人間用 HTML・PDF・印刷）: ノートの画面で画像の下に出している名前（`.custom-figure-caption`）を、図の幅に合わせて図の真ん中に置く。名前が図より長くても図の幅は広げず、折り返す。名前は画面では `<div>` だが、段落 `<p>` の中にあるため、ブラウザがそこで段落を閉じて名前を図の外へ出してしまう。そこで出力では `<span>` にして図の箱（`[data-figure-name]`）の中に残す（`normalizeHtmlExportFigureCaptions`）。名前は、ノートの画面で DOM の変更を見張って付ける処理（`03_figure_embeds.js`）に任せず、書き出す直前に `applyFigureEmbedDisplayNames(tempDiv)` で付ける（見張る処理は少し遅れて動き、Obsidian の中で変更が続くと先送りされるため、名前の無いまま書き出すことがあった）。リサイズのつまみ（`.custom-image-resizer-handle`）は出さない。
+    - **コールアウトの色**: 種類（Obsidian の `data-callout`）ごとに、MkDocs Material と同じ配色で色を分ける。note（と知らない種類）は青、abstract は水色、info は青緑、tip は緑がかった青緑、success は緑、question は黄緑、warning はオレンジ、failure は薄い赤、danger は赤、bug は赤紫、example は紫、quote は灰色。別名（`caution` → warning、`error` → danger、`important` → tip など）も同じ色にする。色は `--callout-rgb` の1か所で決め、左の線・枠・背景・見出しの帯・アイコンがその色を使う（見出しの文字は読みやすいよう濃い灰色のまま）。PDF と印刷でも同じ色。
+ 3. **PDF変換 (`convertHtmlToPdf`)**:
+    - **最優先方式**: システム内の Google Chrome / Chromium / Edge のヘッドレス実行（`--headless --disable-gpu --no-pdf-header-footer --print-to-pdf=...`）を実行。独立したレンダリングエンジンにより、白紙化や画像の欠落なく100%確実に高品質なPDFを出力。
+@@ -77,9 +83,11 @@ Markdownノート（`りんご.md` などのExcalidraw埋め込みや画像、Ma
+ ## 3. 関連ファイル
+ - [RegisterCustomCommands.md](file:///Users/mine/000_work/obsidian-dagnetz/00_templates/RegisterCustomCommands.md)
+ - [claude.md](file:///Users/mine/000_work/obsidian-dagnetz/claude.md)
+-- [AGENTS.md](file:///Users/mine/000_work/obsidian-dagnetz/AGENTS.md)
++- [plugin_specs.md](file:///Users/mine/000_work/obsidian-dagnetz/docs/plugin_specs.md)
+ - [scratch/test_pdf_export.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_pdf_export.js)
+ - [scratch/test_html_export_links.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_html_export_links.js)（リンクの扱い）
+ - [scratch/test_html_export_toc_search.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_html_export_toc_search.js)（目次と検索窓）
+ - [scratch/test_html_export_callout_colors.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_html_export_callout_colors.js)（コールアウトの色）
++- [scratch/test_html_export_excalidraw_svg.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_html_export_excalidraw_svg.js)（Excalidraw の図を SVG 経由で PNG にする、図の名前の位置）
++- [scratch/diagnose_excalidraw_html_export.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/diagnose_excalidraw_html_export.js)（調査用。図の文字が化ける端末で、キャッシュ・`createPNG`・SVG 経由の3通りの画像を書き出して比べる）
+ - [scratch/test_html_export_open_browser.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_html_export_open_browser.js)（保存後にブラウザで開く）
+diff --git a/docs/plugin_specs.md b/docs/plugin_specs.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..3af0c65542a0f1fc9a6e1f6a19335209431ed952
+--- /dev/null
++++ b/docs/plugin_specs.md
+@@ -0,0 +1,326 @@
++# 仕様書: Open in Web App
++
++## 概要
++`.excalidraw.md` ファイルのタブコンテキストメニューに「Webアプリで開く」を追加する。
++
++## 詳細
++- **対象**: ファイル名が `.excalidraw.md` で終わるファイル。
++- **UI**: タブの右クリックメニュー（`file-menu`）。
++- **メニュー項目**: 「Webアプリで開く」。
++- **動作**: 選択すると、以下のURLをデフォルトブラウザで開く。
++    - `http://localhost:3001/?filepath={ファイルの絶対パス}`
++    - パス区切り文字 `/` を維持しつつ、各パスセグメントを `encodeURIComponent` でエンコードする。
++    - 絶対パスは `app.vault.adapter.basePath` とファイルパスを結合して取得。
++
++## 技術的要件
++- Templater スクリプトとして実装される `RegisterCustomCommands.md` に追加。
++- イベントリスナーの重複登録を防止するため、グローバル変数で管理する。
++- メニュー項目の追加後、DOM操作を行い項目を最上部に移動させる。
++
++## 仕様: ファイル削除時の添付ファイル一括削除
++### 概要
++ファイル削除時に、そのファイルに関連する添付ファイルも一緒に削除するかを選択できるモーダルを表示する。
++
++### トリガー
++1. **コンテキストメニュー**: サイドバーのアイテムを右クリック -> "Delete"。
++2. **ショートカットキー**: サイドバーのアイテムを選択中に `Delete` キーを押下。
++
++### 動作
++1. 削除対象のファイルに関連する添付ファイル（画像、PDF、その他非Markdownファイル）を検出する。
++2. **添付ファイルがない場合**:
++   - 通常の確認ダイアログ（`window.confirm`）を表示し、削除実行。
++3. **添付ファイルがある場合**:
++   - カスタムモーダルを表示。
++   - メインファイルの削除確認。
++   - 検出された添付ファイルのリストをチェックボックス付きで表示。
++   - 「すべて選択（Select All）」オプションを提供。
++   - 「削除（Delete）」ボタンで、選択された全ファイルをゴミ箱に移動。
++
++### 技術的要件
++- 添付ファイルの判定ロジックは既存の `refreshRelatedFiles` のロジックを流用・共通化する。
++- 削除は `app.vault.trash(file, true)` (system trash) を使用する。
++
++## 仕様: Sidebar Explorer
++
++### 今日のフォルダ表示
++- **概要**: サイドバーエクスプローラーの「今日のフォルダ」セクションにおいて、すべてのファイルを表示する。
++- **詳細**:
++    - **対象**: 「今日のフォルダ」セクション。
++    - **変更前**: `.md`拡張子のファイルのみ表示。
++    - **変更後**: 拡張子によるフィルタリングを行わず、フォルダ内のすべてのファイル（`.md`以外も含む）を表示する。
++    - **備考**: 「最近開いたファイル」「関連ファイル」セクションなどは、既存のフィルタリングロジック（Markdownファイルまたは特定の関連ファイル）を維持する。
++
++### 関連ファイルの表示 (Excalidraw対応)
++- **概要**: 関連ファイル（Linked from）に、Excalidrawファイルに対するバックリンクも表示できるようにする。
++- **詳細**:
++    - **対象**: `refreshRelatedFiles` 内の Linked from（バックリンク）取得処理
++    - **動作**: 通常の `resolvedLinks` だけでなく、`unresolvedLinks` に含まれるリンクについても、`getFirstLinkpathDest` で現在のファイルに解決されるものであればバックリンクとして扱う。これにより `[[xxx.excalidraw]]` のような拡張子省略リンクが正しく認識される。
++
++### ショートカットキーによるリネーム
++- **概要**: 選択中のファイルに対して、キーボードショートカットでリネームを開始できる。
++- **トリガー**: `R` キー（または `r`）を押下。
++- **条件**:
++    - サイドバー内のアイテムが選択状態であること。
++    - 修飾キー（Ctrl, Cmd, Shift, Alt）が押されていないこと。
++    - 入力フィールド（検索ボックスなど）にフォーカスがないこと。
++- **動作**: Obsidian 標準のファイル名変更ダイアログを表示する。
++
++### 開いているファイルのフォルダ表示と重要度TOP8の非表示
++- **概要**: 開いている関連ファイルセクションの直下に「開いているファイルのフォルダ」セクションを追加し、現在開いているファイルの親フォルダ直下にある全ファイルを表示する。また、タイトルクリックでFinder/Explorerを起動し、「重要度TOP8」セクションは非表示とする。
++- **詳細**:
++    - **配置**: 「開いている関連ファイル」の直下。
++    - **タイトル**: `開いているファイルのフォルダ`（アイコン: `📁`）。
++    - **OS連携**: タイトルをクリックすると、アクティブファイルの親フォルダパスを元に OS コマンド（macOS: `open`, Windows: `explorer.exe`）を実行してファイルマネージャーで開く。
++    - **表示ファイル**: 拡張子による除外を行わず、フォルダ内の全ファイル（Markdown、画像、PDF、Canvas等）を更新日時降順で一覧表示。
++    - **検索**: ヘッダーの検索ボックスにより、全角・半角スペース区切りのキーワードでAND絞り込みが可能。
++    - **重要度TOP8**: サイドバーの画面スペース有効活用のため非表示（生成除外）とする。
++
++### フォルダヘッダータイトルの右クリックメニュー（web アプリで開く、codeで開く）
++- **概要**: フォルダをFinder/Explorerで開く各セクションヘッダータイトル（今日のフォルダ、開いているファイルのフォルダ、データビュー、common prompt）に右クリックメニューを追加し、「web アプリで開く」「codeで開く」を選択可能にする。
++- **詳細**:
++    - **対象**: 今日のフォルダ、開いているファイルのフォルダ、データビュー、common prompt の各セクションタイトル（`titleWrapper`）。
++    - **「web アプリで開く」**:
++        - URL: `http://localhost:8001/?path={エンコードされたフォルダ絶対パス}`
++        - 規定ブラウザで新規タブとして開く。
++    - **「codeで開く」**:
++        - 設定パス（`vscodeExecutablePath`）またはプラットフォーム別コマンド（macOS: `open -a "Visual Studio Code"`, Windows: `Code.exe`/`code`）で対象フォルダをVS Codeで開く。
++    - **エラー時**: フォルダ未作成またはファイル未選択時は Notice を表示。
++
++## 仕様: クリップボードからのリンク貼り付け時の表示テキスト編集
++
++### 概要
++クリップボードからURLやファイルパスをMarkdownリンクとして貼り付ける際、リンクの表示テキスト（`linkText`）をユーザーがダイアログで編集または入力できるようにします。
++
++### トリガー
++- クリップボードにURLまたはパスが格納された状態で、スラッシュコマンド（テンプレート `From Clipboard`）を実行。
++
++### 動作
++1. 貼り付け対象のURL/パスから、デフォルトの表示テキスト（URLの末尾セグメントやドメイン名）を自動抽出します。
++2. 画面上に `tp.system.prompt` による入力ダイアログを表示し、自動抽出したデフォルトの表示テキストを初期入力値として提示します。
++   - **UX改善**: ダイアログが表示された際、初期入力値がテキストボックス内で自動的に全選択（`select()`）された状態にします。これにより、既存の文字を消す手間なくそのまま上書き入力が可能です。
++3. ユーザーがテキストを入力して確定した場合、そのテキストをリンク表示名としてMarkdownリンクを生成します。
++4. ユーザーがテキストを入力しなかった（空文字）場合、またはダイアログをキャンセルした場合は、フォールバックとして自動抽出したデフォルトの表示テキストを使用してMarkdownリンクを生成します。
++
++### 技術的要件
++- `00_templates/From Clipboard.md` 内の `buildMarkdownLink` を非同期化（`async/await` 化）し、`await tp.system.prompt` を使用して入力を取得します。
++
++## 仕様: タグの右クリックメニューからのMOC作成
++
++### 概要
++タグペインやノート内でタグを右クリックした際に表示されるメニュー（`tag-menu`）に「MOCを作成」を追加する。これを選択すると、そのタグが含まれるファイルへのWikilink一覧を記載したMOC（Map of Content）ファイルをVaultルート直下に自動生成して新規タブで開く。
++
++### 動作
++1. **メニュー項目**:
++   - タグの右クリックメニュー（`tag-menu`）に「MOCを作成」を追加。
++2. **処理の流れ**:
++   - Vault内の全マークダウンファイル（非Excalidraw）を対象に、フロントマターや本文中のタグキャッシュをスキャンして該当タグを含むファイルを抽出。
++   - `MOC-[タグ名].md`（例：`MOC-todo.md`。タグ名から `#` は除去する）というファイル名でVaultルート直下にファイルを新規作成または上書き（modify）。
++   - ネストタグやWindows禁止文字を含むタグ名は、安全なファイル名になるよう `/` や `:*?"<>|#[]` などを `_` に置換する（例：`#project/foo` → `MOC-project_foo.md`）。
++   - 作成したファイルを新規タブで表示。
++
++### 技術的要件
++- `00_templates/RegisterCustomCommands.md` 内に実装する。
++- 重複登録を防ぐため `window._customTagMenuListener` にてリスナーを管理する。
++
++## 仕様: 画像の右クリックメニューからのdrawioで編集
++
++### 概要
++画像ファイルを右クリックした際のコンテキストメニュー（マークダウン内の画像および画像ファイルプレビュー画面等）において、対象ファイル名が `.drawio.svg`、`.dio.svg`、または `.drawio` の場合に、「drawioで編集」というメニュー項目を追加し、クリックされた際に drawio エディタビューで編集を開始する。
++
++### 動作
++1. **対象**: ファイル名が `.drawio.svg`、`.dio.svg`、または `.drawio` で終わる画像ファイル。
++2. **メニュー項目**: 「drawioで編集」（アイコンは "shapes"）。
++3. **クリック時の動作**:
++   - `app.workspace.trigger("drawio:edit-diagram", file)` を発火させ、drawio エディタで対象ファイルを開く。
++4. **表示位置**:
++   - 右クリックメニューのカスタム項目（削除や共通画像フォルダへ移動など）の中で最上部付近に prepend して並び替える。
++
++### 技術的要件
++- `00_templates/RegisterCustomCommands.md` 内の `addClipboardImageMenuItems(menu, file)` に実装。
++- メニューが表示されたときに `prepend` で最上部に並び替えるロジックを `handleMarkdownImageContextMenu` および `handleFileMenu` 内に追記。
++
++## 仕様: タグの右クリックメニューからのタグ一括置換（結合・リネーム）
++
++### 概要
++タグペインやノート内でタグを右クリックした際に表示されるメニュー（`tag-menu`）に「一括変換」を追加する。これを選択すると、プロンプトにより新しいタグ名の入力を促し、Vault内の全マークダウンファイル（非Excalidraw）を対象に、そのタグを一括して置換（結合・リネーム）する。
++
++### 動作
++1. **メニュー項目**:
++   - タグの右クリックメニュー（`tag-menu`）に「一括変換」を追加。
++2. **処理の流れ**:
++   - 右クリックされた元のタグ名（例：`todo`。`#` は除去する）を特定する。
++   - 「一括変換」を選択すると、`tp.system.prompt`（または同等のダイアログ）を表示して、置換先の新しいタグ名を入力させる。
++   - ユーザーがキャンセル、または空の文字列を入力した場合は処理を終了。
++   - 入力されたタグ名から `#` は除去して統一する。
++   - Vault内の全マークダウンファイル（非Excalidraw）を対象に、そのタグを含むファイルを `getFilesWithTag` で抽出する。
++   - 抽出された各ファイルに対し、以下の置換処理を適用して保存する：
++     - **インラインタグの置換**: `metadataCache` からタグの position を取得し、本文中の `#旧タグ名` を `#新タグ名` に置換する。
++     - **フロントマター（YAML）の置換**: `app.fileManager.processFrontMatter` を用い、`tags` プロパティ（文字列または配列）に含まれる旧タグ名を新タグ名に置換する。配列内で新タグ名が重複した場合は重複排除する。
++3. **技術的要件**:
++   - `00_templates/RegisterCustomCommands.md` 内に実装する。
++   - `handleTagMenu` 内で「一括変換」メニュー項目を追加し、置換ロジックをキックする。
++
++## 仕様: Excalidraw埋め込みダブルクリック時のExcalidrawビュー切り替え
++
++### 概要
++Markdownノート内に埋め込まれたノート自身と同名のExcalidraw埋め込み（例: `りんご.md` 内の `![[りんご|75]]`）をダブルクリックした際、`Excalidraw: Toggle between Excalidraw and Markdown mode` コマンドを実行し、現在のタブを Excalidraw ビューに切り替える。
++
++### 動作
++1. **対象条件**:
++   - 開いている Markdown ファイル自身（`activeFile`）と同名の埋め込みファイルであること（`file.path === activeFile.path` または `file.basename === activeFile.basename`）。
++   - ファイルのフロントマターに `excalidraw-plugin: parsed` が設定されていること。
++2. **ダブルクリック時の処理**:
++   - ダブルクリック時にイベント伝播とデフォルトのリンク遷移動作をブロック（`preventDefault`, `stopPropagation`, `stopImmediatePropagation`）。
++   - `app.commands.executeCommandById("obsidian-excalidraw-plugin:toggle-excalidraw-view")` を非同期で実行し、現在のタブを Excalidraw ビューへ切り替える。
++3. **技術的要件**:
++   - `00_templates/RegisterCustomCommands.md` の `handleMarkdownImageDblClick` および `handleMarkdownImageMouseDown` に実装する。
++
++## 仕様: HTML人間用をベースとした右クリックからのPDF出力
++
++### 概要
++Markdownファイル（`りんご.md` などのExcalidraw埋め込みや画像を含むファイル）の右クリックメニューから、人間用HTMLの生成パイプラインを利用してPDFを出力する。
++
++### 動作
++1. **メニュー項目**:
++   - ファイル右クリックメニュー（`file-menu`）およびエディタ右クリックメニュー（`editor-menu`）に「PDFで出力(人間用)」（アイコン: `file-text`）を追加。
++2. **処理の流れ**:
++   - 見出し番号付与等の設定プロンプト（`askHtmlExportOptions`）を表示。
++   - `generateExportHtml(file, "human", options)` により、ExcalidrawのPNG置換、画像のBase64インライン化、印刷用CSS（`@page { size: A4; margin: 15mm; }`）が適用された人間用HTMLを生成。
++   - `convertHtmlToPdf(fullHtml, savePath)` により、Electron `BrowserWindow.webContents.printToPDF`（またはChrome headless）でPDFファイルを生成。
++   - 保存ダイアログを表示（デフォルト: `temp/[ファイル名].pdf`）。
++   - 保存完了後、パスをクリップボードにコピーし、Notice通知を表示。
++3. **技術的要件**:
++   - `00_templates/RegisterCustomCommands.md` 内に実装する。
++
++## 仕様: MarkMind プラグイン機能拡張・不具合解消（非侵襲実装）
++
++### 概要
++MarkMind プラグイン本体には一切変更を加えずに、`00_templates/RegisterCustomCommands.md` 側で外側からイベントリスナー・コマンド登録・モンキーパッチを行い、マインドマップの操作性向上および Excalidraw との競合解消を実現する。
++
++### 動作
++1. **Option + M (Alt + M) での有効化・トグル切り替え**:
++   - `Option+M`（Win/Linux: `Alt+M`）を押下した際、現在開いているノートのフロントマターに `mindmap-plugin` がなければ `mindmap-plugin: basic` を自動付与し、マインドマップ画面へ切り替える。
++   - 既にマインドマップ画面が開いている場合は Markdown 画面へ戻す（トグル動作）。
++2. **マインドマップアクティブ時の Delete キー制御**:
++   - マインドマップ編集中（ノード選択中など）に Delete キーを押した際、`RegisterCustomCommands.md` のファイル削除コマンド（`custom:delete-active-file`）を抑止し、MarkMind 内部のノード削除処理へキーイベントを通過させる。
++3. **ホイール中ボタンによる掴んで移動（パン操作）**:
++   - マウスホイールの中ボタン（中央ボタン、`button === 1`）を押し込みながらドラッグすることで、Basic モード（SVG）および Rich モード（HTML）の双方でキャンバス全体を掴んで移動（パン操作）可能にする。ブラウザ既定の中クリックオートスクロールは抑止する。
++4. **Excalidraw 埋め込み時の競合解消（二重描画防止）**:
++   - `![[りんご|75]]` などのノート埋め込みにおいて、フロントマターに `excalidraw-plugin` が設定されている、または `.excalidraw.md` である場合、MarkMind 側の埋め込み変換プロセッサをスキップし、Excalidraw のみ正常に描画させる。
++5. **Excalidraw データのマインドマップ非表示と保護**:
++   - Excalidraw データを持つノートをマインドマップ表示する際、`# Excalidraw Data` 等の作図データセクションがマインドマップノードとして表示されないよう描画テキスト（`getMdText`）から除外する。
++   - 同時にファイル読込時（`setViewData`）に Excalidraw データを退避し、マインドマップ保存時（`mindMapChange`）に末尾へ安全に復元・維持することで、作図データの破損・消失を防止する。
++
++### 技術的要件
++- プラグイン本体（`.obsidian/plugins/obsidian-markmind/main.js`）は直接編集せず、すべて `00_templates/RegisterCustomCommands.md` 内に集約して実装する。
++
++## 仕様: 左右両サイドバーの表示非表示トグル（Option + B）
++
++### 概要
++マインドマップの描画や作図、ノート執筆時に画面領域を最大限に確保するため、`Option + B`（Win/Linux: `Alt + B`）キーによって左右両方のサイドバーを一括で開閉（トグル）できるようにする。
++
++### 動作
++1. **トリガー**:
++   - ショートカットキー: `Option + B`（Mac） / `Alt + B`（Win/Linux）。
++   - Macの特殊文字（`∫`）や `e.code === "KeyB"` に対応。
++   - コマンド: `custom:toggle-both-sidebars`（「左右両方のサイドバー表示/非表示を切り替え」）。
++2. **開閉判定**:
++   - 左右のサイドバーのうち、いずれか一方でも開いている場合は両方閉じる（画面を最大化）。
++   - 両方のサイドバーが閉じている場合は両方開く（作業状態を復元）。
++   - Workspace API と表示幅（`offsetWidth > 0`）の双方で堅牢に判定（クラス名の有無による誤判定を排除）。
++3. **キーボード制御**:
++   - `window._customToggleSidebarsShortcutListener` による `keydown` キャプチャ（キャプチャフェーズ）で検知。
++   - `e.altKey && !e.metaKey && !e.ctrlKey` で検知し、エディタの太字トグル等の既存動作と衝突せず、どこがアクティブであっても確実にトグルを実行。
++
++### 技術的要件
++- `00_templates/RegisterCustomCommands.md` 内に実装する。
++
++## 仕様: ファイルマネージャーからのドラッグ＆ドロップ連携と同一フォルダー保存
++
++### 概要
++ファイルマネージャーのウェブアプリからObsidianエディタへドラッグ＆ドロップされた際に、パスをリンク先に入れたMarkdownリンク（`[名前](file:///…)`）を自動生成する。リンクをクリックすると `http://localhost:8001/api/open-path?path=...` で開く（詳細は [docs/file_path_links_spec.md](docs/file_path_links_spec.md)）。
++さらに、作成されたリンクに対する右クリックメニュー「コピーして同一フォルダーに保存」を提供し、リンク先のファイルを現在開いているMarkdownファイルと同じフォルダーにコピーし、リンクをObsidianリンク（画像は埋め込み形式 `![[...]]`、通常ファイルは拡張子付き `[[...]]`）に自動変換する。
++
++### 動作
++1. **ドラッグ＆ドロップ時のリンク自動生成**:
++   - **トリガー**: ファイルマネージャーWebアプリからエディタへのドラッグ＆ドロップ。
++   - **判定**: `e.dataTransfer.getData("text/plain")` が `[{ name, path, ... }]` または `{ name, path, ... }` のJSON形式であること。
++   - **動作**: ドロップ時のデフォルト挿入をキャンセルし、パスの `file:///` のリンクを挿入（UNC は `file:////host/…`）。
++     - 単一ファイル: `[ファイル名](URL)`
++     - 複数ファイル: `- [ファイル名](URL)` の箇条書きリスト形式
++     - 入力ダイアログは表示せず即座に挿入。
++2. **右クリックメニュー「コピーして同一フォルダーに保存」**:
++   - **対象**: 編集モード（`editor-menu`）および閲覧モード（`contextmenu`）。
++   - **条件**: カーソル位置または対象リンクがファイルのリンク（`file:///…`、以前の形の `http://localhost:8001/api/open-path`）の場合。
++   - **動作フロー**:
++     1. リンクURLからローカルファイルパスを取得し、ファイルの存在を確認（存在しない場合はNotice通知）。
++     2. 現在開いているノートと同じフォルダー（`activeFile.parent`）に保存先を特定。
++     3. **関連ファイル（画像・添付ファイル・相対リンク先）の自動抽出**:
++        - 対象がMarkdownファイル（`.md`）の場合、本文中のWikilink（`![[...]]`, `[[...]]`）およびMarkdownリンク（`![...](...)`, `[...](...)`）を解析。
++        - コピー元ディレクトリ内に実在する画像、PDF、添付ファイル、相対リンク先ファイルをすべて抽出。
++     4. 保存先に同名ファイル（メインファイルまたは関連ファイル）が存在する場合、確認ダイアログ（`window.confirm`）を表示（キャンセル時は中断）。
++     5. ファイルコピー:
++        - メインファイルを `fs.copyFileSync` でコピー。
++        - 抽出された関連ファイルも、相対フォルダー構造を維持して同一フォルダーへ一括コピー（ディレクトリ自動生成）。
++     6. 拡張子に応じてObsidianリンクを生成:
++        - 画像ファイル（`.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`, `.svg`, `.webp`, `.avif`）: `![[ファイル名]]`
++        - その他のファイル（`.md`, `.pdf`, `.txt` 等）: `[[ファイル名]]`
++     7. エディタ内またはファイル本文内の元のリンク表記を生成したObsidianリンクへ自動置換。
++
++### 技術的要件
++- `00_templates/RegisterCustomCommands.md` 内に実装する。
++
++## 仕様: 添付ファイル削除時のノート内リンク自動クリーンアップ
++
++### 概要
++ノート内の画像・PDF・Officeファイル等の添付ファイルや、「コピーして同一フォルダーに保存」等で保存された関連ファイルを削除（「添付ファイルを削除」または画像の「削除」）した際、ファイル実体をゴミ箱に移動すると同時に、ノート内の該当リンク文字列（通常Wikilink、埋め込み、Markdownリンク）をすべて自動削除してリンクの残留による不具合や構造崩れを防止する。
++
++### 動作
++1. **対象リンク記法**:
++   - 埋め込みWikilink: `![[ファイル名]]`（サイズ・見出し指定含む）
++   - 通常Wikilink: `[[ファイル名]]`（別名・見出し指定含む）
++   - 拡張子省略リンク: `[[ファイル名]]`（Markdown用）
++   - 標準Markdownリンク: `[表示名](パス)`、`![代替テキスト](パス)`
++2. **フォーマット崩れ防止**:
++   - リスト項目（`- [[link]]` 等）や単独行リンクは、行ごと（改行含め）クリーンに削除。
++   - インラインリンクは該当リンク部分のみを削除し、周囲の文章を維持。
++3. **ファイルエクスプローラー等からの削除連携**:
++   - `sourceFile` が明示されない場合でも、アクティブなノートおよび参照元（バックリンク）ノートを自動抽出し、すべてのノートから該当ファイルへのリンクを一括自動削除。
++4. **エディタおよびプレビュー画面のメニュー強化**:
++   - Reading View / Live Preview の通常内部リンク（`a.internal-link` 等）およびエディタ上のカーソル位置リンクにおいて、右クリックメニューに「添付ファイルを削除」を提供。
++
++### 技術的要件
++- `00_templates/RegisterCustomCommands.md` 内に実装する。
++
++## 仕様: 画像選択時のショートカットRによるリネーム & モーダルドラッグ移動
++
++### 概要
++マークダウンノート内で画像を選択して `R` キー（または `r`）を押すことで、画像リネーム用モーダルを起動可能とする。モーダルタイトルを「ファイル名」に統一し、入力欄には元のファイル名（ベース名、例: `IMG_0710`）をデフォルト表示して全選択する。タイトルバーをマウスで掴んでドラッグ移動可能とし、画像を見ながら名前を編集できる。
++
++### 動作
++1. **画像選択優先の判定**:
++   - マークダウン上で画像が選択状態（`window._selectedMarkdownImageFilePath` が存在）の場合、エディタ（`contentEditable`）フォーカス時であってもリネームモーダルの起動を優先する（`INPUT` / `TEXTAREA` のみスキップ）。
++   - クエリパラメータ付きURI（`?17...`）やキャプションクリック時からも画像を正確に特定。
++2. **ショートカット起動キー（r）余波の確実なブロック ＆ 安全なkeyup遅延起動**:
++   - ショートカット起動時（`keydown`）にイベントを完全消費（`preventDefault()`, `stopPropagation()`, `stopImmediatePropagation()`）。
++   - **エディタ本文へのr文字挿入防止**: キー押下時にエディタ（`.cm-content`）のフォーカスを即座に解除（`activeEl.blur()`）し、選択範囲をクリア。エディタ宛の `beforeinput` イベントも capture フェーズで完全にブロックすることで、マークダウン本文（画像の左上等）に `r` が打ち込まれる不具合を防止。
++   - `keydown` 中に同期的にモーダルを開かず、キーが完全に離された瞬間（`keyup`）または遅延タイマー（120ms）で安全にモーダルを開くことで、打鍵中のキーストロークが `<input>` に吸い込まれるのを物理的に完全遮断。
++   - モーダル側の `<input>` にて、起動キー（`r`）自身の余波入力（`keydown`, `beforeinput`, `keypress`）を確実にブロックし、モーダル表示時に元のファイル名（例: `IMG_0710`）が表示され全選択された状態を100%維持。
++   - 万が一起動直後の打鍵余波で値が `r` や空文字に化けた場合も、`input` リスナーで検知して即座に元のファイル名（`this.baseName`）へ自動復元するセーフティネット（持続ガード）を装備。
++   - モーダルタイトルをタブからのリネームと統一（`ファイル名`）。
++3. **モーダルのドラッグ移動機能**:
++   - `ImageRenameModal` のタイトルバー（`h2`）をドラッグハンドル化（ホバー時 `cursor: grab`、ドラッグ中 `cursor: grabbing`）。
++   - マウスドラッグでモーダルの位置（`left`, `top`）を滑らかに移動可能とし、画面外への飛び出し防止クランプを適用。
++   - モーダル背景（`.modal-bg`）の透過度を調整し、後ろの画像が見えるように改善。
++4. **元のファイル名のデフォルト表示とそのままの利用**:
++   - モーダル表示直後に入力欄へ元のファイル名（ベース名、例: `IMG_0710`）を確実にデフォルト値として設定。
++   - 勝手に既存の名前を消去（クリア）せず、ユーザーがファイル名をそのまま利用して末尾に文字列を追加したり一部を変更したりできる。
++   - ダイアログ表示時および初回クリック時に入力テキストを全選択（`select()` ＆ `setSelectionRange()`）。矢印キーでカーソル移動して既存文字列をそのまま再利用可能。
++
++### 技術的要件
++- `00_templates/RegisterCustomCommands.md` 内に実装する。
++
++
++
++
++
+diff --git a/docs/testing.md b/docs/testing.md
+index 9d4e3a542df4bbc1dfe8e0c5c97698664cfc5a92..326ba06170b8e2161274df470511cdd3a3759695 100644
+--- a/docs/testing.md
++++ b/docs/testing.md
+@@ -17,7 +17,7 @@
+ | Sidebar Explorer | `.obsidian/plugins/obsidian-sidebar-explorer/utils.test.ts` | `npm test` | 68 |
+ | Sidebar Explorer Tag | `.obsidian/plugins/obsidian-sidebar-explorer-tag/`（`utils.test.ts`、`view.test.js`、`msgParser.test.ts`、`tnefParser.test.ts`、`mailGlobals.test.ts`、`noteListSection.test.ts`、`noteListUpdater.test.ts`） | `npm test` | 116 |
+ | 画像一覧（Excalidraw Cards） | `.obsidian/plugins/obsidian-excalidraw-cards/utils.test.ts` | `npm test` | 26 |
+-| カスタムコマンドのスクリプト（`RegisterCustomCommands.md` と `80_script/register_custom_commands/`）、CSS スニペットほか | `scratch/test_*.js` | `npm test`（`node --test test_*.js`） | 955 |
++| カスタムコマンドのスクリプト（`RegisterCustomCommands.md` と `80_script/register_custom_commands/`）、CSS スニペットほか | `scratch/test_*.js` | `npm test`（`node --test test_*.js`） | 971 |
+ 
+ - いずれも Node.js 標準のテストランナー（`node:test`）を使う。TypeScript のテストは `tsx` 経由で実行する。
+ - プラグインの依存パッケージ（`node_modules`）は Git 管理外。初回や取得し直した後は、各プラグインのフォルダで `npm install` を実行する。
+diff --git a/docs/toggle_both_sidebars_spec.md b/docs/toggle_both_sidebars_spec.md
+index 7fac378f8f78a8c225c9eb9f01fe315e3f34e3a0..ca0f7a6d7c5143a4628af643c904acc0a513de3f 100644
+--- a/docs/toggle_both_sidebars_spec.md
++++ b/docs/toggle_both_sidebars_spec.md
+@@ -61,5 +61,5 @@ Obsidianの Workspace API（`app.workspace.leftSplit`、`app.workspace.rightSpli
+ ## 4. 影響ファイル
+ 1. [RegisterCustomCommands.md](file:///Users/mine/000_work/obsidian-dagnetz/00_templates/RegisterCustomCommands.md)
+ 2. [claude.md](file:///Users/mine/000_work/obsidian-dagnetz/claude.md)
+-3. [AGENTS.md](file:///Users/mine/000_work/obsidian-dagnetz/AGENTS.md)
++3. [plugin_specs.md](file:///Users/mine/000_work/obsidian-dagnetz/docs/plugin_specs.md)
+ 4. [scratch/test_shortcut_and_markmind_behavior.js](file:///Users/mine/000_work/obsidian-dagnetz/scratch/test_shortcut_and_markmind_behavior.js)

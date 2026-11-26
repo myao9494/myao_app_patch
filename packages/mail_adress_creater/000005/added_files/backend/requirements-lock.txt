@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+# 版を固定した依存一覧（backend/requirements.txt から書き出す）
+#
+# Windows の setup_windows.bat と Mac の start_mac.command が、プロジェクト直下の .venv へ pip でこれを入れる。
+# 会社PCには uv が無いので、どの端末でも pip だけで同じ版を再現できるようにしている。
+# Python 3.14 用。pywin32 は Windows だけに入り、Python 3.14 / win_amd64 のビルド済み wheel がある。
+#
+# requirements.txt を変えたら、uv のある端末（Mac）で書き出し直す（冒頭のコメントはそのまま残る）:
+#   cd backend
+#   { grep '^#' requirements-lock.txt; uv pip compile -q --universal --python-version 3.14 --no-header --no-annotate requirements.txt; } > requirements-lock.txt.new && mv requirements-lock.txt.new requirements-lock.txt
+# backend/test_python_env.py が固定漏れを確かめる。
+pywin32==312 ; sys_platform == 'win32'
+tzdata==2026.6 ; sys_platform == 'win32'

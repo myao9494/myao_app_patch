@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <AssemblyName>LocalSearchLauncher</AssemblyName>
+    <RootNamespace>LocalSearchLauncher</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Assets\\catppuccin\\*.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- .py の失敗をポップアップで知らせる起動用ラッパー。Python 版ランチャーと同じファイルを埋め込み、実行時に一時フォルダへ取り出す -->
+    <EmbeddedResource Include="..\..\src\launcher_app\python_run_wrapper.py" LogicalName="LocalSearchLauncher.python_run_wrapper.py" />
+  </ItemGroup>
+</Project>

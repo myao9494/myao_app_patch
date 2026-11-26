@@ -1,0 +1,112 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 6adeaede7d358b8e3fed159f5764ea072234462a..23351ef948a635b6a4d60a032599d6257218d119 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -14,6 +14,7 @@ Outlookの送信履歴CSVから宛先(To)とCCを効率的に作成し、バッ
+ - **テスト**: Vitest + Testing Library（フロント）、unittest（バックエンド）
+ - **バックエンド**: Python 3.14（`.python-version` = 3.14.9） 標準ライブラリ + SQLite
+ - **Outlook連携**: Windows + pywin32（COM）
++- **タイムゾーン**: Windowsはタイムゾーン情報を持たないので `tzdata` が必須（無いと `ZoneInfo("Asia/Tokyo")` で起動に失敗する）
+ - **Python実行環境**: バックエンドは常にプロジェクト直下の `.venv` のPythonで起動する（システムの python は使わない。`.venv` は `.gitignore` 対象）。依存は版固定の `backend/requirements-lock.txt` をpipで入れる（会社PCにuvは無い）。`requirements.txt` を変えたら、uvのあるMacで書き出し直す（コマンドはファイル冒頭）。
+   - `setup_windows.bat`（ASCIIのみ）: Python 3.14を `py -3.14` → `python` の順に探し、`.venv` を作る（3.14で動かない `.venv` は作り直す）→ `requirements-lock.txt` を入れる。`start_windows.bat` は `.venv` が無ければ `/nopause` 付きで呼ぶ。
+   - `start_mac.command`: 3.14で動かない `.venv` は作り直し、`requirements-lock.txt` が前回より新しければ入れ直す（`.venv/.requirements-lock.installed`）。
+diff --git a/README.md b/README.md
+index 50604e409752b8d5212bbc0d6458fb173c0bb108..e0894a1e30ccf12fe5caf28fa8b9adc72edfed48 100644
+--- a/README.md
++++ b/README.md
+@@ -78,7 +78,7 @@ outlook-address-maker/
+ 起動用ファイルは`dist/index.html`がない場合に`npm ci`と`npm run build`を実行し、その後バックエンドを起動します。
+ バックエンドは常にプロジェクト直下の`.venv`（Python 3.14の仮想環境）で起動します。
+ 
+-- Windows: 初回に`setup_windows.bat`を実行すると、Python 3.14を`py -3.14` → `python`の順に探して`.venv`を作り、`backend\requirements-lock.txt`（版を固定したpywin32）をpipで入れます。`start_windows.bat`も`.venv`が無ければ自動で実行します。3.14で動かない`.venv`（古いPythonで作ったもの）は作り直します。社内プロキシが必要な場合は、先にpipの設定（`pip.ini`や`HTTPS_PROXY`）を済ませてください。
++- Windows: 初回に`setup_windows.bat`を実行すると、Python 3.14を`py -3.14` → `python`の順に探して`.venv`を作り、`backend\requirements-lock.txt`（版を固定したpywin32とtzdata）をpipで入れます。`start_windows.bat`も`.venv`が無ければ自動で実行します。3.14で動かない`.venv`（古いPythonで作ったもの）は作り直します。社内プロキシが必要な場合は、先にpipの設定（`pip.ini`や`HTTPS_PROXY`）を済ませてください。
+ - Mac: `start_mac.command`が`.venv`を自動で用意します（3.14で動かなければ作り直す）。
+ Windows用の`start_windows.bat`は、起動前に指定ポート（既定: 8765）を使用中の既存プロセス停止を試みます。その後、バックエンドを別プロセスで起動し、ヘルスチェック成功後にブラウザを開きます。
+ Mac用の`start_mac.command`は、ポート8765が使用中の場合に既存プロセスの停止を試み、8765番以降の空きポートで起動します。
+@@ -225,7 +225,7 @@ npm run lint:backend
+ 
+ - Windows環境で実行しているか確認
+ - デスクトップ版Outlookが利用できる状態か確認
+-- `.venv`にpywin32が入っているか確認（`setup_windows.bat`を再実行すると入れ直します）
++- `.venv`にpywin32とtzdataが入っているか確認（`setup_windows.bat`を再実行すると入れ直します）
+ 
+ ```cmd
+ setup_windows.bat
+diff --git a/backend/requirements-lock.txt b/backend/requirements-lock.txt
+index 19c583799d469da77c6449a29f1136bcc1651c09..ad8365ef53ad14b6b7cdba6915065cb159c88363 100644
+--- a/backend/requirements-lock.txt
++++ b/backend/requirements-lock.txt
+@@ -10,3 +10,4 @@
+ #   { grep '^#' requirements-lock.txt; uv pip compile -q --universal --python-version 3.14 --no-header --no-annotate requirements.txt; } > requirements-lock.txt.new && mv requirements-lock.txt.new requirements-lock.txt
+ # backend/test_python_env.py が固定漏れを確かめる。
+ pywin32==312 ; sys_platform == 'win32'
++tzdata==2026.6 ; sys_platform == 'win32'
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index bd0a80f9fbaab03adadc107e8e3e533a6d089783..e07a821c9ae84da8c458075d4a19314fd51d23c8 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -1 +1,2 @@
+ pywin32>=306; platform_system == "Windows"
++tzdata>=2025.2; platform_system == "Windows"
+diff --git a/backend/test_python_env.py b/backend/test_python_env.py
+index af2d73da07b40341970a15bf8bbe61e72d7492a5..55d33b17b32d906f1d24e96cba1c2916702a923b 100644
+--- a/backend/test_python_env.py
++++ b/backend/test_python_env.py
+@@ -13,7 +13,9 @@ Windows上での実行はこのMacでは確かめられないので、スクリ
+ """
+ from __future__ import annotations
+ 
++import ast
+ import re
++import sys
+ import unittest
+ from pathlib import Path
+ 
+@@ -52,6 +54,25 @@ class RequirementsLockTest(unittest.TestCase):
+     def test_lock_installs_pywin32_only_on_windows(self) -> None:
+         self.assertRegex(LOCK.read_text(encoding="utf-8"), re.compile(r"^pywin32==\S+ ; sys_platform == 'win32'$", re.MULTILINE))
+ 
++    def test_lock_installs_tzdata_only_on_windows(self) -> None:
++        # Windowsはタイムゾーン情報を持たないので、tzdataが無いと ZoneInfo("Asia/Tokyo") で起動に失敗する
++        self.assertRegex(LOCK.read_text(encoding="utf-8"), re.compile(r"^tzdata==\S+ ; sys_platform == 'win32'$", re.MULTILINE))
++
++    def test_every_third_party_import_is_required(self) -> None:
++        # 読み込むモジュール名と、それを提供するパッケージ名の対応。新しい依存を足したらここにも足す
++        providers = {"win32com": "pywin32", "pythoncom": "pywin32"}
++        imported: set[str] = set()
++        for path in (ROOT / "backend").rglob("*.py"):
++            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
++                if isinstance(node, ast.Import):
++                    imported.update(alias.name.split(".")[0] for alias in node.names)
++                elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
++                    imported.add(node.module.split(".")[0])
++        third_party = imported - set(sys.stdlib_module_names) - {"backend"}
++        self.assertLessEqual(third_party, providers.keys(), "requirements.txt に対応が無い import があります")
++        required = _names(ROOT / "backend" / "requirements.txt")
++        self.assertLessEqual({providers[name] for name in third_party}, required)
++
+     def test_lock_declares_utf8_first(self) -> None:
+         # 宣言が無いと、pipが日本語版Windowsの既定（cp932）で読み、日本語コメントで失敗することがある
+         self.assertEqual(LOCK.read_bytes().splitlines()[0], b"# -*- coding: utf-8 -*-")
+diff --git a/setup_windows.bat b/setup_windows.bat
+index d47173608f9e20359708b05303b6e160d171537f..d27cb2ba42215cef6a6e497ae3e076710969ee1c 100644
+--- a/setup_windows.bat
++++ b/setup_windows.bat
+@@ -8,7 +8,7 @@ rem 1. Find Python 3.14 (py -3.14 first, then python). Stop if it is missing.
+ rem 2. Create .venv. Reuse it when it already runs on Python 3.14; otherwise
+ rem    (broken, or made with another Python version) recreate it. Only the
+ rem    contents of .venv are replaced. Never install into the system Python.
+-rem 3. Install backend\requirements-lock.txt (pywin32, pinned) with pip.
++rem 3. Install backend\requirements-lock.txt (pywin32 and tzdata, pinned) with pip.
+ rem Usage: double-click. Safe to run again.
+ rem   start_windows.bat calls it with /nopause when .venv is missing.
+ rem   If a proxy is required, configure pip (pip.ini or HTTPS_PROXY) first.
+@@ -53,7 +53,7 @@ echo [Setup] Installing backend\requirements-lock.txt ...
+ "%VENV_PY%" -m pip install -r backend\requirements-lock.txt
+ if errorlevel 1 goto :fail
+ 
+-"%VENV_PY%" -c "import win32com.client, sys; print('[Setup] Python', sys.version.split()[0], '/ pywin32 OK')"
++"%VENV_PY%" -c "import win32com.client, sys, zoneinfo; zoneinfo.ZoneInfo('Asia/Tokyo'); print('[Setup] Python', sys.version.split()[0], '/ pywin32 and tzdata OK')"
+ if errorlevel 1 goto :fail
+ 
+ echo [Setup] Done. Start the app with start_windows.bat
